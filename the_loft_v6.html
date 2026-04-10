@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Loft — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F7F5F0;--surface:#FFFFFF;--surface2:#F2EFE8;
+  --border:#E5E0D5;--border2:#D5CFC2;
+  --text:#1A1714;--text2:#6B6560;--text3:#A89F96;
+  --accent:#C8933A;--accent-bg:#FDF3E3;
+  --green:#3A7D44;--green-bg:#EBF5EE;
+  --red:#B94040;--red-bg:#FAEAEA;
+  --blue:#2B5FA8;--blue-bg:#EBF1FC;
+  --amber:#C8731A;--amber-bg:#FDF0E3;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+  --r-sm:6px;--r-md:10px;--r-lg:14px;--r-xl:18px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg:0 20px 60px rgba(0,0,0,.12),0 8px 24px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:13px;line-height:1.5}
+
+/* ── Layout ── */
+.wrap{max-width:1240px;margin:0 auto;padding:20px 20px 60px}
+
+/* ── Header ── */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:0;flex-wrap:wrap;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.hdr-brand{display:flex;align-items:center;gap:10px}
+.hdr-logo{width:36px;height:36px;background:var(--text);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center}
+.hdr-logo svg{color:white}
+.hdr-title{font-size:16px;font-weight:600;letter-spacing:-.3px}
+.hdr-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.hdr-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-md);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;border:1px solid transparent;transition:all .15s ease;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{filter:brightness(1.05)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
+.btn-ghost{background:var(--surface);color:var(--text);border-color:var(--border);box-shadow:var(--shadow-sm)}
+.btn-ghost:hover{background:var(--surface2);border-color:var(--border2)}
+.btn-icon{padding:7px}
+
+/* ── Nav Tabs ── */
+.nav-tabs{display:flex;gap:2px;margin:16px 0 20px;border-bottom:1px solid var(--border);overflow-x:auto}
+.nav-tab{padding:10px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:7px}
+.nav-tab:hover{color:var(--text2)}
+.nav-tab.active{color:var(--text);border-bottom-color:var(--accent);font-weight:600}
+.nav-tab .tab-icon{font-size:14px}
+
+/* ── Tab Pages ── */
+.tab-page{display:none}
+.tab-page.active{display:block}
+
+/* ── KPI Row ── */
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-sm);transition:box-shadow .2s}
+.kpi-card:hover{box-shadow:var(--shadow-md)}
+.kpi-label{font-size:11px;color:var(--text3);font-weight:500;letter-spacing:.03em;margin-bottom:5px}
+.kpi-value{font-size:22px;font-weight:600;letter-spacing:-.5px;color:var(--text)}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.kpi-accent{border-top:2px solid var(--accent)}
+.kpi-good{border-top:2px solid var(--green)}
+.kpi-bad{border-top:2px solid var(--red)}
+
+/* ── Executive summary cards ── */
+.exec-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.exec-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow-sm)}
+.chart-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.chart-subtitle{font-size:11px;color:var(--text3);margin-bottom:14px}
+.chart-wrap{position:relative}
+
+/* ── Insight boxes ── */
+.insight-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.insight-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;box-shadow:var(--shadow-sm)}
+.insight-box.good{border-left:3px solid var(--green)}
+.insight-box.bad{border-left:3px solid var(--red)}
+.insight-box.warn{border-left:3px solid var(--amber)}
+.insight-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.insight-val{font-size:20px;font-weight:700;letter-spacing:-.5px;margin-bottom:2px}
+.insight-desc{font-size:11px;color:var(--text3);line-height:1.5}
+.insight-box.good .insight-val{color:var(--green)}
+.insight-box.bad .insight-val{color:var(--red)}
+.insight-box.warn .insight-val{color:var(--amber)}
+
+/* ── Section ── */
+.sec{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:14px;box-shadow:var(--shadow-sm);overflow:hidden}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 12px;border-bottom:1px solid var(--border);background:var(--surface)}
+.sec-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em}
+.sec-body{padding:16px 18px}
+
+/* ── Section group label ── */
+.page-section-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin:20px 0 8px;padding-left:2px}
+.page-section-label:first-child{margin-top:0}
+
+/* ── Grid ── */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px;border:1px solid}
+.badge-ok{background:var(--green-bg);color:var(--green);border-color:#8DC89A}
+.badge-warn{background:var(--amber-bg);color:var(--amber);border-color:#E8B87A}
+.badge-up{background:var(--red-bg);color:var(--red);border-color:#D48888}
+.badge-hold{background:var(--surface2);color:var(--text2);border-color:var(--border2)}
+
+/* ── Season badge ── */
+.season-tag{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px}
+.sb-low{background:var(--blue-bg);color:var(--blue)}
+.sb-mid{background:var(--amber-bg);color:var(--amber)}
+.sb-high{background:var(--red-bg);color:var(--red)}
+.sb-peak{background:#FCEAEA;color:#8B2020}
+
+/* ── Occ inputs ── */
+.occ-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.occ-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;transition:border-color .15s}
+.occ-card:focus-within{border-color:var(--accent)}
+.occ-card-name{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:6px}
+.occ-card-row{display:flex;align-items:center;gap:6px}
+.occ-card input{width:100%;padding:5px 8px;font-size:15px;font-weight:600;font-family:var(--mono);border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--text);text-align:center;transition:border-color .15s}
+.occ-card input:focus{outline:none;border-color:var(--accent)}
+.occ-card-pct{font-size:12px;color:var(--text3);font-weight:500}
+
+/* ── Recalc button ── */
+.recalc-btn{width:100%;padding:10px;font-size:13px;font-weight:600;font-family:var(--sans);border:none;border-radius:var(--r-md);background:var(--text);color:#fff;cursor:pointer;margin-bottom:10px;transition:opacity .15s,transform .1s;letter-spacing:.01em}
+.recalc-btn:hover{opacity:.88}
+.recalc-btn:active{transform:scale(.99)}
+
+/* ── Week tabs ── */
+.tabs{display:flex;gap:4px;padding:0 18px 12px}
+.tab{padding:6px 14px;font-size:12px;font-weight:500;border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;background:var(--surface);color:var(--text2);transition:all .15s}
+.tab:hover{background:var(--surface2)}
+.tab.active{background:var(--text);color:#fff;border-color:var(--text);box-shadow:var(--shadow-sm)}
+
+/* ── Table ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:10px;font-weight:600;color:var(--text3);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--surface2);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
+td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFAF7}
+
+/* ── Chips ── */
+.chip{font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;display:inline-block;font-family:var(--mono);letter-spacing:-.01em}
+.chip-lux{background:#EDEAFC;color:#3A2E88}
+.chip-ret{background:var(--amber-bg);color:#7A4A10}
+.chip-all{background:var(--blue-bg);color:var(--blue)}
+.chip-ele{background:var(--green-bg);color:var(--green)}
+.chip-leg{background:#FCE8EF;color:#832040}
+.chip-bgt{background:var(--surface2);color:var(--text2)}
+
+/* ── Action cells ── */
+.action-tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;display:inline-block;white-space:nowrap;letter-spacing:.01em}
+.act-up{background:var(--red-bg);color:var(--red)}
+.act-hold{background:var(--surface2);color:var(--text2)}
+.act-dn{background:var(--green-bg);color:var(--green)}
+.act-peak{background:#FCEAEA;color:#8B2020}
+.act-cta{background:#EDEAFC;color:#3A2E88}
+
+/* ── Occ bar ── */
+.occ-bar-bg{width:64px;height:6px;background:var(--surface2);border-radius:3px;display:inline-block;vertical-align:middle;overflow:hidden}
+.occ-bar-fill{height:100%;border-radius:3px;transition:width .3s ease}
+
+/* ── Price ── */
+.price{font-family:var(--mono);font-size:12px;font-weight:500}
+.price-main{font-weight:600}
+
+/* ── Channel tags ── */
+.ch-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;margin-right:3px;display:inline-block}
+.ch-airbnb{background:var(--amber-bg);color:var(--amber)}
+.ch-exp{background:#EDEAFC;color:#3A2E88}
+.ch-bkc{background:var(--blue-bg);color:var(--blue)}
+.ch-trp{background:var(--green-bg);color:var(--green)}
+
+/* ── Rules ── */
+.rule-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.rule-row:last-child{border-bottom:none}
+.rule-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700}
+.ri-up{background:var(--red-bg);color:var(--red)}
+.ri-dn{background:var(--green-bg);color:var(--green)}
+.ri-hold{background:var(--surface2);color:var(--text2)}
+.ri-peak{background:#FCEAEA;color:#8B2020}
+.rule-body{flex:1}
+.rule-title{font-size:12px;font-weight:600;color:var(--text)}
+.rule-desc{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* ── Checklist ── */
+.cl-group-label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;padding:10px 18px 7px;background:var(--surface2);border-bottom:1px solid var(--border);border-top:1px solid var(--border)}
+.cl-group-label:first-child{border-top:none;padding-top:8px}
+.check-item{display:flex;align-items:flex-start;gap:12px;padding:11px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;user-select:none}
+.check-item:last-child{border-bottom:none}
+.check-item:hover{background:#FAFAF7}
+.check-item.is-done{opacity:.45}
+.cb-box{width:19px;height:19px;border:1.5px solid var(--border2);border-radius:5px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .18s cubic-bezier(.34,1.56,.64,1);background:var(--surface)}
+.cb-box.done{background:var(--green);border-color:var(--green)}
+.cb-check{display:none}
+.cb-box.done .cb-check{display:block}
+.check-body{flex:1;min-width:0}
+.check-text{font-size:12px;color:var(--text);line-height:1.45;font-weight:500}
+.check-text.done{color:var(--text3);text-decoration:line-through}
+.check-sub{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4}
+.check-tag{font-size:10px;font-weight:600;padding:1px 7px;border-radius:3px;display:inline-block;margin-left:6px;vertical-align:middle;letter-spacing:.02em}
+.tag-lh{background:var(--blue-bg);color:var(--blue)}
+.tag-ab{background:var(--amber-bg);color:var(--amber)}
+.tag-bkc{background:var(--blue-bg);color:#1A5A9A}
+.tag-exp{background:#EDEAFC;color:#3A2E88}
+
+/* ── Progress ── */
+.cl-progress-wrap{padding:12px 18px 10px;border-bottom:1px solid var(--border);background:var(--surface)}
+.cl-progress-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.cl-progress-label{font-size:11px;color:var(--text3)}
+.cl-progress-count{font-size:12px;font-weight:600;color:var(--text2);font-family:var(--mono)}
+.cl-progress-bg{height:7px;background:var(--surface2);border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+.cl-progress-fill{height:100%;border-radius:10px;background:var(--blue);transition:width .4s cubic-bezier(.4,0,.2,1),background .3s ease}
+.cl-done-banner{display:none;margin-top:8px;background:var(--green-bg);border:1px solid #8DC89A;border-radius:var(--r-sm);padding:7px 12px;font-size:12px;font-weight:500;color:var(--green);text-align:center}
+.cl-reset-btn{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px}
+.cl-reset-btn:hover{color:var(--red)}
+
+/* ── Sheets preview ── */
+.sheets-preview{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;margin-bottom:12px}
+.sheets-preview-hdr{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text2);font-weight:500;margin-bottom:10px}
+.sheets-room-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px}
+.sheets-room-chip{background:var(--surface);border-radius:var(--r-sm);padding:7px 10px;text-align:center;border:1px solid var(--border)}
+.sheets-room-chip .name{font-size:10px;color:var(--text3)}
+.sheets-room-chip .occ{font-size:16px;font-weight:700;font-family:var(--mono)}
+.sheets-room-chip .nights{font-size:10px;color:var(--text3)}
+.booking-list{max-height:120px;overflow-y:auto}
+.booking-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)}
+.booking-row:last-child{border-bottom:none}
+
+/* ── Status bar ── */
+.status-bar{display:none;align-items:center;gap:8px;padding:9px 14px;border-radius:var(--r-md);font-size:12px;margin-bottom:12px;border:1px solid;animation:slideIn .2s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+/* ── Proj ── */
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.proj-item{background:var(--surface2);border-radius:var(--r-md);padding:10px 12px}
+.proj-lbl{font-size:11px;color:var(--text3);margin-bottom:3px}
+.proj-val{font-size:18px;font-weight:600;letter-spacing:-.3px}
+.proj-cmp{font-size:11px;margin-top:2px;color:var(--green)}
+
+/* ── Fee ── */
+.fee-note{font-size:11px;color:var(--text3);margin-top:8px}
+
+/* ── Spinner ── */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,12,10,.55);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center}
+.modal{background:var(--surface);border-radius:var(--r-xl);padding:0;width:min(560px,92vw);max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);border:1px solid var(--border);animation:modalIn .2s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:14px;font-weight:600}
+.modal-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3);padding:0 4px;line-height:1}
+.modal-body{padding:20px;overflow-y:auto;flex:1}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
+.setup-step{display:flex;gap:12px;margin-bottom:16px}
+.step-num{width:22px;height:22px;background:var(--text);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.step-text{font-size:12px;color:var(--text);line-height:1.6}
+.code-block{position:relative;margin:12px 0;background:#1C1917;border-radius:var(--r-md);overflow:hidden}
+.code-block pre{color:#D6C9B8;font-family:var(--mono);font-size:11px;line-height:1.7;padding:14px 16px;overflow-x:auto;white-space:pre-wrap;max-height:200px;overflow-y:auto}
+.code-copy{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.1);color:#D6C9B8;border:1px solid rgba(255,255,255,.15);border-radius:var(--r-sm);padding:3px 10px;font-size:10px;cursor:pointer;font-weight:500;transition:all .15s}
+.code-copy:hover{background:rgba(255,255,255,.2)}
+.field{margin-bottom:12px}
+.field label{font-size:12px;font-weight:500;color:var(--text2);display:block;margin-bottom:5px}
+.field input{width:100%;padding:8px 11px;font-size:12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);color:var(--text);font-family:var(--sans);transition:border-color .15s}
+.field input:focus{outline:none;border-color:var(--accent)}
+.field input::placeholder{color:var(--text3)}
+
+@media(max-width:900px){
+  .exec-grid,.exec-grid-3,.insight-row{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .occ-grid{grid-template-columns:repeat(3,1fr)}
+  .sheets-room-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:480px){
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .occ-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ── HEADER ── -->
+<div class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div>
+      <div class="hdr-title">The Loft <span style="color:var(--text3);font-weight:400">— Revenue Dashboard</span></div>
+      <div class="hdr-sub">ระบบตัดสินใจราคา · <span id="hdr-date"></span></div>
+    </div>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn btn-primary" id="sync-btn" onclick="syncFromSheets()">
+      <svg id="sync-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      <span id="sync-label">ดึงข้อมูลจาก Sheets</span>
+    </button>
+    <button class="btn btn-ghost btn-icon" onclick="openSetupModal()" title="ตั้งค่า">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.42 1.41M4.93 4.93l1.42 1.41M4.93 19.07l1.42-1.41M19.07 19.07l-1.42-1.41M2 12h2M20 12h2M12 2v2M12 20v2"/></svg>
+    </button>
+    <a class="btn btn-ghost" href="https://docs.google.com/spreadsheets/d/1XbTJLhecql_HNqyE80Hc6h30A2_elIxliudF4e6Rlz0/edit" target="_blank">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+      Sheets
+    </a>
+  </div>
+</div>
+
+<!-- ── STATUS BAR ── -->
+<div class="status-bar" id="sync-status"></div>
+
+<!-- ── NAV TABS ── -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('exec',this)"><span class="tab-icon">📊</span>ภาพรวมผู้บริหาร</div>
+  <div class="nav-tab" onclick="switchTab('pricing',this)"><span class="tab-icon">💰</span>ตั้งราคา</div>
+  <div class="nav-tab" onclick="switchTab('strategy',this)"><span class="tab-icon">🎯</span>กลยุทธ์ & Projection</div>
+  <div class="nav-tab" onclick="switchTab('ops',this)"><span class="tab-icon">✅</span>Checklist & Fees</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TAB 1: EXECUTIVE OVERVIEW
+══════════════════════════════════════ -->
+<div class="tab-page active" id="tab-exec">
+
+  <!-- KPI row -->
+  <div class="kpi-row">
+    <div class="kpi-card kpi-accent">
+      <div class="kpi-label">Revenue รวม (1 ปี)</div>
+      <div class="kpi-value">฿1.34M</div>
+      <div class="kpi-sub">Apr 2025 – Apr 2026</div>
+    </div>
+    <div class="kpi-card kpi-bad">
+      <div class="kpi-label">ADR จริง เฉลี่ย</div>
+      <div class="kpi-value">฿531</div>
+      <div class="kpi-sub" style="color:var(--red)">เป้า ฿850–1,100</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Occ เฉลี่ย (1 ปี)</div>
+      <div class="kpi-value">75%</div>
+      <div class="kpi-sub">เป้า 65–75% พร้อมดันราคา</div>
+    </div>
+    <div class="kpi-card kpi-bad">
+      <div class="kpi-label">Revenue หาย/ปี</div>
+      <div class="kpi-value" style="color:var(--red)">฿931K</div>
+      <div class="kpi-sub">ถ้า ADR = ฿850 occ เท่าเดิม</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Season ตอนนี้</div>
+      <div class="kpi-value" id="k-season" style="font-size:15px;margin-top:3px">—</div>
+      <div class="kpi-sub" id="k-season-sub">—</div>
+    </div>
+  </div>
+
+  <!-- 3 insight boxes -->
+  <div class="insight-row">
+    <div class="insight-box bad">
+      <div class="insight-label">ช่องว่างราคาใหญ่สุด</div>
+      <div class="insight-val">Luxury −฿437</div>
+      <div class="insight-desc">ADR จริง ฿663 vs เป้า ฿1,100 · ยังขายถูกที่สุดเทียบ tier</div>
+    </div>
+    <div class="insight-box warn">
+      <div class="insight-label">LOS ยาวเกินไป</div>
+      <div class="insight-val">เฉลี่ย 10 คืน</div>
+      <div class="insight-desc">lock ห้องราคาถูก · เป้า short stay 2–4 คืน ดันรายได้/คืนขึ้น</div>
+    </div>
+    <div class="insight-box good">
+      <div class="insight-label">Revenue Potential ปี 2569</div>
+      <div class="insight-val">฿2.27M</div>
+      <div class="insight-desc">16 ห้อง · ADR ฿850 · occ 70% · เพิ่มขึ้น +70% จากปัจจุบัน</div>
+    </div>
+  </div>
+
+  <!-- Charts row 1: ADR comparison + Channel mix -->
+  <div class="exec-grid">
+    <div class="chart-card">
+      <div class="chart-title">ADR จริง vs เป้าหมาย รายประเภทห้อง</div>
+      <div class="chart-subtitle">ข้อมูลจริง 1 ปี (Apr 2025–Apr 2026) จาก Little Hotelier</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chartADR" role="img" aria-label="Bar chart comparing real ADR vs target ADR by room type"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Channel Mix — Revenue 1 ปีที่แล้ว</div>
+      <div class="chart-subtitle">Airbnb ครอง 76% · ต้องกระจาย OTA เพิ่ม</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chartChannel" role="img" aria-label="Donut chart of channel revenue mix"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Charts row 2: Occ + Revenue gap -->
+  <div class="exec-grid">
+    <div class="chart-card">
+      <div class="chart-title">Occupancy รายประเภทห้อง (1 ปี)</div>
+      <div class="chart-subtitle">Allure เต็มสุด 83% · Luxury & Retro มีช่องว่างขึ้นราคา</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartOcc" role="img" aria-label="Horizontal bar chart of occupancy by room type"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Revenue จริง vs ศักยภาพ (8 ห้อง → 16 ห้อง)</div>
+      <div class="chart-subtitle">คำนวณที่ ADR ฿850 · Occ 70%</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartRevenue" role="img" aria-label="Bar chart comparing actual vs potential revenue"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Occ live (14 days) summary -->
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title">Occupancy Live — 14 วันข้างหน้า (ดึงจาก Sheets)</span>
+      <span id="occ-source-label" style="font-size:11px;color:var(--text3)">กำลังดึงข้อมูล...</span>
+    </div>
+    <div class="sec-body">
+      <div class="sheets-preview" id="sheets-preview">
+        <div class="sheets-preview-hdr">
+          <span>📊 ข้อมูลจาก Sheets — <strong id="preview-sheet-name"></strong></span>
+          <span id="preview-updated" style="color:var(--text3)"></span>
+        </div>
+        <div class="sheets-room-grid" id="sheets-room-summary"></div>
+        <div class="booking-list" id="sheets-booking-list"></div>
+      </div>
+      <div class="chart-wrap" style="height:180px;margin-top:4px"><canvas id="chartOcc14" role="img" aria-label="Bar chart of 14-day occupancy by room type"></canvas></div>
+    </div>
+  </div>
+
+</div><!-- /tab-exec -->
+
+<!-- ══════════════════════════════════════
+     TAB 2: PRICING
+══════════════════════════════════════ -->
+<div class="tab-page" id="tab-pricing">
+
+  <div class="page-section-label">กรอก Occupancy 14 วันข้างหน้า</div>
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title">Occupancy รายประเภทห้อง — อัปเดตก่อนคำนวณ</span>
+      <span style="font-size:11px;color:var(--text3)">ดึงจาก Sheets อัตโนมัติ หรือกรอกเอง</span>
+    </div>
+    <div class="sec-body">
+      <div class="occ-grid" id="occ-inputs"></div>
+      <button class="recalc-btn" onclick="recalc()">คำนวณราคาและ Action Plan</button>
+      <p style="font-size:11px;color:var(--text3)">% = จำนวนคืนที่จองแล้ว ÷ (14 × จำนวนห้องของ type นั้น)</p>
+    </div>
+  </div>
+
+  <div class="page-section-label">Price Action Table</div>
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title">ราคาที่ควรตั้งใน Little Hotelier สัปดาห์นี้</span>
+      <span id="action-season-badge" class="season-tag sb-mid">Normal season</span>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchWeek('weekday',this)">จ–พฤ</div>
+      <div class="tab" onclick="switchWeek('fri',this)">ศุกร์</div>
+      <div class="tab" onclick="switchWeek('weekend',this)">เสาร์–อาทิตย์</div>
+      <div class="tab" onclick="switchWeek('peak',this)">Peak day</div>
+    </div>
+    <div class="tbl-wrap" style="padding:0 0 4px">
+      <table>
+        <thead>
+          <tr>
+            <th>ประเภทห้อง</th><th>Occ %</th>
+            <th>ADR จริง</th><th>เป้าหมาย</th>
+            <th>Airbnb</th><th>Booking</th><th>Expedia/Agoda</th>
+            <th>2 คน</th><th>3 คน</th><th>4 คน</th>
+            <th>Action</th><th>หมายเหตุ</th>
+          </tr>
+        </thead>
+        <tbody id="price-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page-section-label">Cleaning Fee & Extra Guest</div>
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-title">ตั้งครั้งเดียวใน Little Hotelier — ไม่ต้องเปลี่ยนทุกสัปดาห์</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ประเภทห้อง</th><th>Base (2 คน)</th><th>Cleaning fee</th><th>Extra คนที่ 3</th><th>Extra คนที่ 4</th><th>Max guests</th><th>Min stay ปกติ</th><th>Min stay wknd</th></tr></thead>
+        <tbody>
+          <tr><td><span class="chip chip-lux">Luxury</span></td><td class="price">฿1,100</td><td class="price">฿350</td><td class="price">+฿400/คืน</td><td class="price">+฿350/คืน</td><td>4</td><td>1 คืน</td><td>2 คืน</td></tr>
+          <tr><td><span class="chip chip-ret">Retro</span></td><td class="price">฿950</td><td class="price">฿300</td><td class="price">+฿350/คืน</td><td class="price">+฿300/คืน</td><td>4</td><td>1 คืน</td><td>2 คืน</td></tr>
+          <tr><td><span class="chip chip-all">Allure</span></td><td class="price">฿800</td><td class="price">฿250</td><td class="price">+฿300/คืน</td><td>—</td><td>3</td><td>1 คืน</td><td>2 คืน</td></tr>
+          <tr><td><span class="chip chip-ele">Elegance</span></td><td class="price">฿800</td><td class="price">฿250</td><td class="price">+฿300/คืน</td><td>—</td><td>3</td><td>1 คืน</td><td>2 คืน</td></tr>
+          <tr><td><span class="chip chip-leg">Legacy</span></td><td class="price">฿750</td><td class="price">฿250</td><td class="price">+฿280/คืน</td><td>—</td><td>3</td><td>1 คืน</td><td>2 คืน</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /tab-pricing -->
+
+<!-- ══════════════════════════════════════
+     TAB 3: STRATEGY & PROJECTION
+══════════════════════════════════════ -->
+<div class="tab-page" id="tab-strategy">
+
+  <div class="page-section-label">กฎการปรับราคา</div>
+  <div class="grid2">
+    <div class="sec">
+      <div class="sec-hdr"><span class="sec-title">Occupancy Rules Engine</span></div>
+      <div class="sec-body" id="rules-list" style="padding-top:4px"></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hdr"><span class="sec-title">Revenue Projection</span></div>
+      <div class="sec-body" id="proj-list"></div>
+    </div>
+  </div>
+
+  <div class="page-section-label">กลยุทธ์ Channel รายประเภทห้อง</div>
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-title">Channel Strategy</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ประเภทห้อง</th><th>Priority channel</th><th>Strategy</th><th>Min stay</th></tr></thead>
+        <tbody id="channel-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="page-section-label">Seasonal Pricing Calendar</div>
+  <div class="sec">
+    <div class="sec-hdr"><span class="sec-title">ราคาตาม Season — Base rate (Luxury / Retro / Allure / Elegance / Legacy)</span></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Season</th><th>เดือน</th><th>Luxury WD</th><th>Luxury WE</th><th>Retro WD</th><th>Allure WD</th><th>Elegance WD</th><th>Legacy WD</th></tr></thead>
+        <tbody>
+          <tr><td><span class="season-tag sb-low">Low</span></td><td style="color:var(--text3)">พ.ค.–ต.ค.</td><td class="price">฿935</td><td class="price">฿1,215</td><td class="price">฿808</td><td class="price">฿680</td><td class="price">฿680</td><td class="price">฿638</td></tr>
+          <tr><td><span class="season-tag sb-mid">Normal</span></td><td style="color:var(--text3)">มี.ค.–เม.ย., พ.ย.</td><td class="price">฿1,100</td><td class="price">฿1,430</td><td class="price">฿950</td><td class="price">฿800</td><td class="price">฿800</td><td class="price">฿750</td></tr>
+          <tr><td><span class="season-tag sb-high">High</span></td><td style="color:var(--text3)">ธ.ค.–ก.พ.</td><td class="price">฿1,375</td><td class="price">฿1,788</td><td class="price">฿1,188</td><td class="price">฿1,000</td><td class="price">฿1,000</td><td class="price">฿938</td></tr>
+          <tr><td><span class="season-tag sb-peak">Peak</span></td><td style="color:var(--text3)">ปีใหม่ / สงกรานต์</td><td class="price" style="color:#8B2020">฿1,650</td><td class="price" style="color:#8B2020">฿2,145</td><td class="price" style="color:#8B2020">฿1,425</td><td class="price" style="color:#8B2020">฿1,200</td><td class="price" style="color:#8B2020">฿1,200</td><td class="price" style="color:#8B2020">฿1,125</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:10px 18px;font-size:11px;color:var(--text3)">Weekend (+30%) · ศุกร์ (+15%) · Peak day (+50%) คำนวณจาก base rate ปกติ</div>
+  </div>
+
+</div><!-- /tab-strategy -->
+
+<!-- ══════════════════════════════════════
+     TAB 4: CHECKLIST & OPS
+══════════════════════════════════════ -->
+<div class="tab-page" id="tab-ops">
+
+  <div class="page-section-label">Sunday Checklist — ทำทุกสัปดาห์ ~30 นาที</div>
+  <div class="sec">
+    <div class="sec-hdr" style="padding-bottom:12px">
+      <span class="sec-title">Weekly Action Checklist</span>
+      <button class="cl-reset-btn" onclick="resetChecklist()">รีเซ็ต</button>
+    </div>
+    <div class="cl-progress-wrap">
+      <div class="cl-progress-row">
+        <span class="cl-progress-label">ความคืบหน้าสัปดาห์นี้</span>
+        <span class="cl-progress-count" id="cl-count">0 / 11</span>
+      </div>
+      <div class="cl-progress-bg"><div class="cl-progress-fill" id="cl-progress" style="width:0%"></div></div>
+      <div class="cl-done-banner" id="cl-done-msg">🎉 เสร็จแล้ว! ราคาอัพเดตครบทุก channel</div>
+    </div>
+    <div id="checklist"></div>
+  </div>
+
+  <div class="page-section-label">Occ เฉลี่ย 14 วัน (Live)</div>
+  <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
+    <div class="kpi-card">
+      <div class="kpi-label">Occ เฉลี่ย 14 วัน</div>
+      <div class="kpi-value" id="k-occ">—</div>
+      <div class="kpi-sub">คำนวณจาก Sheets live</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">จำนวนประเภทห้อง</div>
+      <div class="kpi-value" id="k-rooms">5</div>
+      <div class="kpi-sub">เป้าขยายเป็น 16 ห้อง</div>
+    </div>
+    <div class="kpi-card kpi-accent">
+      <div class="kpi-label">Season ปัจจุบัน</div>
+      <div class="kpi-value" style="font-size:15px;margin-top:3px" id="k-season2">—</div>
+      <div class="kpi-sub" id="k-season-sub2">—</div>
+    </div>
+  </div>
+
+</div><!-- /tab-ops -->
+
+</div><!-- /wrap -->
+<!-- ══════════ SETUP MODAL ══════════ -->
+<div class="modal-overlay" id="setup-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span class="modal-title">เชื่อมต่อ Google Sheets</span>
+      <button class="modal-close" onclick="closeSetupModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="setup-step">
+        <div class="step-num">1</div>
+        <div class="step-text">เปิด Google Sheets → เมนู <strong>Extensions → Apps Script</strong> แล้วลบ code เดิมทิ้งทั้งหมด</div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Paste code ด้านล่างนี้ลงใน editor แล้วกด Save (Ctrl+S)</div>
+      </div>
+      <div class="code-block">
+        <pre id="apps-script-code">function doGet(e) {
+  var ss = SpreadsheetApp.openById("1XbTJLhecql_HNqyE80Hc6h30A2_elIxliudF4e6Rlz0");
+  var ws = ss.getSheetByName("Bookings") ||
+           ss.getSheetByName("bookings") ||
+           ss.getSheets()[0];
+  var data = ws.getDataRange().getValues();
+  var headers = data[0];
+  var rows = [];
+  for (var i = 1; i < data.length; i++) {
+    if (!data[i][0] && !data[i][1]) continue;
+    var row = {};
+    for (var j = 0; j < headers.length; j++) {
+      var val = data[i][j];
+      if (val instanceof Date) {
+        val = Utilities.formatDate(val, "Asia/Bangkok", "yyyy-MM-dd");
+      }
+      row[String(headers[j]).trim()] = val;
+    }
+    rows.push(row);
+  }
+  var json = JSON.stringify({
+    success: true,
+    sheet: ws.getName(),
+    rows: rows,
+    updatedAt: new Date().toISOString()
+  });
+  return ContentService
+    .createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+        <button class="code-copy" id="copy-btn" onclick="copyScript()">Copy</button>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">3</div>
+        <div class="step-text">กด <strong>Deploy → New deployment</strong> → Type: <strong>Web app</strong> → Execute as: <strong>Me</strong> → Who has access: <strong>Anyone</strong> → กด Deploy</div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">4</div>
+        <div class="step-text">Copy <strong>Web app URL</strong> ที่ได้ → Paste ด้านล่างนี้</div>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div class="field">
+        <label>Web App URL จาก Apps Script</label>
+        <input type="text" id="script-url-input" placeholder="https://script.google.com/macros/s/AKfycby.../exec">
+      </div>
+      <div class="field">
+        <label>คอลัมน์ชื่อห้อง</label>
+        <input type="text" id="col-room" value="เลขห้อง" placeholder="เลขห้อง">
+      </div>
+      <div class="grid2" style="gap:8px">
+        <div class="field">
+          <label>คอลัมน์ Check-in</label>
+          <input type="text" id="col-checkin" value="เช็คอิน">
+        </div>
+        <div class="field">
+          <label>คอลัมน์ Check-out</label>
+          <input type="text" id="col-checkout" value="เช็คเอาท์">
+        </div>
+      </div>
+      <div id="test-result" style="display:none;font-size:12px;padding:8px 12px;border-radius:var(--r-md);margin-top:4px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" style="flex:1" onclick="saveAndTest()">บันทึกและทดสอบการเชื่อมต่อ</button>
+      <button class="btn btn-ghost" onclick="closeSetupModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ SCRIPTS ══════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ── Data ── (realADR + realOcc = ข้อมูลจริง 1 ปี Apr25–Apr26 จาก Little Hotelier · by room type)
+const ROOMS_DATA = [
+  {id:'Luxury',   tier:'Luxury',   chip:'chip-lux', base:1100, realADR:663, realOcc:70, occ:70, revpar:462, los:9,  count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
+  {id:'Retro',    tier:'Retro',    chip:'chip-ret', base:950,  realADR:554, realOcc:70, occ:70, revpar:385, los:10, count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
+  {id:'Allure',   tier:'Allure',   chip:'chip-all', base:800,  realADR:483, realOcc:83, occ:83, revpar:402, los:10, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
+  {id:'Elegance', tier:'Elegance', chip:'chip-ele', base:800,  realADR:480, realOcc:76, occ:76, revpar:367, los:11, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
+  {id:'Legacy',   tier:'Legacy',   chip:'chip-leg', base:750,  realADR:476, realOcc:76, occ:76, revpar:360, los:9,  count:2, maxG:3, chPri:'Airbnb',  minStay:3, minWknd:3},
+];
+
+const SEASON_RULES = {
+  low:    {name:'Low season',    months:[4,5,6,7,8,9], mult:0.85, badge:'sb-low'},
+  normal: {name:'Normal season', months:[0,1,2,8,9],   mult:1.0,  badge:'sb-mid'},
+  high:   {name:'High season',   months:[10,11],       mult:1.25, badge:'sb-high'},
+  peak:   {name:'Peak period',   months:[],            mult:1.5,  badge:'sb-peak'},
+};
+const DOW_MULT = {weekday:1.0, fri:1.15, weekend:1.3, peak:1.6};
+const OCC_RULES = [
+  {max:50,  mult:0.85, action:'dn',   label:'ลดราคา 15%',    note:'Occ ต่ำ — ดึง demand'},
+  {max:65,  mult:0.93, action:'dn',   label:'ลดราคา 7%',     note:'Occ ปานกลาง'},
+  {max:75,  mult:1.0,  action:'hold', label:'คงราคา',        note:'Occ ปกติ — sweet spot'},
+  {max:85,  mult:1.15, action:'up',   label:'เพิ่มราคา 15%', note:'Demand ดี'},
+  {max:95,  mult:1.25, action:'up',   label:'เพิ่มราคา 25%', note:'Occ สูงมาก'},
+  {max:101, mult:1.4,  action:'peak', label:'Peak! +40%',    note:'Close arrival, max rate'},
+];
+const CH_MULT = {Airbnb:0.9, Booking:1.0, 'Expedia/Agoda':1.2};
+const CH_CONFIG = {
+  Luxury:   [{ch:'Expedia',tag:'ch-exp'},{ch:'Agoda',tag:'ch-exp'},{ch:'Booking',tag:'ch-bkc'}],
+  Retro:    [{ch:'Expedia',tag:'ch-exp'},{ch:'Booking',tag:'ch-bkc'}],
+  Allure:   [{ch:'Booking',tag:'ch-bkc'},{ch:'Trip.com',tag:'ch-trp'}],
+  Elegance: [{ch:'Booking',tag:'ch-bkc'},{ch:'Trip.com',tag:'ch-trp'}],
+  Legacy:   [{ch:'Airbnb',tag:'ch-airbnb'},{ch:'Booking',tag:'ch-bkc'}],
+  Budget:   [{ch:'Airbnb',tag:'ch-airbnb'}],
+};
+const STRAT = {
+  Luxury:'Short stay, high rate, 1–3 คืน', Retro:'Short stay, high rate, 1–3 คืน',
+  Allure:'Balance 2–5 คืน', Elegance:'Balance 2–5 คืน',
+  Legacy:'Long stay 5–14 คืน', Budget:'Long stay, fill rate',
+};
+
+let currentWeek = 'weekday';
+let inputOccs = {};
+
+// ── Helpers ──
+function getSeason(){
+  const m=new Date().getMonth(), d=new Date();
+  const songkran=m===3&&d.getDate()>=13&&d.getDate()<=15;
+  const newyear=(m===11&&d.getDate()>=30)||(m===0&&d.getDate()<=2);
+  if(songkran||newyear) return 'peak';
+  if(m>=10||m<=1) return 'high';
+  if(m>=4&&m<=8) return 'low';
+  return 'normal';
+}
+function getOccRule(occ){ return OCC_RULES.find(r=>occ<=r.max)||OCC_RULES[OCC_RULES.length-1]; }
+function calcPrice(base, occ, dow, season){
+  return Math.round(base * (SEASON_RULES[season]?.mult||1) * (DOW_MULT[dow]||1) * getOccRule(occ).mult / 50)*50;
+}
+function thb(n){ return '฿'+n.toLocaleString(); }
+
+// ── Header date ──
+document.getElementById('hdr-date').textContent = new Date().toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// ── Occ inputs ──
+function buildOccInputs(){
+  const cont=document.getElementById('occ-inputs'); cont.innerHTML='';
+  ROOMS_DATA.forEach(r=>{
+    const occ=inputOccs[r.id]!==undefined?inputOccs[r.id]:r.occ;
+    const col=occ<50?'var(--blue)':occ<70?'var(--green)':occ<85?'var(--amber)':'var(--red)';
+    const card=document.createElement('div'); card.className='occ-card';
+    card.innerHTML=`
+      <div class="occ-card-name"><span class="chip ${r.chip}" style="font-size:10px;padding:1px 6px">${r.id}</span></div>
+      <div class="occ-card-row">
+        <input type="number" min="0" max="100" value="${occ}"
+          id="oi-${r.id}"
+          oninput="updateOccLive('${r.id}',this.value)"
+          style="border-color:${occ>=85?'var(--red)':occ>=65?'var(--border)':'var(--border)'}">
+        <span class="occ-card-pct" style="color:${col}">%</span>
+      </div>`;
+    cont.appendChild(card);
+  });
+}
+
+function updateOccLive(id, val){
+  inputOccs[id]=parseInt(val)||0;
+  const avg=Math.round(ROOMS_DATA.map(r=>inputOccs[r.id]!==undefined?inputOccs[r.id]:r.occ).reduce((a,b)=>a+b,0)/ROOMS_DATA.length);
+  document.getElementById('k-occ').textContent=avg+'%';
+}
+
+function recalc(){
+  ROOMS_DATA.forEach(r=>{
+    const el=document.getElementById('oi-'+r.id);
+    r.currentOcc=el?parseInt(el.value)||r.occ:r.occ;
+  });
+  renderPriceTable(); renderProjection(); renderRules();
+}
+
+// ── Week tabs ──
+function switchWeek(w,el){
+  currentWeek=w;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderPriceTable();
+}
+
+// ── Price table ──
+function renderPriceTable(){
+  const season=getSeason(), dow=currentWeek;
+  const tbody=document.getElementById('price-tbody'); tbody.innerHTML='';
+  const sb=document.getElementById('action-season-badge');
+  sb.textContent=SEASON_RULES[season].name;
+  sb.className='season-tag '+SEASON_RULES[season].badge;
+
+  ROOMS_DATA.forEach(r=>{
+    const occ=r.currentOcc!==undefined?r.currentOcc:r.occ;
+    const price=calcPrice(r.base,occ,dow,season);
+    const or=getOccRule(occ);
+    const airbnb=Math.round(price*CH_MULT['Airbnb']/50)*50;
+    const bkc=Math.round(price*CH_MULT['Booking']/50)*50;
+    const exp=Math.round(price*CH_MULT['Expedia/Agoda']/50)*50;
+    const p3=Math.round(price*1.32/50)*50;
+    const p4=r.maxG>=4?Math.round(price*1.6/50)*50:null;
+    const barCol=occ<50?'#5B9BD5':occ<70?'#5B9B6E':occ<85?'#C8931A':'#C84040';
+    const actCls={dn:'act-dn',hold:'act-hold',up:'act-up',peak:'act-peak'}[or.action]||'act-hold';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="chip ${r.chip}">${r.id}</span></td>
+      <td style="font-size:11px;color:var(--text3)">${r.tier}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:7px">
+          <div class="occ-bar-bg"><div class="occ-bar-fill" style="width:${occ}%;background:${barCol}"></div></div>
+          <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:${barCol}">${occ}%</span>
+        </div>
+      </td>
+      <td><span class="price" style="color:var(--text3);text-decoration:line-through">${thb(r.realADR||0)}</span></td>
+      <td><span class="price price-main" style="color:var(--green)">${thb(price)}</span></td>
+      <td><span class="price" style="color:#8B5A10">${thb(airbnb)}</span></td>
+      <td><span class="price" style="color:var(--blue)">${thb(bkc)}</span></td>
+      <td><span class="price" style="color:#4A3A8A">${thb(exp)}</span></td>
+      <td class="price">${thb(price)}</td>
+      <td class="price">${thb(p3)}</td>
+      <td class="price">${p4?thb(p4):'—'}</td>
+      <td>
+        <span class="action-tag ${actCls}">${or.label}</span>
+        ${occ>=85?'<br><span class="action-tag act-cta" style="margin-top:3px;display:inline-block">Close arrival</span>':''}
+      </td>
+      <td style="font-size:11px;color:var(--text3);max-width:130px">${or.note}${r.revpar?` · RevPAR ฿${r.revpar} / LoS ${r.los}ค`:''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Rules ──
+function renderRules(){
+  const cont=document.getElementById('rules-list'); cont.innerHTML='';
+  const rules=[
+    {cls:'ri-dn',  sym:'↓', t:'< 50% — ลดราคา 15%',       d:'ห้องว่างมาก ลดดึง demand ป้องกันห้องว่างนาน'},
+    {cls:'ri-dn',  sym:'↓', t:'50–65% — ลดราคา 7%',        d:'Occ ต่ำกว่าเป้า ปรับเล็กน้อยเพื่อเร่ง booking'},
+    {cls:'ri-hold',sym:'=', t:'65–75% — คงราคา',           d:'อยู่ใน sweet spot รักษาราคา อย่าลดโดยไม่จำเป็น'},
+    {cls:'ri-up',  sym:'↑', t:'> 75% — เพิ่มราคา 15%',     d:'Demand ดี ลูกค้าพร้อมจ่ายแพงขึ้น'},
+    {cls:'ri-up',  sym:'↑', t:'> 85% — เพิ่มราคา 25%',     d:'เกือบเต็ม ยิ่งห้องน้อย ยิ่งขายแพง'},
+    {cls:'ri-peak',sym:'!', t:'> 90% — Peak +40% + Close', d:'ห้องสุดท้ายราคาสูงสุด ปิดไม่ให้จอง 1 คืน'},
+  ];
+  rules.forEach(r=>{
+    cont.innerHTML+=`<div class="rule-row">
+      <div class="rule-icon ${r.cls}">${r.sym}</div>
+      <div class="rule-body">
+        <div class="rule-title">${r.t}</div>
+        <div class="rule-desc">${r.d}</div>
+      </div>
+    </div>`;
+  });
+}
+
+// ── Projection ──
+function renderProjection(){
+  const season=getSeason();
+  const occs=ROOMS_DATA.map(r=>r.currentOcc!==undefined?r.currentOcc:r.occ);
+  const avgOcc=Math.round(occs.reduce((a,b)=>a+b,0)/occs.length);
+  const avgPrice=Math.round(ROOMS_DATA.map((r,i)=>{
+    const o=occs[i];
+    return calcPrice(r.base,o,'weekday',season)*0.5+calcPrice(r.base,o,'weekend',season)*0.5;
+  }).reduce((a,b)=>a+b,0)/ROOMS_DATA.length);
+  const revPar=Math.round(avgPrice*avgOcc/100);
+  const rev8=Math.round(avgPrice*(avgOcc/100)*365*8/1000);
+  const rev16=Math.round(avgPrice*(avgOcc/100)*365*16/1000);
+  const tgt=Math.round(ROOMS_DATA.reduce((a,r)=>a+calcPrice(r.base,75,'weekday',season),0)/ROOMS_DATA.length);
+  document.getElementById('proj-list').innerHTML=`
+    <div class="proj-grid">
+      <div class="proj-item"><div class="proj-lbl">ADR คาดการณ์</div><div class="proj-val">${thb(avgPrice)}</div><div class="proj-cmp">เป้า ${thb(tgt)}</div></div>
+      <div class="proj-item"><div class="proj-lbl">RevPAR คาดการณ์</div><div class="proj-val">${thb(revPar)}</div><div class="proj-cmp">vs ฿447 เดิม</div></div>
+      <div class="proj-item"><div class="proj-lbl">Rev ปีนี้ (8 ห้อง)</div><div class="proj-val">${thb(rev8)}K</div><div class="proj-cmp">vs ฿1.3M เดิม</div></div>
+      <div class="proj-item"><div class="proj-lbl">Rev ปีนี้ (16 ห้อง)</div><div class="proj-val">${thb(rev16)}K</div><div class="proj-cmp">เมื่อขยายครบ</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);line-height:1.8;padding:10px;background:var(--surface2);border-radius:var(--r-md)">
+      Occ เฉลี่ย: <strong style="color:var(--text)">${avgOcc}%</strong> &nbsp;·&nbsp;
+      กำไรโดยประมาณ (margin 45%): <strong style="color:var(--green)">${thb(Math.round(rev16*0.45))}K/ปี</strong>
+    </div>`;
+}
+
+// ── Channels ──
+function renderChannels(){
+  const tbody=document.getElementById('channel-tbody'); tbody.innerHTML='';
+  ROOMS_DATA.forEach(r=>{
+    const chs=CH_CONFIG[r.tier]||[];
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td><span class="chip ${r.chip}">${r.id}</span></td>
+      <td>${chs.map(c=>`<span class="ch-tag ${c.tag}">${c.ch}</span>`).join('')}</td>
+      <td style="font-size:11px;color:var(--text3)">${STRAT[r.tier]||''}</td>
+      <td style="font-size:11px;font-family:var(--mono)">ปกติ ${r.minStay}ค · wknd ${r.minWknd}ค</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Checklist ──
+const CHECKLIST = [
+  // group 0: คำนวณราคา
+  { group:'📊 คำนวณราคา', text:'กด "คำนวณราคาและ Action Plan"', sub:'ตรวจดูว่า Occ แต่ละห้องถูกต้องก่อนกด', tag:null },
+  { group:null, text:'เช็ค Action table — จดราคาห้องที่เปลี่ยน', sub:'ดู tab จ–พฤ / ศุกร์ / เสาร์–อาทิตย์ แยกกัน', tag:null },
+  // group 1: อัพเดต Little Hotelier
+  { group:'🏨 Little Hotelier', text:'อัพเดตราคาทีละห้องตาม Action table', sub:'เปลี่ยนทุก rate plan ให้ครบ — weekday / weekend / peak', tag:'LH' },
+  { group:null, text:'ตั้ง Close Arrival ห้องที่ Occ > 85%', sub:'บังคับ min stay 2 คืน ป้องกัน last-minute 1 คืน', tag:'LH' },
+  { group:null, text:'เช็ค special dates ใน 14 วัน', sub:'วันหยุดยาว / เทศกาล → ขึ้น Peak rate ×1.6 ทันที', tag:'LH' },
+  // group 2: อัพเดต channel
+  { group:'📱 OTA Channels', text:'Airbnb — ปรับ base price + ตรวจ cleaning fee', sub:'Base ต่ำ + cleaning fee แยก = ดูถูกในผลค้นหา แต่ได้ราคาจริง', tag:'Airbnb' },
+  { group:null, text:'Booking.com — sync ราคาและ availability', sub:'เช็ค promotion ที่ระบบเปิดอัตโนมัติ — ปิดถ้าไม่ต้องการ', tag:'BKC' },
+  { group:null, text:'Expedia / Agoda — ตั้ง rate สูงสุดสำหรับ Luxury & Retro', sub:'สองห้องนี้ commission สูง ต้อง mark up ราคาชดเชย', tag:'Exp' },
+  // group 3: review & track
+  { group:'✅ Review & Track', text:'ตอบ review ทุกอันที่ยังค้างอยู่', sub:'ตอบภายใน 24 ชม. — algorithm OTA ให้ความสำคัญมาก', tag:null },
+  { group:null, text:'เช็ค booking pace สัปดาห์หน้า', sub:'ถ้า pace เร็วกว่าปกติ → ขึ้นราคาอีก 10% ทันที ไม่ต้องรอ', tag:null },
+  { group:null, text:'บันทึก ADR + Occ สัปดาห์นี้ลง Sheets', sub:'track weekly trend เพื่อเปรียบเทียบ month-over-month', tag:null },
+];
+
+const TOTAL_ITEMS = CHECKLIST.length;
+let checkState = new Array(TOTAL_ITEMS).fill(false);
+
+function renderChecklist(){
+  const cont = document.getElementById('checklist');
+  cont.innerHTML = '';
+  let globalIdx = 0;
+  CHECKLIST.forEach((item, i) => {
+    if(item.group){
+      const lbl = document.createElement('div');
+      lbl.className = 'cl-group-label';
+      lbl.textContent = item.group;
+      cont.appendChild(lbl);
+    }
+    const d = document.createElement('div');
+    d.className = 'check-item' + (checkState[i] ? ' is-done' : '');
+    d.onclick = () => toggleCheck(i);
+    const tagMap = { LH:'LH', Airbnb:'Airbnb', BKC:'Booking', Exp:'Exp/Agoda' };
+    const tagCls = { LH:'tag-lh', Airbnb:'tag-ab', BKC:'tag-bkc', Exp:'tag-exp' };
+    const tagHtml = item.tag
+      ? `<span class="check-tag ${tagCls[item.tag]}">${tagMap[item.tag]}</span>`
+      : '';
+    d.innerHTML = `
+      <div class="cb-box ${checkState[i]?'done':''}" id="cb-${i}">
+        <svg class="cb-check" width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <polyline points="1.5,5 4,7.5 8.5,2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="check-body">
+        <div class="check-text ${checkState[i]?'done':''}" id="ct-${i}">${item.text}${tagHtml}</div>
+        <div class="check-sub">${item.sub}</div>
+      </div>`;
+    cont.appendChild(d);
+  });
+  updateProgress();
+}
+
+function toggleCheck(i){
+  checkState[i] = !checkState[i];
+  const box = document.getElementById('cb-'+i);
+  const txt = document.getElementById('ct-'+i);
+  const row = box.closest('.check-item');
+  if(checkState[i]){
+    box.classList.add('done'); txt.classList.add('done'); row.classList.add('is-done');
+  } else {
+    box.classList.remove('done'); txt.classList.remove('done'); row.classList.remove('is-done');
+  }
+  updateProgress();
+}
+
+function updateProgress(){
+  const total = CHECKLIST.length;
+  const done  = checkState.filter(Boolean).length;
+  const pct   = Math.round(done / total * 100);
+  const fill  = document.getElementById('cl-progress');
+  fill.style.width = pct + '%';
+  fill.style.background = pct === 100 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--blue)';
+  document.getElementById('cl-count').textContent = done + ' / ' + total;
+  document.getElementById('cl-done-msg').style.display = pct === 100 ? 'block' : 'none';
+}
+
+function resetChecklist(){
+  checkState = new Array(CHECKLIST.length).fill(false);
+  renderChecklist();
+}
+
+// ── Season init ──
+function initSeason(){
+  const s=getSeason(), info=SEASON_RULES[s];
+  document.getElementById('k-season').textContent=info.name;
+  document.getElementById('k-season-sub').textContent=new Date().toLocaleDateString('th-TH',{month:'short',day:'numeric',year:'numeric'});
+}
+function initOccAvg(){
+  const avg=Math.round(ROOMS_DATA.map(r=>r.occ).reduce((a,b)=>a+b,0)/ROOMS_DATA.length);
+  document.getElementById('k-occ').textContent=avg+'%';
+}
+
+// ── Init ──
+buildOccInputs(); initSeason(); initOccAvg();
+renderPriceTable(); renderRules(); renderProjection(); renderChannels(); renderChecklist();
+
+// ══════════ GOOGLE SHEETS SYNC ══════════
+const SK_URL  = 'loft_script_url';
+const SK_ROOM = 'loft_col_room';
+const SK_IN   = 'loft_col_checkin';
+const SK_OUT  = 'loft_col_checkout';
+
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGnmq5WVvNIM_DFEVbp9nqNcukZ_0IDCFS4PohlLG_SVmG8_amjmib8zbI42Cm48k/exec';
+
+function loadSettings(){
+  return {
+    url:     localStorage.getItem(SK_URL)||DEFAULT_SCRIPT_URL,
+    colRoom: localStorage.getItem(SK_ROOM)||'เลขห้อง',
+    colIn:   localStorage.getItem(SK_IN)||'เช็คอิน',
+    colOut:  localStorage.getItem(SK_OUT)||'เช็คเอาท์',
+  };
+}
+
+function openSetupModal(){
+  const s=loadSettings();
+  document.getElementById('script-url-input').value=s.url;
+  document.getElementById('col-room').value=s.colRoom;
+  document.getElementById('col-checkin').value=s.colIn;
+  document.getElementById('col-checkout').value=s.colOut;
+  document.getElementById('test-result').style.display='none';
+  const m=document.getElementById('setup-modal');
+  m.style.display='flex';
+}
+function closeSetupModal(){ document.getElementById('setup-modal').style.display='none'; }
+document.getElementById('setup-modal').addEventListener('click',function(e){ if(e.target===this) closeSetupModal(); });
+
+function copyScript(){
+  navigator.clipboard.writeText(document.getElementById('apps-script-code').textContent).then(()=>{
+    const btn=document.getElementById('copy-btn');
+    btn.textContent='Copied ✓'; btn.style.background='rgba(91,155,110,.3)';
+    setTimeout(()=>{ btn.textContent='Copy'; btn.style.background=''; },2000);
+  });
+}
+
+function saveSettings(){
+  localStorage.setItem(SK_URL,  document.getElementById('script-url-input').value.trim());
+  localStorage.setItem(SK_ROOM, document.getElementById('col-room').value.trim());
+  localStorage.setItem(SK_IN,   document.getElementById('col-checkin').value.trim());
+  localStorage.setItem(SK_OUT,  document.getElementById('col-checkout').value.trim());
+}
+
+async function saveAndTest(){
+  saveSettings();
+  const res=document.getElementById('test-result');
+  res.style.display='block';
+  res.style.cssText='display:block;padding:8px 12px;border-radius:var(--r-md);font-size:12px;background:var(--surface2);color:var(--text2)';
+  res.textContent='⏳ กำลังทดสอบ...';
+  const result=await fetchSheetsData();
+  if(result.success){
+    res.style.background='var(--green-bg)'; res.style.color='var(--green)';
+    res.textContent=`✅ เชื่อมต่อสำเร็จ! พบ ${result.rows.length} แถว จาก "${result.sheet}"`;
+    setTimeout(()=>{ closeSetupModal(); applySheetData(result); },1500);
+  } else {
+    res.style.background='var(--red-bg)'; res.style.color='var(--red)';
+    res.textContent='❌ '+result.error;
+  }
+}
+
+function showStatus(msg, type='info'){
+  const el=document.getElementById('sync-status');
+  const cfg={
+    info:    {bg:'var(--blue-bg)', color:'var(--blue)', border:'#93B8E8'},
+    success: {bg:'var(--green-bg)',color:'var(--green)',border:'#8DC89A'},
+    error:   {bg:'var(--red-bg)',  color:'var(--red)',  border:'#D48888'},
+    loading: {bg:'var(--amber-bg)',color:'var(--amber)',border:'#E8B87A'},
+  };
+  const c=cfg[type]||cfg.info;
+  el.style.cssText=`display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:var(--r-md);font-size:12px;margin-bottom:12px;background:${c.bg};color:${c.color};border:1px solid ${c.border};animation:slideIn .2s ease`;
+  el.innerHTML=msg;
+}
+function hideStatus(){ document.getElementById('sync-status').style.display='none'; }
+
+async function fetchSheetsData(){
+  const s=loadSettings();
+  if(!s.url) return {success:false, error:'ยังไม่ได้ตั้งค่า URL — กดปุ่ม ⚙ ตั้งค่า แล้วใส่ Web App URL'};
+
+  // timeout helper
+  const timeout = ms => new Promise((_,rej)=>setTimeout(()=>rej(new Error('Timeout '+ms/1000+'s — เชื่อมต่อช้าเกินไป')),ms));
+
+  const url = s.url + (s.url.includes('?')?'&':'?') + 'cb=' + Date.now();
+
+  try {
+    const resp = await Promise.race([
+      fetch(url),
+      timeout(15000)
+    ]);
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    let data;
+    try { data = JSON.parse(text); }
+    catch(pe) { throw new Error('ไม่ใช่ JSON — ตรวจสอบ Apps Script: ' + text.slice(0,100)); }
+    if(!data.success) throw new Error(data.error || 'Apps Script ตอบ success:false');
+    return {...data, success:true};
+  } catch(e) {
+    const msg = String(e.message||e);
+    if(msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')) {
+      return {success:false, error:'CORS Error: เปิด URL ใน browser ก่อน แล้วกด Allow หรือตรวจสอบ Apps Script deploy'};
+    }
+    return {success:false, error:msg};
+  }
+}
+
+function parseDate(val){
+  if(!val) return null;
+  if(val instanceof Date) return val;
+  const d=new Date(val); if(!isNaN(d)) return d;
+  const m=String(val).match(/(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+  if(m){ let y=parseInt(m[3]); if(y>2400) y-=543; return new Date(y,parseInt(m[2])-1,parseInt(m[1])); }
+  return null;
+}
+
+function computeOcc(rows, colRoom, colIn, colOut){
+  const today=new Date(); today.setHours(0,0,0,0);
+  const end14=new Date(today); end14.setDate(end14.getDate()+14);
+  const roomNights={};
+  ROOMS_DATA.forEach(r=>roomNights[r.id]=0);
+  const summary=[];
+  rows.forEach(row=>{
+    const roomRaw=String(row[colRoom]||'').trim();
+    // Skip cancelled / empty
+    if(!roomRaw || roomRaw.toLowerCase().includes('cancel')) return;
+    const ci=parseDate(row[colIn]), co=parseDate(row[colOut]);
+    if(!ci||!co) return;
+
+    // Match by type: "203 Allure" → "Allure", "300 Luxury" → "Luxury"
+    const parts = roomRaw.split(' ');
+    const typeWord = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+    const matched = ROOMS_DATA.find(r =>
+      r.id.toLowerCase() === typeWord.toLowerCase() ||
+      r.id.toLowerCase() === roomRaw.toLowerCase()
+    );
+    if(!matched) return;
+
+    let nights=0;
+    const cur=new Date(Math.max(ci,today)), fin=new Date(Math.min(co,end14));
+    while(cur<fin){ nights++; cur.setDate(cur.getDate()+1); }
+    if(nights>0){ roomNights[matched.id]+=nights; summary.push({room:matched.id,ci,co,nights,raw:roomRaw}); }
+  });
+  const occMap={};
+  ROOMS_DATA.forEach(r=>occMap[r.id]=Math.min(100,Math.round((roomNights[r.id]||0)/((r.count||1)*14)*100)));
+  return {occMap,summary,roomNights};
+}
+
+function detectColumns(rows, settingColRoom, settingColIn, settingColOut) {
+  if(!rows||!rows.length) return {colRoom:settingColRoom,colIn:settingColIn,colOut:settingColOut};
+  const keys = Object.keys(rows[0]).map(k=>k.trim());
+  const find = (candidates) => keys.find(k=> candidates.some(c=>k.toLowerCase().includes(c.toLowerCase()))) || candidates[0];
+  const colRoom = keys.includes(settingColRoom) ? settingColRoom : find(['เลขห้อง','ห้อง','room','Room','ROOM','room_name','ชื่อห้อง']);
+  const colIn   = keys.includes(settingColIn)   ? settingColIn   : find(['เช็คอิน','checkin','check_in','check-in','Check in','CheckIn','วันเข้า','เข้าพัก']);
+  const colOut  = keys.includes(settingColOut)  ? settingColOut  : find(['เช็คเอาท์','checkout','check_out','check-out','Check out','CheckOut','วันออก','ออก']);
+  return {colRoom, colIn, colOut};
+}
+
+function applySheetData(data){
+  const s=loadSettings();
+  const {colRoom,colIn,colOut}=detectColumns(data.rows,s.colRoom,s.colIn,s.colOut);
+  const {occMap,summary,roomNights}=computeOcc(data.rows,colRoom,colIn,colOut);
+  ROOMS_DATA.forEach(r=>{ if(occMap[r.id]!==undefined){ inputOccs[r.id]=occMap[r.id]; r.currentOcc=occMap[r.id]; } });
+  buildOccInputs();
+  const avg=Math.round(ROOMS_DATA.map(r=>r.currentOcc||r.occ).reduce((a,b)=>a+b,0)/ROOMS_DATA.length);
+  document.getElementById('k-occ').textContent=avg+'%';
+
+  // Preview panel
+  const preview=document.getElementById('sheets-preview');
+  preview.style.display='block';
+  document.getElementById('preview-sheet-name').textContent=data.sheet||'';
+  document.getElementById('preview-updated').textContent='อัพเดต '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+
+  document.getElementById('sheets-room-summary').innerHTML=ROOMS_DATA.map(r=>{
+    const o=occMap[r.id]||0, n=roomNights[r.id]||0;
+    const col=o<50?'var(--blue)':o<70?'var(--green)':o<85?'var(--amber)':'var(--red)';
+    return `<div class="sheets-room-chip">
+      <div class="name">${r.id}</div>
+      <div class="occ" style="color:${col}">${o}%</div>
+      <div class="nights">${n}/${(r.count||1)*14} คืน</div>
+    </div>`;
+  }).join('');
+
+  const listEl=document.getElementById('sheets-booking-list');
+  listEl.innerHTML=summary.length===0
+    ?'<div style="font-size:11px;color:var(--text3);padding:4px 0">ไม่พบการจองใน 14 วันข้างหน้า</div>'
+    :summary.map(b=>`<div class="booking-row">
+        <span style="color:var(--text2)">${b.raw}</span>
+        <span>${b.ci.toLocaleDateString('th-TH',{day:'numeric',month:'short'})} → ${b.co.toLocaleDateString('th-TH',{day:'numeric',month:'short'})}</span>
+        <span style="color:var(--green);font-weight:600">${b.nights} คืน</span>
+      </div>`).join('');
+
+  document.getElementById('occ-source-label').innerHTML=`<span style="color:var(--green);font-weight:500">✓ ดึงจาก Sheets — ${summary.length} การจอง · คอลัมน์: ${colRoom} / ${colIn} / ${colOut}</span>`;
+  renderPriceTable(); renderProjection();
+  if(typeof drawOcc14Chart==='function' && typeof chartsDrawn!=='undefined' && chartsDrawn) drawOcc14Chart();
+}
+
+async function syncFromSheets(){
+  const btn=document.getElementById('sync-btn');
+  const label=document.getElementById('sync-label');
+  const icon=document.getElementById('sync-icon');
+  btn.disabled=true; label.textContent='กำลังดึงข้อมูล...';
+  icon.classList.add('spin');
+  showStatus('กำลังเชื่อมต่อ Google Sheets...','loading');
+  const result=await fetchSheetsData();
+  btn.disabled=false; label.textContent='ดึงข้อมูลจาก Sheets'; icon.classList.remove('spin');
+  if(result.success){
+    applySheetData(result);
+    showStatus(`✓ สำเร็จ — พบ ${result.rows.length} แถว จาก "${result.sheet}" · อัพเดต occupancy แล้ว`,'success');
+    setTimeout(hideStatus,6000);
+  } else {
+    showStatus(`${result.error} · <button onclick="openSetupModal()" style="background:none;border:none;color:inherit;text-decoration:underline;cursor:pointer;font-size:12px">ตั้งค่า URL</button>`,'error');
+  }
+}
+
+// Auto-sync on load
+(function(){
+  if(localStorage.getItem(SK_ROOM)==='room_name')  localStorage.removeItem(SK_ROOM);
+  if(localStorage.getItem(SK_IN)==='check_in')     localStorage.removeItem(SK_IN);
+  if(localStorage.getItem(SK_OUT)==='check_out')   localStorage.removeItem(SK_OUT);
+  if(!localStorage.getItem(SK_URL)) localStorage.setItem(SK_URL, DEFAULT_SCRIPT_URL);
+  document.getElementById('occ-source-label').innerHTML='<span style="color:var(--amber)">⏳ กำลังดึงข้อมูลอัตโนมัติ...</span>';
+  setTimeout(()=>{ syncFromSheets(); }, 600);
+})();
+</script>
+<script>
+// ── Tab navigation ──
+function switchTab(id, el) {
+  document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  el.classList.add('active');
+  if(id==='exec') drawExecCharts();
+}
+
+// ── Executive Charts ──
+let chartsDrawn = false;
+let chartADR, chartChannel, chartOcc, chartRevenue, chartOcc14;
+
+function drawExecCharts() {
+  if(chartsDrawn) return;
+  chartsDrawn = true;
+
+  const TYPES = ['Luxury','Retro','Allure','Elegance','Legacy'];
+  const REAL_ADR = [663, 554, 483, 480, 476];
+  const TARGET_ADR = [1100, 950, 800, 800, 750];
+  const REAL_OCC = [70, 70, 83, 76, 76];
+  const COLORS_REAL  = '#A89F96';
+  const COLORS_TGT   = '#C8933A';
+  const COLORS_OCC   = ['#EDEAFC','#FDF0E3','#EBF1FC','#EBF5EE','#FCE8EF'];
+  const COLORS_OCC_B = ['#534AB7','#C8731A','#2B5FA8','#3A7D44','#832040'];
+
+  // Chart 1: ADR real vs target
+  chartADR = new Chart(document.getElementById('chartADR'), {
+    type:'bar',
+    data:{
+      labels: TYPES,
+      datasets:[
+        {label:'ADR จริง (฿)', data:REAL_ADR, backgroundColor:'#B4B2A9', borderRadius:4},
+        {label:'เป้าหมาย (฿)', data:TARGET_ADR, backgroundColor:'#C8933A', borderRadius:4}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:8}}},
+      scales:{y:{ticks:{callback:v=>'฿'+v,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
+              x:{grid:{display:false},ticks:{font:{size:11}}}}
+    }
+  });
+
+  // Chart 2: Channel donut
+  chartChannel = new Chart(document.getElementById('chartChannel'), {
+    type:'doughnut',
+    data:{
+      labels:['Airbnb 76%','Expedia 8%','Trip.com 8%','Booking 7%','Other 1%'],
+      datasets:[{data:[76,8,8,7,1],
+        backgroundColor:['#EF9F27','#534AB7','#3A7D44','#2B5FA8','#B4B2A9'],
+        borderWidth:0}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:8}}}
+    }
+  });
+
+  // Chart 3: Occupancy horizontal bar
+  chartOcc = new Chart(document.getElementById('chartOcc'), {
+    type:'bar',
+    data:{
+      labels:TYPES,
+      datasets:[{label:'Occupancy %',data:REAL_OCC,
+        backgroundColor:COLORS_OCC_B.map(c=>c+'33'),
+        borderColor:COLORS_OCC_B, borderWidth:1.5, borderRadius:4}]
+    },
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},
+      scales:{x:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
+              y:{grid:{display:false},ticks:{font:{size:11}}}}
+    }
+  });
+
+  // Chart 4: Revenue actual vs potential
+  chartRevenue = new Chart(document.getElementById('chartRevenue'), {
+    type:'bar',
+    data:{
+      labels:['8 ห้อง (จริง)','8 ห้อง (เป้า)','16 ห้อง (เป้า)'],
+      datasets:[{label:'Revenue/ปี (฿)',
+        data:[1337120, 2268000, 4536000],
+        backgroundColor:['#B4B2A9','#C8933A','#3A7D44'],
+        borderRadius:4}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>'฿'+Math.round(ctx.raw/1000)+'K'}}},
+      scales:{y:{ticks:{callback:v=>'฿'+Math.round(v/1000)+'K',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
+              x:{grid:{display:false},ticks:{font:{size:10}}}}
+    }
+  });
+
+  drawOcc14Chart();
+}
+
+function drawOcc14Chart() {
+  const occs = ROOMS_DATA.map(r => r.currentOcc !== undefined ? r.currentOcc : r.occ);
+  const colors = occs.map(o => o < 50 ? '#2B5FA8' : o < 70 ? '#3A7D44' : o < 85 ? '#C8931A' : '#B94040');
+  if(chartOcc14) chartOcc14.destroy();
+  chartOcc14 = new Chart(document.getElementById('chartOcc14'), {
+    type:'bar',
+    data:{
+      labels: ROOMS_DATA.map(r=>r.id),
+      datasets:[{label:'Occ % (14 วัน)',data:occs,backgroundColor:colors,borderRadius:4}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},
+      scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
+              x:{grid:{display:false},ticks:{font:{size:11}}}}
+    }
+  });
+}
+
+// Sync k-season2 to tab-ops after init (called separately)
+function syncSeasonToOps(){
+  const s2=document.getElementById('k-season2');
+  const s2b=document.getElementById('k-season-sub2');
+  const src=document.getElementById('k-season');
+  const srb=document.getElementById('k-season-sub');
+  if(s2&&src) s2.textContent=src.textContent;
+  if(s2b&&srb) s2b.textContent=srb.textContent;
+}
+
+// occ14 chart redrawn inside applySheetData directly (see below)
+
+// Draw executive charts on load (first tab)
+window.addEventListener('load', ()=>{ syncSeasonToOps(); setTimeout(drawExecCharts, 800); });
+</script>
+</body>
+</html>
