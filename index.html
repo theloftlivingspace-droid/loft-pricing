@@ -284,6 +284,22 @@ tr:hover td{background:#FAFAF7}
   .kpi-row{grid-template-columns:1fr 1fr}
   .occ-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ── Alert Banner ── */
+.alert-banner{display:none;border-radius:var(--r-lg);padding:14px 18px;margin-bottom:14px;border:1px solid;animation:slideIn .25s ease}
+.alert-banner.show{display:block}
+.alert-title{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.alert-icon{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.alert-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.alert-item{background:rgba(255,255,255,.6);border-radius:var(--r-md);padding:9px 12px;font-size:12px}
+.alert-item-room{font-weight:600;margin-bottom:2px}
+.alert-item-action{font-size:11px;margin-top:3px}
+.al-red{background:var(--red-bg);border-color:#D48888;color:var(--red)}
+.al-amber{background:var(--amber-bg);border-color:#E8B87A;color:var(--amber)}
+.al-green{background:var(--green-bg);border-color:#8DC89A;color:var(--green)}
+.al-icon-red{background:var(--red);color:#fff}
+.al-icon-amb{background:var(--amber);color:#fff}
+.al-icon-grn{background:var(--green);color:#fff}
 </style>
 </head>
 <body>
@@ -317,6 +333,16 @@ tr:hover td{background:#FAFAF7}
 
 <!-- ── STATUS BAR ── -->
 <div class="status-bar" id="sync-status"></div>
+
+<!-- ── ALERT BANNER ── -->
+<div id="alert-banner" class="alert-banner">
+  <div class="alert-title">
+    <span class="alert-icon" id="alert-icon">!</span>
+    <span id="alert-title-text">แจ้งเตือนการปรับราคา</span>
+  </div>
+  <div class="alert-items" id="alert-items"></div>
+</div>
+
 
 <!-- ── NAV TABS ── -->
 <div class="nav-tabs">
@@ -407,10 +433,10 @@ tr:hover td{background:#FAFAF7}
     </div>
   </div>
 
-  <!-- Occ live (14 days) summary -->
+  <!-- Occ live (7 days) summary -->
   <div class="sec">
     <div class="sec-hdr">
-      <span class="sec-title">Occupancy Live — 14 วันข้างหน้า (ดึงจาก Sheets)</span>
+      <span class="sec-title">Occupancy Live — 7 วันข้างหน้า (ดึงจาก Sheets)</span>
       <span id="occ-source-label" style="font-size:11px;color:var(--text3)">กำลังดึงข้อมูล...</span>
     </div>
     <div class="sec-body">
@@ -422,7 +448,7 @@ tr:hover td{background:#FAFAF7}
         <div class="sheets-room-grid" id="sheets-room-summary"></div>
         <div class="booking-list" id="sheets-booking-list"></div>
       </div>
-      <div class="chart-wrap" style="height:180px;margin-top:4px"><canvas id="chartOcc14" role="img" aria-label="Bar chart of 14-day occupancy by room type"></canvas></div>
+      <div class="chart-wrap" style="height:180px;margin-top:4px"><canvas id="chartOcc14" role="img" aria-label="Bar chart of 7-day occupancy by room type"></canvas></div>
     </div>
   </div>
 
@@ -433,7 +459,7 @@ tr:hover td{background:#FAFAF7}
 ══════════════════════════════════════ -->
 <div class="tab-page" id="tab-pricing">
 
-  <div class="page-section-label">กรอก Occupancy 14 วันข้างหน้า</div>
+  <div class="page-section-label">กรอก Occupancy 7 วันข้างหน้า</div>
   <div class="sec">
     <div class="sec-hdr">
       <span class="sec-title">Occupancy รายประเภทห้อง — อัปเดตก่อนคำนวณ</span>
@@ -442,7 +468,7 @@ tr:hover td{background:#FAFAF7}
     <div class="sec-body">
       <div class="occ-grid" id="occ-inputs"></div>
       <button class="recalc-btn" onclick="recalc()">คำนวณราคาและ Action Plan</button>
-      <p style="font-size:11px;color:var(--text3)">% = จำนวนคืนที่จองแล้ว ÷ (14 × จำนวนห้องของ type นั้น)</p>
+      <p style="font-size:11px;color:var(--text3)">% = จำนวนคืนที่จองแล้ว ÷ (7 × จำนวนห้องของ type นั้น)</p>
     </div>
   </div>
 
@@ -562,12 +588,12 @@ tr:hover td{background:#FAFAF7}
     <div id="checklist"></div>
   </div>
 
-  <div class="page-section-label">Occ เฉลี่ย 14 วัน (Live)</div>
+  <div class="page-section-label">Occ เฉลี่ย 7 วัน (Live)</div>
   <div class="kpi-row" style="grid-template-columns:repeat(3,1fr)">
     <div class="kpi-card">
-      <div class="kpi-label">Occ เฉลี่ย 14 วัน</div>
+      <div class="kpi-label">Occ เฉลี่ย 7 วัน</div>
       <div class="kpi-value" id="k-occ">—</div>
-      <div class="kpi-sub">คำนวณจาก Sheets live</div>
+      <div class="kpi-sub">คำนวณจาก Sheets live · 7 วัน</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">จำนวนประเภทห้อง</div>
@@ -768,6 +794,7 @@ function recalc(){
     r.currentOcc=el?parseInt(el.value)||r.occ:r.occ;
   });
   renderPriceTable(); renderProjection(); renderRules();
+  if(typeof checkAlerts==='function') checkAlerts();
 }
 
 // ── Week tabs ──
@@ -895,7 +922,7 @@ const CHECKLIST = [
   // group 1: อัพเดต Little Hotelier
   { group:'🏨 Little Hotelier', text:'อัพเดตราคาทีละห้องตาม Action table', sub:'เปลี่ยนทุก rate plan ให้ครบ — weekday / weekend / peak', tag:'LH' },
   { group:null, text:'ตั้ง Close Arrival ห้องที่ Occ > 85%', sub:'บังคับ min stay 2 คืน ป้องกัน last-minute 1 คืน', tag:'LH' },
-  { group:null, text:'เช็ค special dates ใน 14 วัน', sub:'วันหยุดยาว / เทศกาล → ขึ้น Peak rate ×1.6 ทันที', tag:'LH' },
+  { group:null, text:'เช็ค special dates ใน 7 วัน', sub:'วันหยุดยาว / เทศกาล → ขึ้น Peak rate ×1.6 ทันที', tag:'LH' },
   // group 2: อัพเดต channel
   { group:'📱 OTA Channels', text:'Airbnb — ปรับ base price + ตรวจ cleaning fee', sub:'Base ต่ำ + cleaning fee แยก = ดูถูกในผลค้นหา แต่ได้ราคาจริง', tag:'Airbnb' },
   { group:null, text:'Booking.com — sync ราคาและ availability', sub:'เช็ค promotion ที่ระบบเปิดอัตโนมัติ — ปิดถ้าไม่ต้องการ', tag:'BKC' },
@@ -1104,7 +1131,7 @@ function parseDate(val){
 
 function computeOcc(rows, colRoom, colIn, colOut){
   const today=new Date(); today.setHours(0,0,0,0);
-  const end14=new Date(today); end14.setDate(end14.getDate()+14);
+  const end14=new Date(today); end14.setDate(end14.getDate()+7);
   const roomNights={};
   ROOMS_DATA.forEach(r=>roomNights[r.id]=0);
   const summary=[];
@@ -1130,7 +1157,7 @@ function computeOcc(rows, colRoom, colIn, colOut){
     if(nights>0){ roomNights[matched.id]+=nights; summary.push({room:matched.id,ci,co,nights,raw:roomRaw}); }
   });
   const occMap={};
-  ROOMS_DATA.forEach(r=>occMap[r.id]=Math.min(100,Math.round((roomNights[r.id]||0)/((r.count||1)*14)*100)));
+  ROOMS_DATA.forEach(r=>occMap[r.id]=Math.min(100,Math.round((roomNights[r.id]||0)/((r.count||1)*7)*100)));
   return {occMap,summary,roomNights};
 }
 
@@ -1165,13 +1192,13 @@ function applySheetData(data){
     return `<div class="sheets-room-chip">
       <div class="name">${r.id}</div>
       <div class="occ" style="color:${col}">${o}%</div>
-      <div class="nights">${n}/${(r.count||1)*14} คืน</div>
+      <div class="nights">${n}/${(r.count||1)*7} คืน</div>
     </div>`;
   }).join('');
 
   const listEl=document.getElementById('sheets-booking-list');
   listEl.innerHTML=summary.length===0
-    ?'<div style="font-size:11px;color:var(--text3);padding:4px 0">ไม่พบการจองใน 14 วันข้างหน้า</div>'
+    ?'<div style="font-size:11px;color:var(--text3);padding:4px 0">ไม่พบการจองใน 7 วันข้างหน้า</div>'
     :summary.map(b=>`<div class="booking-row">
         <span style="color:var(--text2)">${b.raw}</span>
         <span>${b.ci.toLocaleDateString('th-TH',{day:'numeric',month:'short'})} → ${b.co.toLocaleDateString('th-TH',{day:'numeric',month:'short'})}</span>
@@ -1181,6 +1208,7 @@ function applySheetData(data){
   document.getElementById('occ-source-label').innerHTML=`<span style="color:var(--green);font-weight:500">✓ ดึงจาก Sheets — ${summary.length} การจอง · คอลัมน์: ${colRoom} / ${colIn} / ${colOut}</span>`;
   renderPriceTable(); renderProjection();
   if(typeof drawOcc14Chart==='function' && typeof chartsDrawn!=='undefined' && chartsDrawn) drawOcc14Chart();
+  if(typeof checkAlerts==='function') checkAlerts();
 }
 
 async function syncFromSheets(){
@@ -1212,6 +1240,86 @@ async function syncFromSheets(){
 })();
 </script>
 <script>
+
+// ── Alert Engine ──
+function checkAlerts() {
+  const alerts = { urgent:[], warn:[], ok:[] };
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  ROOMS_DATA.forEach(r => {
+    const occ = r.currentOcc !== undefined ? r.currentOcc : r.occ;
+    const season = getSeason();
+    const targetPrice = calcPrice(r.base, occ, 'weekday', season);
+
+    // URGENT: >90% → close arrival + raise price
+    if(occ >= 90) {
+      alerts.urgent.push({
+        room: r.id, occ,
+        action: `ปิด Close Arrival + ขึ้นราคา ฿${targetPrice} (+40%)`,
+        cls:'al-red'
+      });
+    }
+    // URGENT: ≤1 room last-minute (occ > 85%)
+    else if(occ >= 85) {
+      alerts.urgent.push({
+        room: r.id, occ,
+        action: `Demand สูง — ขึ้นราคาทันที ฿${targetPrice} (+25%)`,
+        cls:'al-red'
+      });
+    }
+    // WARN: <50% → drop price to fill
+    else if(occ < 50) {
+      alerts.warn.push({
+        room: r.id, occ,
+        action: `Occ ต่ำ — ลดราคา ฿${calcPrice(r.base, occ, 'weekday', season)} (−15%)`,
+        cls:'al-amber'
+      });
+    }
+    // OK zone
+    else {
+      alerts.ok.push({ room: r.id, occ, action:`Occ ${occ}% — คงราคา ฿${targetPrice}`, cls:'al-icon-grn' });
+    }
+  });
+
+  const banner = document.getElementById('alert-banner');
+  const itemsEl = document.getElementById('alert-items');
+  const titleEl = document.getElementById('alert-title-text');
+  const iconEl  = document.getElementById('alert-icon');
+
+  const allItems = [...alerts.urgent, ...alerts.warn];
+
+  if(allItems.length === 0) {
+    banner.className = 'alert-banner al-green show';
+    iconEl.className = 'alert-icon al-icon-grn';
+    iconEl.textContent = '✓';
+    titleEl.textContent = 'ราคาอยู่ในช่วงปกติ — ไม่ต้องปรับอะไรสัปดาห์นี้';
+    itemsEl.innerHTML = alerts.ok.map(a=>`
+      <div class="alert-item">
+        <div class="alert-item-room">${a.room} · ${a.occ}%</div>
+        <div class="alert-item-action" style="color:var(--green)">${a.action}</div>
+      </div>`).join('');
+    return;
+  }
+
+  if(alerts.urgent.length > 0) {
+    banner.className = 'alert-banner al-red show';
+    iconEl.className = 'alert-icon al-icon-red';
+    iconEl.textContent = '!';
+    titleEl.textContent = `ต้องปรับราคาทันที — ${alerts.urgent.length} ห้อง Occ สูงมาก`;
+  } else {
+    banner.className = 'alert-banner al-amber show';
+    iconEl.className = 'alert-icon al-icon-amb';
+    iconEl.textContent = '↓';
+    titleEl.textContent = `แนะนำลดราคา — ${alerts.warn.length} ห้อง Occ ต่ำกว่าเป้า`;
+  }
+
+  itemsEl.innerHTML = allItems.map(a=>`
+    <div class="alert-item">
+      <div class="alert-item-room">${a.room} · Occ ${a.occ}%</div>
+      <div class="alert-item-action">${a.action}</div>
+    </div>`).join('');
+}
+
 // ── Tab navigation ──
 function switchTab(id, el) {
   document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
@@ -1315,7 +1423,7 @@ function drawOcc14Chart() {
     type:'bar',
     data:{
       labels: ROOMS_DATA.map(r=>r.id),
-      datasets:[{label:'Occ % (14 วัน)',data:occs,backgroundColor:colors,borderRadius:4}]
+      datasets:[{label:'Occ % (7 วัน)',data:occs,backgroundColor:colors,borderRadius:4}]
     },
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},
