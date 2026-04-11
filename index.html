@@ -391,45 +391,68 @@ tr:hover td{background:#FAFAF7}
     <div class="insight-box bad">
       <div class="insight-label">ช่องว่างราคาใหญ่สุด</div>
       <div class="insight-val">Luxury −฿437</div>
-      <div class="insight-desc">ADR จริง ฿663 vs เป้า ฿1,100 · ยังขายถูกที่สุดเทียบ tier</div>
+      <div class="insight-desc">ADR จริง ฿663 vs เป้า ฿1,100 · High season ทำได้ ฿1,076 แล้ว</div>
     </div>
     <div class="insight-box warn">
       <div class="insight-label">LOS ยาวเกินไป</div>
-      <div class="insight-val">เฉลี่ย 10 คืน</div>
-      <div class="insight-desc">lock ห้องราคาถูก · เป้า short stay 2–4 คืน ดันรายได้/คืนขึ้น</div>
+      <div class="insight-val">Elegance 11 คืน</div>
+      <div class="insight-desc">lock ห้องราคาถูก · Luxury สั้นสุด 8 คืน · เป้า 2–4 คืนสำหรับ premium tier</div>
     </div>
-    <div class="insight-box good">
-      <div class="insight-label">Revenue Potential ปี 2569</div>
-      <div class="insight-val">฿2.27M</div>
-      <div class="insight-desc">16 ห้อง · ADR ฿850 · occ 70% · เพิ่มขึ้น +70% จากปัจจุบัน</div>
-    </div>
-  </div>
-
-  <!-- Charts row 1: ADR comparison + Channel mix -->
-  <div class="exec-grid">
-    <div class="chart-card">
-      <div class="chart-title">ADR จริง vs เป้าหมาย รายประเภทห้อง</div>
-      <div class="chart-subtitle">ข้อมูลจริง 1 ปี (Apr 2025–Apr 2026) จาก Little Hotelier</div>
-      <div class="chart-wrap" style="height:220px"><canvas id="chartADR" role="img" aria-label="Bar chart comparing real ADR vs target ADR by room type"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Channel Mix — Revenue 1 ปีที่แล้ว</div>
-      <div class="chart-subtitle">Airbnb ครอง 76% · ต้องกระจาย OTA เพิ่ม</div>
-      <div class="chart-wrap" style="height:220px"><canvas id="chartChannel" role="img" aria-label="Donut chart of channel revenue mix"></canvas></div>
+    <div class="insight-box bad">
+      <div class="insight-label">ADR ดิ่งช่วงล่าสุด</div>
+      <div class="insight-val">Luxury ฿262 ก.พ.69</div>
+      <div class="insight-desc">ต่ำสุดตลอดปี — ช่วงนี้ต้องตั้งราคา floor ไม่ให้ต่ำกว่า ฿600</div>
     </div>
   </div>
 
-  <!-- Charts row 2: Occ + Revenue gap -->
-  <div class="exec-grid">
+  <!-- Legend row -->
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md)">
+    <span style="font-size:11px;font-weight:500;color:var(--text3);margin-right:4px">ประเภทห้อง:</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#534AB7;display:inline-block"></span>Luxury</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#C8731A;display:inline-block"></span>Retro</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#2B5FA8;display:inline-block"></span>Allure</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#3A7D44;display:inline-block"></span>Elegance</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:12px"><span style="width:10px;height:10px;border-radius:2px;background:#832040;display:inline-block"></span>Legacy</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--text3)">ข้อมูลจริง ธ.ค.2567 – เม.ย.2569 · 515 รายการ</span>
+  </div>
+
+  <!-- Chart 1: ADR trend (full width) -->
+  <div class="chart-card" style="margin-bottom:14px">
+    <div class="chart-title">แนวโน้ม ADR รายเดือน แยกตามประเภทห้อง</div>
+    <div class="chart-subtitle">ราคาเฉลี่ยต่อคืนจากใบเสร็จจริง — เส้นขาดคือช่วงที่ไม่มี booking</div>
+    <div class="chart-wrap" style="height:260px"><canvas id="chartADR" role="img" aria-label="Line chart of monthly ADR trends by room type"></canvas></div>
+  </div>
+
+  <!-- Chart 2+3: Revenue stacked + ADR vs target -->
+  <div class="exec-grid" style="margin-bottom:14px">
     <div class="chart-card">
-      <div class="chart-title">Occupancy รายประเภทห้อง (1 ปี)</div>
-      <div class="chart-subtitle">Allure เต็มสุด 83% · Luxury & Retro มีช่องว่างขึ้นราคา</div>
-      <div class="chart-wrap" style="height:200px"><canvas id="chartOcc" role="img" aria-label="Horizontal bar chart of occupancy by room type"></canvas></div>
+      <div class="chart-title">Revenue รายเดือน (Stacked)</div>
+      <div class="chart-subtitle">รายได้ค่าเช่ารวมทุกประเภทห้อง ฿K/เดือน</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chartRev" role="img" aria-label="Stacked bar chart of monthly revenue by room type"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Revenue จริง vs ศักยภาพ (8 ห้อง → 16 ห้อง)</div>
-      <div class="chart-subtitle">คำนวณที่ ADR ฿850 · Occ 70%</div>
-      <div class="chart-wrap" style="height:200px"><canvas id="chartRevenue" role="img" aria-label="Bar chart comparing actual vs potential revenue"></canvas></div>
+      <div class="chart-title">ADR จริง vs เป้าหมาย</div>
+      <div class="chart-subtitle">ช่องว่างรายได้ที่ยังปิดไม่ได้ — ฿319–437 ต่อคืน</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="chartTarget" role="img" aria-label="Grouped bar chart of real ADR vs target ADR"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Chart 4+5+6: Season ADR + Channel + LOS -->
+  <div class="exec-grid-3" style="margin-bottom:14px">
+    <div class="chart-card">
+      <div class="chart-title">ADR ตาม Season จริง</div>
+      <div class="chart-subtitle">Low (พ.ค.–ก.ย.) vs High (ธ.ค.–ก.พ.)</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartSeason" role="img" aria-label="Grouped bar chart of ADR by season"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Channel Revenue Mix</div>
+      <div class="chart-subtitle">Airbnb ฿1.28M · ยังพึ่งพามากเกินไป</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartChannel" role="img" aria-label="Donut chart of channel revenue mix"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Length of Stay จริง</div>
+      <div class="chart-subtitle">LOS ยาวเกิน → lock ราคาถูก · เป้า 2–4 คืน</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chartLOS" role="img" aria-label="Horizontal bar chart of average LOS by room type"></canvas></div>
     </div>
   </div>
 
@@ -1238,8 +1261,7 @@ async function syncFromSheets(){
   document.getElementById('occ-source-label').innerHTML='<span style="color:var(--amber)">⏳ กำลังดึงข้อมูลอัตโนมัติ...</span>';
   setTimeout(()=>{ syncFromSheets(); }, 600);
 })();
-</script>
-<script>
+
 
 // ── Alert Engine ──
 function checkAlerts() {
@@ -1330,111 +1352,230 @@ function switchTab(id, el) {
 }
 
 // ── Executive Charts ──
+
+// ── Executive Charts — ข้อมูลจริงจากใบเสร็จ Apr 2024–Apr 2026 ──
+const CHART_MONTHS = ["2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04"];
+const MONTH_LABELS = ["ธ.ค.67","ม.ค.68","ก.พ.68","มี.ค.68","เม.ย.68","พ.ค.68","มิ.ย.68","ก.ค.68","ส.ค.68","ก.ย.68","ต.ค.68","พ.ย.68","ธ.ค.68","ม.ค.69","ก.พ.69","มี.ค.69","เม.ย.69"];
+
+const ADR_DATA = {
+  Luxury:   [1646,1085,1422,787,2766,762,264,1049,1689,766,211,null,1023,637,262,539,189],
+  Retro:    [null,886,754,549,382,608,389,null,423,620,681,1387,659,536,756,456,423],
+  Allure:   [1111,960,1431,508,589,609,366,763,448,827,536,931,757,905,272,770,1260],
+  Elegance: [613,612,1043,738,884,774,527,410,585,602,893,487,681,602,372,685,559],
+  Legacy:   [676,1060,348,521,923,517,660,520,603,731,793,614,482,625,356,433,397]
+};
+
+const REV_DATA = {
+  Luxury:   [6584,20043,14548,13285,24803,14760,7393,44697,10164,13072,20683,0,11939,12237,7337,10771,6252],
+  Retro:    [0,17480,15080,13583,18091,10560,18713,0,12967,11410,16869,16509,19110,10196,6878,7296,3383],
+  Allure:   [2221,38046,35974,11055,25521,29164,33968,9870,64655,19666,27470,27523,46967,30985,34863,21950,8679],
+  Elegance: [6748,23142,27228,32871,36535,17627,32650,18511,26198,40121,29120,7177,47653,28220,25418,15737,15942],
+  Legacy:   [18679,39016,23659,24316,37025,24739,16366,28263,26949,28325,12825,41148,17775,25331,30375,26978,6354]
+};
+
+const TYPE_COLORS  = {Luxury:'#534AB7',Retro:'#C8731A',Allure:'#2B5FA8',Elegance:'#3A7D44',Legacy:'#832040'};
+const TYPE_COLORS2 = {Luxury:'rgba(83,74,183,.18)',Retro:'rgba(200,115,26,.18)',Allure:'rgba(43,95,168,.18)',Elegance:'rgba(58,125,68,.18)',Legacy:'rgba(131,32,64,.18)'};
+
+const PEAK_ADR = {Allure:843,Elegance:685,Legacy:655,Luxury:1076,Retro:734};
+const LOW_ADR  = {Allure:577,Elegance:589,Legacy:610,Luxury:952,Retro:504};
+const LOS_TYPE = {Luxury:8.0,Retro:9.6,Allure:10.9,Elegance:11.1,Legacy:9.1};
+const CH_REV   = {Airbnb:1280486,Booking:229985,Trip:126759,Expedia:106010,Other:21047};
+
+const TYPES = ['Luxury','Retro','Allure','Elegance','Legacy'];
+const REAL_ADR = {Luxury:663,Retro:554,Allure:483,Elegance:480,Legacy:476};
+const TARGET_ADR = {Luxury:1100,Retro:950,Allure:800,Elegance:800,Legacy:750};
+
 let chartsDrawn = false;
-let chartADR, chartChannel, chartOcc, chartRevenue, chartOcc14;
+let _charts = {};
 
 function drawExecCharts() {
   if(chartsDrawn) return;
   chartsDrawn = true;
 
-  const TYPES = ['Luxury','Retro','Allure','Elegance','Legacy'];
-  const REAL_ADR = [663, 554, 483, 480, 476];
-  const TARGET_ADR = [1100, 950, 800, 800, 750];
-  const REAL_OCC = [70, 70, 83, 76, 76];
-  const COLORS_REAL  = '#A89F96';
-  const COLORS_TGT   = '#C8933A';
-  const COLORS_OCC   = ['#EDEAFC','#FDF0E3','#EBF1FC','#EBF5EE','#FCE8EF'];
-  const COLORS_OCC_B = ['#534AB7','#C8731A','#2B5FA8','#3A7D44','#832040'];
+  // helper: get data array for a type, replacing null/0 with null for line gaps
+  const series = (type, data) => CHART_MONTHS.map(m => data[type][CHART_MONTHS.indexOf(m)] || null);
 
-  // Chart 1: ADR real vs target
-  chartADR = new Chart(document.getElementById('chartADR'), {
+  // ── Chart 1: ADR trend lines by type ──
+  _charts.adr = new Chart(document.getElementById('chartADR'), {
+    type:'line',
+    data:{
+      labels: MONTH_LABELS,
+      datasets: TYPES.map(t=>({
+        label: t,
+        data: ADR_DATA[t],
+        borderColor: TYPE_COLORS[t],
+        backgroundColor: TYPE_COLORS2[t],
+        borderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        tension: 0.3,
+        spanGaps: true,
+        fill: false
+      }))
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ฿${ctx.raw||'-'}`}}
+      },
+      scales:{
+        y:{ticks:{callback:v=>'฿'+v,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'},min:0},
+        x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45}}
+      }
+    }
+  });
+
+  // ── Chart 2: Revenue stacked bar ──
+  _charts.rev = new Chart(document.getElementById('chartRev'), {
+    type:'bar',
+    data:{
+      labels: MONTH_LABELS,
+      datasets: TYPES.map(t=>({
+        label: t,
+        data: REV_DATA[t],
+        backgroundColor: TYPE_COLORS2[t].replace('.18','.7'),
+        borderColor: TYPE_COLORS[t],
+        borderWidth: 1,
+        borderRadius: 2,
+      }))
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ฿${Math.round(ctx.raw/1000)}K`}}
+      },
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:10},maxRotation:45}},
+        y:{stacked:true,ticks:{callback:v=>'฿'+Math.round(v/1000)+'K',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}}
+      }
+    }
+  });
+
+  // ── Chart 3: ADR real vs target grouped bar ──
+  _charts.target = new Chart(document.getElementById('chartTarget'), {
     type:'bar',
     data:{
       labels: TYPES,
       datasets:[
-        {label:'ADR จริง (฿)', data:REAL_ADR, backgroundColor:'#B4B2A9', borderRadius:4},
-        {label:'เป้าหมาย (฿)', data:TARGET_ADR, backgroundColor:'#C8933A', borderRadius:4}
+        {label:'ADR จริง (1 ปี)',data:TYPES.map(t=>REAL_ADR[t]),backgroundColor:'#B4B2A9',borderRadius:4},
+        {label:'เป้าหมาย',       data:TYPES.map(t=>TARGET_ADR[t]),backgroundColor:'#C8933A',borderRadius:4}
       ]
     },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:8}}},
-      scales:{y:{ticks:{callback:v=>'฿'+v,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
-              x:{grid:{display:false},ticks:{font:{size:11}}}}
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ฿${ctx.raw}`}}
+      },
+      scales:{
+        y:{ticks:{callback:v=>'฿'+v,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
+        x:{grid:{display:false}}
+      }
     }
   });
 
-  // Chart 2: Channel donut
-  chartChannel = new Chart(document.getElementById('chartChannel'), {
+  // ── Chart 4: Peak vs Low season ADR ──
+  _charts.season = new Chart(document.getElementById('chartSeason'), {
+    type:'bar',
+    data:{
+      labels: TYPES,
+      datasets:[
+        {label:'Low season (พ.ค.–ก.ย.)',data:TYPES.map(t=>LOW_ADR[t]),backgroundColor:'rgba(43,95,168,.6)',borderRadius:4},
+        {label:'High season (ธ.ค.–ก.พ.)',data:TYPES.map(t=>PEAK_ADR[t]),backgroundColor:'rgba(185,64,64,.7)',borderRadius:4}
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ฿${ctx.raw}`}}
+      },
+      scales:{
+        y:{ticks:{callback:v=>'฿'+v,font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+
+  // ── Chart 5: Channel revenue donut ──
+  const chTotal = Object.values(CH_REV).reduce((a,b)=>a+b,0);
+  _charts.channel = new Chart(document.getElementById('chartChannel'), {
     type:'doughnut',
     data:{
-      labels:['Airbnb 76%','Expedia 8%','Trip.com 8%','Booking 7%','Other 1%'],
-      datasets:[{data:[76,8,8,7,1],
-        backgroundColor:['#EF9F27','#534AB7','#3A7D44','#2B5FA8','#B4B2A9'],
-        borderWidth:0}]
+      labels:['Airbnb','Booking','Trip.com','Expedia','Walk-in'],
+      datasets:[{
+        data: Object.values(CH_REV),
+        backgroundColor:['#EF9F27','#2B5FA8','#3A7D44','#534AB7','#B4B2A9'],
+        borderWidth: 0
+      }]
     },
-    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
-      plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:8}}}
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{
+        legend:{position:'right',labels:{font:{size:11},boxWidth:10,padding:8}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ฿${Math.round(ctx.raw/1000)}K (${Math.round(ctx.raw/chTotal*100)}%)`}}
+      }
     }
   });
 
-  // Chart 3: Occupancy horizontal bar
-  chartOcc = new Chart(document.getElementById('chartOcc'), {
+  // ── Chart 6: LOS by type ──
+  _charts.los = new Chart(document.getElementById('chartLOS'), {
     type:'bar',
     data:{
-      labels:TYPES,
-      datasets:[{label:'Occupancy %',data:REAL_OCC,
-        backgroundColor:COLORS_OCC_B.map(c=>c+'33'),
-        borderColor:COLORS_OCC_B, borderWidth:1.5, borderRadius:4}]
+      labels: TYPES,
+      datasets:[{
+        label:'LOS เฉลี่ย (คืน)',
+        data: TYPES.map(t=>LOS_TYPE[t]),
+        backgroundColor: TYPES.map(t=>TYPE_COLORS2[t].replace('.18','.7')),
+        borderColor: TYPES.map(t=>TYPE_COLORS[t]),
+        borderWidth:1, borderRadius:4
+      }]
     },
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},
-      scales:{x:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
-              y:{grid:{display:false},ticks:{font:{size:11}}}}
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.raw} คืน`}}
+      },
+      scales:{
+        x:{ticks:{callback:v=>v+' คืน',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'},min:0,max:14},
+        y:{grid:{display:false}}
+      }
     }
   });
 
-  // Chart 4: Revenue actual vs potential
-  chartRevenue = new Chart(document.getElementById('chartRevenue'), {
-    type:'bar',
-    data:{
-      labels:['8 ห้อง (จริง)','8 ห้อง (เป้า)','16 ห้อง (เป้า)'],
-      datasets:[{label:'Revenue/ปี (฿)',
-        data:[1337120, 2268000, 4536000],
-        backgroundColor:['#B4B2A9','#C8933A','#3A7D44'],
-        borderRadius:4}]
-    },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>'฿'+Math.round(ctx.raw/1000)+'K'}}},
-      scales:{y:{ticks:{callback:v=>'฿'+Math.round(v/1000)+'K',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
-              x:{grid:{display:false},ticks:{font:{size:10}}}}
-    }
-  });
-
+  // ── Chart 7: Occ 7-day live bar ──
   drawOcc14Chart();
 }
 
 function drawOcc14Chart() {
   const occs = ROOMS_DATA.map(r => r.currentOcc !== undefined ? r.currentOcc : r.occ);
-  const colors = occs.map(o => o < 50 ? '#2B5FA8' : o < 70 ? '#3A7D44' : o < 85 ? '#C8931A' : '#B94040');
-  if(chartOcc14) chartOcc14.destroy();
-  chartOcc14 = new Chart(document.getElementById('chartOcc14'), {
+  const cols  = occs.map(o => o<50?'rgba(43,95,168,.7)':o<70?'rgba(58,125,68,.7)':o<85?'rgba(200,115,26,.7)':'rgba(185,64,64,.7)');
+  if(_charts.occ14){ _charts.occ14.destroy(); }
+  const el = document.getElementById('chartOcc14');
+  if(!el) return;
+  _charts.occ14 = new Chart(el, {
     type:'bar',
     data:{
       labels: ROOMS_DATA.map(r=>r.id),
-      datasets:[{label:'Occ % (7 วัน)',data:occs,backgroundColor:colors,borderRadius:4}]
+      datasets:[{label:'Occ % (7 วัน)',data:occs,backgroundColor:cols,borderRadius:4}]
     },
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},
-        tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},
-      scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
-              x:{grid:{display:false},ticks:{font:{size:11}}}}
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}},
+      scales:{
+        y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'}},
+        x:{grid:{display:false}}
+      }
     }
   });
 }
 
-// Sync k-season2 to tab-ops after init (called separately)
+
 function syncSeasonToOps(){
   const s2=document.getElementById('k-season2');
   const s2b=document.getElementById('k-season-sub2');
@@ -1444,10 +1585,8 @@ function syncSeasonToOps(){
   if(s2b&&srb) s2b.textContent=srb.textContent;
 }
 
-// occ14 chart redrawn inside applySheetData directly (see below)
-
-// Draw executive charts on load (first tab)
 window.addEventListener('load', ()=>{ syncSeasonToOps(); setTimeout(drawExecCharts, 800); });
+
 </script>
 </body>
 </html>
