@@ -495,32 +495,35 @@ tr:hover td{background:#FAFAF7}
     </div>
   </div>
 
-  <div class="page-section-label">Price Action Table</div>
+  <div class="page-section-label">Price Action — กราฟราคาสัปดาห์นี้</div>
   <div class="sec">
     <div class="sec-hdr">
-      <span class="sec-title">ราคาที่ควรตั้งใน Little Hotelier สัปดาห์นี้</span>
-      <span id="action-season-badge" class="season-tag sb-mid">Normal season</span>
+      <span class="sec-title">ราคาที่ควรตั้งใน Little Hotelier</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="action-season-badge" class="season-tag sb-mid">Normal season</span>
+      </div>
     </div>
+    <!-- Day tabs -->
     <div class="tabs">
       <div class="tab active" onclick="switchWeek('weekday',this)">จ–พฤ</div>
       <div class="tab" onclick="switchWeek('fri',this)">ศุกร์</div>
       <div class="tab" onclick="switchWeek('weekend',this)">เสาร์–อาทิตย์</div>
       <div class="tab" onclick="switchWeek('peak',this)">Peak day</div>
     </div>
-    <div class="tbl-wrap" style="padding:0 0 4px">
-      <table>
-        <thead>
-          <tr>
-            <th>ประเภทห้อง</th><th>Occ %</th>
-            <th>ADR จริง</th><th>เป้าหมาย</th>
-            <th>Airbnb</th><th>Booking</th><th>Expedia/Agoda</th>
-            <th>2 คน</th><th>3 คน</th><th>4 คน</th>
-            <th>Action</th><th>หมายเหตุ</th>
-          </tr>
-        </thead>
-        <tbody id="price-tbody"></tbody>
-      </table>
+    <!-- Price cards grid -->
+    <div style="padding:16px 18px">
+      <div id="price-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px"></div>
+      <!-- Bar chart -->
+      <div style="background:var(--surface2);border-radius:var(--r-md);padding:16px 18px">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">เปรียบเทียบราคาต่อ Channel</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:12px">ADR จริง (เทา) · เป้าหมาย (ทอง) · Airbnb · Booking · Expedia</div>
+        <div style="position:relative;height:220px">
+          <canvas id="chartPriceBar" role="img" aria-label="Grouped bar chart of room prices by channel"></canvas>
+        </div>
+      </div>
     </div>
+    <!-- Hidden tbody kept for compatibility -->
+    <div style="display:none"><table><tbody id="price-tbody"></tbody></table></div>
   </div>
 
   <div class="page-section-label">Cleaning Fee & Extra Guest</div>
@@ -829,48 +832,137 @@ function switchWeek(w,el){
 }
 
 // ── Price table ──
+let _chartPriceBar = null;
+
 function renderPriceTable(){
   const season=getSeason(), dow=currentWeek;
-  const tbody=document.getElementById('price-tbody'); tbody.innerHTML='';
   const sb=document.getElementById('action-season-badge');
-  sb.textContent=SEASON_RULES[season].name;
-  sb.className='season-tag '+SEASON_RULES[season].badge;
+  if(sb){ sb.textContent=SEASON_RULES[season].name; sb.className='season-tag '+SEASON_RULES[season].badge; }
 
-  ROOMS_DATA.forEach(r=>{
-    const occ=r.currentOcc!==undefined?r.currentOcc:r.occ;
-    const price=calcPrice(r.base,occ,dow,season);
-    const or=getOccRule(occ);
-    const airbnb=Math.round(price*CH_MULT['Airbnb']/50)*50;
-    const bkc=Math.round(price*CH_MULT['Booking']/50)*50;
-    const exp=Math.round(price*CH_MULT['Expedia/Agoda']/50)*50;
-    const p3=Math.round(price*1.32/50)*50;
-    const p4=r.maxG>=4?Math.round(price*1.6/50)*50:null;
-    const barCol=occ<50?'#5B9BD5':occ<70?'#5B9B6E':occ<85?'#C8931A':'#C84040';
-    const actCls={dn:'act-dn',hold:'act-hold',up:'act-up',peak:'act-peak'}[or.action]||'act-hold';
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><span class="chip ${r.chip}">${r.id}</span></td>
-      <td style="font-size:11px;color:var(--text3)">${r.tier}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:7px">
-          <div class="occ-bar-bg"><div class="occ-bar-fill" style="width:${occ}%;background:${barCol}"></div></div>
-          <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:${barCol}">${occ}%</span>
-        </div>
-      </td>
-      <td><span class="price" style="color:var(--text3);text-decoration:line-through">${thb(r.realADR||0)}</span></td>
-      <td><span class="price price-main" style="color:var(--green)">${thb(price)}</span></td>
-      <td><span class="price" style="color:#8B5A10">${thb(airbnb)}</span></td>
-      <td><span class="price" style="color:var(--blue)">${thb(bkc)}</span></td>
-      <td><span class="price" style="color:#4A3A8A">${thb(exp)}</span></td>
-      <td class="price">${thb(price)}</td>
-      <td class="price">${thb(p3)}</td>
-      <td class="price">${p4?thb(p4):'—'}</td>
-      <td>
-        <span class="action-tag ${actCls}">${or.label}</span>
-        ${occ>=85?'<br><span class="action-tag act-cta" style="margin-top:3px;display:inline-block">Close arrival</span>':''}
-      </td>
-      <td style="font-size:11px;color:var(--text3);max-width:130px">${or.note}${r.revpar?` · RevPAR ฿${r.revpar} / LoS ${r.los}ค`:''}</td>`;
-    tbody.appendChild(tr);
+  const actionColors = {
+    dn:   {bg:'#EBF5EE',border:'#8DC89A',text:'#3A7D44',label:'ลดราคา'},
+    hold: {bg:'#F2EFE8',border:'#D5CFC2',text:'#6B6560',label:'คงราคา'},
+    up:   {bg:'#FAEAEA',border:'#D48888',text:'#B94040',label:'ขึ้นราคา'},
+    peak: {bg:'#FCEAEA',border:'#D48888',text:'#8B2020',label:'Peak!'}
+  };
+
+  // ── Price Cards ──
+  const cardsEl = document.getElementById('price-cards');
+  if(cardsEl){
+    cardsEl.innerHTML = '';
+    ROOMS_DATA.forEach(r=>{
+      const occ  = r.currentOcc!==undefined?r.currentOcc:r.occ;
+      const price= calcPrice(r.base,occ,dow,season);
+      const or   = getOccRule(occ);
+      const ac   = actionColors[or.action]||actionColors.hold;
+      const airbnb = Math.round(price*CH_MULT['Airbnb']/50)*50;
+      const bkc    = Math.round(price*CH_MULT['Booking']/50)*50;
+      const exp    = Math.round(price*CH_MULT['Expedia/Agoda']/50)*50;
+      const p3     = Math.round(price*1.32/50)*50;
+      const p4     = r.maxG>=4?Math.round(price*1.6/50)*50:null;
+      const occCol = occ<50?'#2B5FA8':occ<70?'#3A7D44':occ<85?'#C8731A':'#B94040';
+      const gap    = price-(r.realADR||0);
+      const chipColors = {
+        'chip-lux':'#534AB7','chip-ret':'#C8731A','chip-all':'#2B5FA8',
+        'chip-ele':'#3A7D44','chip-leg':'#832040'
+      };
+      const typeColor = chipColors[r.chip]||'#888';
+
+      const card = document.createElement('div');
+      card.style.cssText=`background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;border-top:3px solid ${typeColor}`;
+      card.innerHTML=`
+        <div style="padding:14px 16px 10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-size:13px;font-weight:600;color:${typeColor}">${r.id}</span>
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:${ac.bg};color:${ac.text};border:1px solid ${ac.border}">${or.label}</span>
+          </div>
+          <!-- Occ bar -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden">
+              <div style="width:${occ}%;height:100%;background:${occCol};border-radius:3px"></div>
+            </div>
+            <span style="font-size:12px;font-weight:700;color:${occCol};min-width:34px;text-align:right">${occ}%</span>
+          </div>
+          <!-- Main price -->
+          <div style="text-align:center;padding:10px 0;background:var(--surface2);border-radius:10px;margin-bottom:10px">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:2px">ราคาแนะนำ (2 คน)</div>
+            <div style="font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--text)">฿${price.toLocaleString()}</div>
+            <div style="font-size:11px;color:${gap>=0?'#3A7D44':'#B94040'}">
+              ADR จริง ฿${(r.realADR||0).toLocaleString()} · ${gap>=0?'+':''}${gap.toLocaleString()}/คืน
+            </div>
+          </div>
+          <!-- Channel prices -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:10px">
+            <div style="text-align:center;padding:6px 4px;background:#FDF0E3;border-radius:6px">
+              <div style="font-size:9px;color:#C8731A;font-weight:600;margin-bottom:2px">AIRBNB</div>
+              <div style="font-size:13px;font-weight:600;color:#7A4A10">฿${airbnb.toLocaleString()}</div>
+            </div>
+            <div style="text-align:center;padding:6px 4px;background:#EBF1FC;border-radius:6px">
+              <div style="font-size:9px;color:#2B5FA8;font-weight:600;margin-bottom:2px">BOOKING</div>
+              <div style="font-size:13px;font-weight:600;color:#2B5FA8">฿${bkc.toLocaleString()}</div>
+            </div>
+            <div style="text-align:center;padding:6px 4px;background:#EDEAFC;border-radius:6px">
+              <div style="font-size:9px;color:#534AB7;font-weight:600;margin-bottom:2px">EXPEDIA</div>
+              <div style="font-size:13px;font-weight:600;color:#534AB7">฿${exp.toLocaleString()}</div>
+            </div>
+          </div>
+          <!-- Guest pricing -->
+          <div style="display:flex;gap:6px;font-size:11px">
+            <div style="flex:1;text-align:center;padding:4px;background:var(--surface2);border-radius:6px">
+              <div style="color:var(--text3)">2 คน</div>
+              <div style="font-weight:600">฿${price.toLocaleString()}</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:4px;background:var(--surface2);border-radius:6px">
+              <div style="color:var(--text3)">3 คน</div>
+              <div style="font-weight:600">฿${p3.toLocaleString()}</div>
+            </div>
+            <div style="flex:1;text-align:center;padding:4px;background:var(--surface2);border-radius:6px">
+              <div style="color:var(--text3)">4 คน</div>
+              <div style="font-weight:600">${p4?'฿'+p4.toLocaleString():'—'}</div>
+            </div>
+          </div>
+          ${occ>=85?`<div style="margin-top:8px;text-align:center;font-size:11px;font-weight:600;padding:4px;background:#EDEAFC;color:#3A2E88;border-radius:6px">⚠ Close Arrival</div>`:''}
+        </div>`;
+      cardsEl.appendChild(card);
+    });
+  }
+
+  // ── Bar Chart ──
+  const season2=season, dow2=dow;
+  const labels = ROOMS_DATA.map(r=>r.id);
+  const realADRs= ROOMS_DATA.map(r=>r.realADR||0);
+  const targets = ROOMS_DATA.map(r=>calcPrice(r.base,75,dow2,season2)); // 75% occ = target
+  const airbnbs = ROOMS_DATA.map(r=>Math.round(calcPrice(r.base,r.currentOcc!==undefined?r.currentOcc:r.occ,dow2,season2)*CH_MULT['Airbnb']/50)*50);
+  const bkcs    = ROOMS_DATA.map(r=>Math.round(calcPrice(r.base,r.currentOcc!==undefined?r.currentOcc:r.occ,dow2,season2)*CH_MULT['Booking']/50)*50);
+  const exps    = ROOMS_DATA.map(r=>Math.round(calcPrice(r.base,r.currentOcc!==undefined?r.currentOcc:r.occ,dow2,season2)*CH_MULT['Expedia/Agoda']/50)*50);
+
+  if(_chartPriceBar){ _chartPriceBar.destroy(); _chartPriceBar=null; }
+  const el=document.getElementById('chartPriceBar');
+  if(!el) return;
+  _chartPriceBar = new Chart(el,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'ADR จริง (1 ปี)',  data:realADRs, backgroundColor:'rgba(168,159,150,.5)', borderColor:'#888780', borderWidth:1, borderRadius:3},
+        {label:'เป้าหมาย (Occ 75%)',data:targets,  backgroundColor:'rgba(200,147,58,.55)',borderColor:'#C8933A', borderWidth:1, borderRadius:3},
+        {label:'Airbnb',           data:airbnbs,  backgroundColor:'rgba(200,115,26,.65)',borderColor:'#C8731A', borderWidth:1, borderRadius:3},
+        {label:'Booking',          data:bkcs,     backgroundColor:'rgba(43,95,168,.65)', borderColor:'#2B5FA8', borderWidth:1, borderRadius:3},
+        {label:'Expedia/Agoda',    data:exps,     backgroundColor:'rgba(83,74,183,.65)', borderColor:'#534AB7', borderWidth:1, borderRadius:3},
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:11},boxWidth:10,padding:10}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ฿${ctx.raw.toLocaleString()}`}}
+      },
+      scales:{
+        y:{ticks:{callback:v=>'฿'+v.toLocaleString(),font:{size:10}},grid:{color:'rgba(0,0,0,0.04)'},min:0},
+        x:{grid:{display:false},ticks:{font:{size:11}}}
+      }
+    }
   });
 }
 
