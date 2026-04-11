@@ -344,6 +344,17 @@ tr:hover td{background:#FAFAF7}
 </div>
 
 
+<!-- ── PHASE SWITCHER ── -->
+<div id="phase-bar" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:12px;flex-wrap:wrap">
+  <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">📈 Pricing Phase</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap" id="phase-btns">
+    <button onclick="setPhase(1)" id="pb1" class="btn btn-ghost" style="font-size:11px;padding:5px 12px">Phase 1 — ADR+20%<br><span style="font-size:10px;color:var(--text3)">Luxury ฿800 · Retro ฿700 · Allure ฿600</span></button>
+    <button onclick="setPhase(2)" id="pb2" class="btn btn-ghost" style="font-size:11px;padding:5px 12px">Phase 2 — +15-20%<br><span style="font-size:10px;color:var(--text3)">Luxury ฿950 · Retro ฿850 · Allure ฿700</span></button>
+    <button onclick="setPhase(3)" id="pb3" class="btn btn-ghost" style="font-size:11px;padding:5px 12px">Phase 3 — Full target<br><span style="font-size:10px;color:var(--text3)">Luxury ฿1,100 · Retro ฿950 · Allure ฿800</span></button>
+  </div>
+  <div style="margin-left:auto;font-size:11px;color:var(--text3)" id="phase-hint"></div>
+</div>
+
 <!-- ── NAV TABS ── -->
 <div class="nav-tabs">
   <div class="nav-tab active" onclick="switchTab('exec',this)"><span class="tab-icon">📊</span>ภาพรวมผู้บริหาร</div>
@@ -579,7 +590,7 @@ tr:hover td{background:#FAFAF7}
     <div class="tbl-wrap">
       <table>
         <thead><tr><th>Season</th><th>เดือน</th><th>Luxury WD</th><th>Luxury WE</th><th>Retro WD</th><th>Allure WD</th><th>Elegance WD</th><th>Legacy WD</th></tr></thead>
-        <tbody>
+        <tbody id="seasonal-price-tbody">
           <tr><td><span class="season-tag sb-low">Low</span></td><td style="color:var(--text3)">พ.ค.–ต.ค.</td><td class="price">฿935</td><td class="price">฿1,215</td><td class="price">฿808</td><td class="price">฿680</td><td class="price">฿680</td><td class="price">฿638</td></tr>
           <tr><td><span class="season-tag sb-mid">Normal</span></td><td style="color:var(--text3)">มี.ค.–เม.ย., พ.ย.</td><td class="price">฿1,100</td><td class="price">฿1,430</td><td class="price">฿950</td><td class="price">฿800</td><td class="price">฿800</td><td class="price">฿750</td></tr>
           <tr><td><span class="season-tag sb-high">High</span></td><td style="color:var(--text3)">ธ.ค.–ก.พ.</td><td class="price">฿1,375</td><td class="price">฿1,788</td><td class="price">฿1,188</td><td class="price">฿1,000</td><td class="price">฿1,000</td><td class="price">฿938</td></tr>
@@ -728,12 +739,23 @@ tr:hover td{background:#FAFAF7}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ── Data ── (realADR + realOcc = ข้อมูลจริง 1 ปี Apr25–Apr26 จาก Little Hotelier · by room type)
+// ── Pricing Phase System ──
+// Phase 1: ADR จริง +20-25% (ตอนนี้)
+// Phase 2: Phase1 +15-20% (1-2 เดือน ถ้า Occ ยังทรงตัว)
+// Phase 3: Target base เต็ม (3-4 เดือน)
+const PRICE_PHASES = {
+  1: { label:'Phase 1 — เริ่มต้น (ADR+20%)',  bases: {Luxury:800,  Retro:700,  Allure:600,  Elegance:600,  Legacy:580}  },
+  2: { label:'Phase 2 — 1-2 เดือน (+15-20%)', bases: {Luxury:950,  Retro:850,  Allure:700,  Elegance:700,  Legacy:700}  },
+  3: { label:'Phase 3 — เต็ม target',          bases: {Luxury:1100, Retro:950,  Allure:800,  Elegance:800,  Legacy:750}  },
+};
+let currentPhase = parseInt(localStorage.getItem('pricingPhase')||'1');
+
 const ROOMS_DATA = [
-  {id:'Luxury',   tier:'Luxury',   chip:'chip-lux', base:1100, realADR:663, realOcc:70, occ:70, revpar:462, los:9,  count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
-  {id:'Retro',    tier:'Retro',    chip:'chip-ret', base:950,  realADR:554, realOcc:70, occ:70, revpar:385, los:10, count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
-  {id:'Allure',   tier:'Allure',   chip:'chip-all', base:800,  realADR:483, realOcc:83, occ:83, revpar:402, los:10, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
-  {id:'Elegance', tier:'Elegance', chip:'chip-ele', base:800,  realADR:480, realOcc:76, occ:76, revpar:367, los:11, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
-  {id:'Legacy',   tier:'Legacy',   chip:'chip-leg', base:750,  realADR:476, realOcc:76, occ:76, revpar:360, los:9,  count:2, maxG:3, chPri:'Airbnb',  minStay:3, minWknd:3},
+  {id:'Luxury',   tier:'Luxury',   chip:'chip-lux', base:PRICE_PHASES[currentPhase].bases.Luxury,   realADR:663, realOcc:70, occ:70, revpar:462, los:9,  count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
+  {id:'Retro',    tier:'Retro',    chip:'chip-ret', base:PRICE_PHASES[currentPhase].bases.Retro,    realADR:554, realOcc:70, occ:70, revpar:385, los:10, count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
+  {id:'Allure',   tier:'Allure',   chip:'chip-all', base:PRICE_PHASES[currentPhase].bases.Allure,   realADR:483, realOcc:83, occ:83, revpar:402, los:10, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
+  {id:'Elegance', tier:'Elegance', chip:'chip-ele', base:PRICE_PHASES[currentPhase].bases.Elegance, realADR:480, realOcc:76, occ:76, revpar:367, los:11, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
+  {id:'Legacy',   tier:'Legacy',   chip:'chip-leg', base:PRICE_PHASES[currentPhase].bases.Legacy,   realADR:476, realOcc:76, occ:76, revpar:360, los:9,  count:2, maxG:3, chPri:'Airbnb',  minStay:3, minWknd:3},
 ];
 
 const SEASON_RULES = {
@@ -1677,7 +1699,79 @@ function syncSeasonToOps(){
   if(s2b&&srb) s2b.textContent=srb.textContent;
 }
 
-window.addEventListener('load', ()=>{ syncSeasonToOps(); setTimeout(drawExecCharts, 800); });
+// ── Phase Switcher ──
+const PHASE_HINTS = {
+  1: '🟢 ใช้ตอนนี้ — ขึ้นราคาจาก ADR จริง +20%',
+  2: '🟡 เปลี่ยนเมื่อ Occ ยังทรงตัวหลัง 1–2 เดือน',
+  3: '🔴 เปลี่ยนเมื่อตลาดรับได้ หลัง 3–4 เดือน',
+};
+
+function setPhase(p){
+  currentPhase = p;
+  localStorage.setItem('pricingPhase', p);
+  // อัพเดต base ทุกห้อง
+  const bases = PRICE_PHASES[p].bases;
+  ROOMS_DATA.forEach(r => { r.base = bases[r.id]; r.currentOcc = undefined; });
+  // reset inputOccs
+  inputOccs = {};
+  buildOccInputs();
+  renderPriceTable();
+  renderProjection();
+  renderRules();
+  updatePhaseUI();
+  updateSeasonTable();
+}
+
+function updatePhaseUI(){
+  [1,2,3].forEach(p=>{
+    const btn = document.getElementById('pb'+p);
+    if(!btn) return;
+    if(p === currentPhase){
+      btn.style.background = 'var(--text)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'var(--text)';
+      btn.querySelector('span').style.color = 'rgba(255,255,255,.6)';
+    } else {
+      btn.style.background = 'var(--surface)';
+      btn.style.color = 'var(--text)';
+      btn.style.borderColor = 'var(--border)';
+      btn.querySelector('span').style.color = 'var(--text3)';
+    }
+  });
+  const hint = document.getElementById('phase-hint');
+  if(hint) hint.textContent = PHASE_HINTS[currentPhase]||'';
+}
+
+// อัพเดต Seasonal Pricing table ให้ตรงกับ phase
+function updateSeasonTable(){
+  const bases = PRICE_PHASES[currentPhase].bases;
+  const seasonMults = {low:0.85, normal:1.0, high:1.25, peak:1.5};
+  const weMult = 1.3;
+  const rows = document.querySelectorAll('#seasonal-price-tbody tr');
+  const order = ['Luxury','Retro','Allure','Elegance','Legacy'];
+  if(!rows.length) return;
+  const seasons = ['low','normal','high','peak'];
+  rows.forEach((tr, i)=>{
+    const s = seasons[i];
+    const sm = seasonMults[s];
+    const tds = tr.querySelectorAll('td');
+    if(tds.length < 8) return;
+    const lux = Math.round(bases.Luxury * sm / 50)*50;
+    const luxWe = Math.round(bases.Luxury * sm * weMult / 50)*50;
+    const ret = Math.round(bases.Retro * sm / 50)*50;
+    const all = Math.round(bases.Allure * sm / 50)*50;
+    const ele = Math.round(bases.Elegance * sm / 50)*50;
+    const leg = Math.round(bases.Legacy * sm / 50)*50;
+    tds[2].textContent = '฿'+lux.toLocaleString();
+    tds[3].textContent = '฿'+luxWe.toLocaleString();
+    tds[4].textContent = '฿'+ret.toLocaleString();
+    tds[5].textContent = '฿'+all.toLocaleString();
+    tds[6].textContent = '฿'+ele.toLocaleString();
+    tds[7].textContent = '฿'+leg.toLocaleString();
+  });
+}
+
+window.addEventListener('load', ()=>{ syncSeasonToOps(); updatePhaseUI(); updateSeasonTable(); setTimeout(drawExecCharts, 800); });
 
 </script>
 </body>
