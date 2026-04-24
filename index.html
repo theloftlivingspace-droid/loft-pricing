@@ -344,17 +344,6 @@ tr:hover td{background:#FAFAF7}
 </div>
 
 
-<!-- ── PHASE SWITCHER ── -->
-<div id="phase-bar" style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:12px;flex-wrap:wrap">
-  <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">📈 Pricing Phase</div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap" id="phase-btns">
-    <button onclick="setPhase(1)" id="pb1" class="btn btn-ghost" style="font-size:11px;padding:5px 12px">Phase 1 — ADR+20%<br><span style="font-size:10px;color:var(--text3)">Luxury ฿800 · Retro ฿700 · Allure ฿600</span></button>
-    <button onclick="setPhase(2)" id="pb2" class="btn btn-ghost" style="font-size:11px;padding:5px 12px">Phase 2 — +15-20%<br><span style="font-size:10px;color:var(--text3)">Luxury ฿950 · Retro ฿850 · Allure ฿700</span></button>
-    <button onclick="setPhase(3)" id="pb3" class="btn btn-ghost" style="font-size:11px;padding:5px 12px">Phase 3 — Full target<br><span style="font-size:10px;color:var(--text3)">Luxury ฿1,100 · Retro ฿950 · Allure ฿800</span></button>
-  </div>
-  <div style="margin-left:auto;font-size:11px;color:var(--text3)" id="phase-hint"></div>
-</div>
-
 <!-- ── NAV TABS ── -->
 <div class="nav-tabs">
   <div class="nav-tab active" onclick="switchTab('exec',this)"><span class="tab-icon">📊</span>ภาพรวมผู้บริหาร</div>
@@ -376,19 +365,19 @@ tr:hover td{background:#FAFAF7}
       <div class="kpi-sub">Apr 2025 – Apr 2026</div>
     </div>
     <div class="kpi-card kpi-bad">
-      <div class="kpi-label">ADR จริง เฉลี่ย</div>
-      <div class="kpi-value">฿531</div>
-      <div class="kpi-sub" style="color:var(--red)">เป้า ฿850–1,100</div>
+      <div class="kpi-label">ADR Airbnb เม.ย.นี้</div>
+      <div class="kpi-value">฿656</div>
+      <div class="kpi-sub" style="color:var(--amber)">PriceLabs base avg ฿878 · เป้า ฿800+</div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Occ เฉลี่ย (1 ปี)</div>
-      <div class="kpi-value">75%</div>
-      <div class="kpi-sub">เป้า 65–75% พร้อมดันราคา</div>
+    <div class="kpi-card kpi-good">
+      <div class="kpi-label">Occ เฉลี่ย เม.ย.นี้</div>
+      <div class="kpi-value" style="color:var(--green)">88%</div>
+      <div class="kpi-sub">Luxury+Allure เต็ม · Retro 55%</div>
     </div>
     <div class="kpi-card kpi-bad">
       <div class="kpi-label">Revenue หาย/ปี</div>
       <div class="kpi-value" style="color:var(--red)">฿931K</div>
-      <div class="kpi-sub">ถ้า ADR = ฿850 occ เท่าเดิม</div>
+      <div class="kpi-sub">ถ้า ADR = ฿850 · nights เท่าเดิม</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Season ตอนนี้</div>
@@ -467,6 +456,77 @@ tr:hover td{background:#FAFAF7}
     </div>
   </div>
 
+  <!-- Airbnb Live Performance Apr 1-11 -->
+  <div class="sec" style="margin-bottom:14px">
+    <div class="sec-hdr">
+      <span class="sec-title">Airbnb Performance — เม.ย. 1–11 (11 วัน)</span>
+      <span style="font-size:11px;background:#FDF0E3;color:#C8731A;padding:3px 10px;border-radius:20px;font-weight:500">Live · Airbnb report</span>
+    </div>
+    <div style="padding:14px 18px">
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px" id="airbnb-cards">
+        <!-- Luxury -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px;border-left:3px solid #534AB7">
+          <div style="font-size:10px;font-weight:700;color:#534AB7;letter-spacing:.05em;margin-bottom:6px">LUXURY</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.5px">฿557</div>
+          <div style="font-size:11px;color:var(--text3)">ADR · 1 booking</div>
+          <div style="margin:6px 0 2px;height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:100%;height:100%;background:#534AB7;border-radius:3px"></div></div>
+          <div style="font-size:11px;font-weight:600;color:#534AB7">100% · 11 คืน</div>
+        </div>
+        <!-- Allure -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px;border-left:3px solid #2B5FA8">
+          <div style="font-size:10px;font-weight:700;color:#2B5FA8;letter-spacing:.05em;margin-bottom:6px">ALLURE</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.5px">฿677</div>
+          <div style="font-size:11px;color:var(--text3)">ADR · 4 bookings</div>
+          <div style="margin:6px 0 2px;height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:100%;height:100%;background:#2B5FA8;border-radius:3px"></div></div>
+          <div style="font-size:11px;font-weight:600;color:#2B5FA8">100% · 24 คืน</div>
+        </div>
+        <!-- Retro -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px;border-left:3px solid #C8731A">
+          <div style="font-size:10px;font-weight:700;color:#C8731A;letter-spacing:.05em;margin-bottom:6px">RETRO</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.5px">฿667</div>
+          <div style="font-size:11px;color:var(--text3)">ADR · 1 booking</div>
+          <div style="margin:6px 0 2px;height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:55%;height:100%;background:#C8731A;border-radius:3px"></div></div>
+          <div style="font-size:11px;font-weight:600;color:#C8731A">55% · 6 คืน ⚠</div>
+        </div>
+        <!-- Legacy -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px;border-left:3px solid #832040">
+          <div style="font-size:10px;font-weight:700;color:#832040;letter-spacing:.05em;margin-bottom:6px">LEGACY</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.5px">฿703</div>
+          <div style="font-size:11px;color:var(--text3)">ADR · 2 bookings</div>
+          <div style="margin:6px 0 2px;height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:91%;height:100%;background:#832040;border-radius:3px"></div></div>
+          <div style="font-size:11px;font-weight:600;color:#832040">91% · 20 คืน</div>
+        </div>
+        <!-- Elegance -->
+        <div style="background:var(--surface2);border-radius:var(--r-md);padding:12px;border-left:3px solid #3A7D44">
+          <div style="font-size:10px;font-weight:700;color:#3A7D44;letter-spacing:.05em;margin-bottom:6px">ELEGANCE</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.5px">฿637</div>
+          <div style="font-size:11px;color:var(--text3)">ADR · 3 bookings</div>
+          <div style="margin:6px 0 2px;height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:95%;height:100%;background:#3A7D44;border-radius:3px"></div></div>
+          <div style="font-size:11px;font-weight:600;color:#3A7D44">95% · 21 คืน</div>
+        </div>
+      </div>
+      <!-- Summary bar -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div style="text-align:center;padding:8px;background:var(--surface2);border-radius:var(--r-md)">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">Revenue รวม</div>
+          <div style="font-size:16px;font-weight:700">฿53,833</div>
+        </div>
+        <div style="text-align:center;padding:8px;background:var(--surface2);border-radius:var(--r-md)">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">ADR เฉลี่ย</div>
+          <div style="font-size:16px;font-weight:700;color:var(--accent)">฿656</div>
+        </div>
+        <div style="text-align:center;padding:8px;background:var(--surface2);border-radius:var(--r-md)">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:3px">Bookings รวม</div>
+          <div style="font-size:16px;font-weight:700">11</div>
+        </div>
+        <div style="text-align:center;padding:8px;background:var(--amber-bg);border-radius:var(--r-md);border:1px solid #E8B87A">
+          <div style="font-size:10px;color:var(--amber);margin-bottom:3px">⚠ Retro ว่าง</div>
+          <div style="font-size:14px;font-weight:700;color:var(--amber)">ลดราคาด่วน</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Occ live (7 days) summary -->
   <div class="sec">
     <div class="sec-hdr">
@@ -497,12 +557,12 @@ tr:hover td{background:#FAFAF7}
   <div class="sec">
     <div class="sec-hdr">
       <span class="sec-title">Occupancy รายประเภทห้อง — อัปเดตก่อนคำนวณ</span>
-      <span style="font-size:11px;color:var(--text3)">ดึงจาก Sheets อัตโนมัติ หรือกรอกเอง</span>
+      <span style="font-size:11px;color:var(--text3)">ดึงจาก Sheets อัตโนมัติ · ราคาคำนวณจาก PriceLabs pattern</span>
     </div>
     <div class="sec-body">
       <div class="occ-grid" id="occ-inputs"></div>
       <button class="recalc-btn" onclick="recalc()">คำนวณราคาและ Action Plan</button>
-      <p style="font-size:11px;color:var(--text3)">% = จำนวนคืนที่จองแล้ว ÷ (7 × จำนวนห้องของ type นั้น)</p>
+      <p style="font-size:11px;color:var(--text3)">% = จำนวนคืนที่จองแล้ว ÷ (7 × จำนวนห้อง) · ราคาอิงจาก PriceLabs base + occ adjustment</p>
     </div>
   </div>
 
@@ -510,8 +570,10 @@ tr:hover td{background:#FAFAF7}
   <div class="sec">
     <div class="sec-hdr">
       <span class="sec-title">ราคาที่ควรตั้งใน Little Hotelier</span>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span id="action-season-badge" class="season-tag sb-mid">Normal season</span>
+        <span id="price-source-badge" style="display:none;font-size:11px;background:var(--green-bg);color:var(--green);padding:3px 10px;border-radius:20px;border:1px solid #8DC89A;font-weight:500"></span>
+        <button onclick="openSetupModal()" style="font-size:11px;background:none;border:1px solid var(--border);border-radius:var(--r-md);padding:4px 10px;cursor:pointer;color:var(--text2)">+ อัปโหลด CSV</button>
       </div>
     </div>
     <!-- Day tabs -->
@@ -590,7 +652,7 @@ tr:hover td{background:#FAFAF7}
     <div class="tbl-wrap">
       <table>
         <thead><tr><th>Season</th><th>เดือน</th><th>Luxury WD</th><th>Luxury WE</th><th>Retro WD</th><th>Allure WD</th><th>Elegance WD</th><th>Legacy WD</th></tr></thead>
-        <tbody id="seasonal-price-tbody">
+        <tbody>
           <tr><td><span class="season-tag sb-low">Low</span></td><td style="color:var(--text3)">พ.ค.–ต.ค.</td><td class="price">฿935</td><td class="price">฿1,215</td><td class="price">฿808</td><td class="price">฿680</td><td class="price">฿680</td><td class="price">฿638</td></tr>
           <tr><td><span class="season-tag sb-mid">Normal</span></td><td style="color:var(--text3)">มี.ค.–เม.ย., พ.ย.</td><td class="price">฿1,100</td><td class="price">฿1,430</td><td class="price">฿950</td><td class="price">฿800</td><td class="price">฿800</td><td class="price">฿750</td></tr>
           <tr><td><span class="season-tag sb-high">High</span></td><td style="color:var(--text3)">ธ.ค.–ก.พ.</td><td class="price">฿1,375</td><td class="price">฿1,788</td><td class="price">฿1,188</td><td class="price">฿1,000</td><td class="price">฿1,000</td><td class="price">฿938</td></tr>
@@ -666,6 +728,8 @@ tr:hover td{background:#FAFAF7}
       <div class="code-block">
         <pre id="apps-script-code">function doGet(e) {
   var ss = SpreadsheetApp.openById("1XbTJLhecql_HNqyE80Hc6h30A2_elIxliudF4e6Rlz0");
+
+  // ── Bookings sheet ──
   var ws = ss.getSheetByName("Bookings") ||
            ss.getSheetByName("bookings") ||
            ss.getSheets()[0];
@@ -677,21 +741,35 @@ tr:hover td{background:#FAFAF7}
     var row = {};
     for (var j = 0; j < headers.length; j++) {
       var val = data[i][j];
-      if (val instanceof Date) {
+      if (val instanceof Date)
         val = Utilities.formatDate(val, "Asia/Bangkok", "yyyy-MM-dd");
-      }
       row[String(headers[j]).trim()] = val;
     }
     rows.push(row);
   }
-  var json = JSON.stringify({
-    success: true,
-    sheet: ws.getName(),
-    rows: rows,
-    updatedAt: new Date().toISOString()
-  });
+
+  // ── Prices sheet (optional) ──
+  var prices = [];
+  var pw = ss.getSheetByName("Prices") || ss.getSheetByName("prices");
+  if (pw) {
+    var pd = pw.getDataRange().getValues();
+    var ph = pd[0];
+    for (var i = 1; i < pd.length; i++) {
+      if (!pd[i][0]) continue;
+      var pr = {};
+      for (var j = 0; j < ph.length; j++) pr[String(ph[j]).trim()] = pd[i][j];
+      prices.push(pr);
+    }
+  }
+
   return ContentService
-    .createTextOutput(json)
+    .createTextOutput(JSON.stringify({
+      success: true,
+      sheet: ws.getName(),
+      rows: rows,
+      prices: prices,
+      updatedAt: new Date().toISOString()
+    }))
     .setMimeType(ContentService.MimeType.JSON);
 }</pre>
         <button class="code-copy" id="copy-btn" onclick="copyScript()">Copy</button>
@@ -703,6 +781,14 @@ tr:hover td{background:#FAFAF7}
       <div class="setup-step">
         <div class="step-num">4</div>
         <div class="step-text">Copy <strong>Web app URL</strong> ที่ได้ → Paste ด้านล่างนี้</div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num" style="background:#3A7D44">+</div>
+        <div class="step-text">
+          <strong>(Optional) สร้าง Sheet tab ชื่อ "Prices"</strong> เพื่อให้ราคาอัปเดตอัตโนมัติ<br>
+          <span style="color:var(--text3)">ใส่ columns: type, base_rate, airbnb_rate, booking_rate, expedia_rate, updated</span><br>
+          <button id="copy-prices-btn" onclick="copyPricesTemplate()" style="margin-top:6px;font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface2);cursor:pointer">Copy template</button>
+        </div>
       </div>
 
       <div style="height:12px"></div>
@@ -727,6 +813,21 @@ tr:hover td{background:#FAFAF7}
       </div>
       <div id="test-result" style="display:none;font-size:12px;padding:8px 12px;border-radius:var(--r-md);margin-top:4px"></div>
     </div>
+    <div style="margin:0 20px 16px">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-top:12px;border-top:1px solid var(--border)">
+        อัปโหลด CSV จาก Little Hotelier (optional)
+      </div>
+      <div id="csv-drop" onclick="document.getElementById('csv-file').click()"
+        style="border:1.5px dashed var(--border2);border-radius:var(--r-md);padding:16px;text-align:center;cursor:pointer;transition:all .15s;background:var(--surface2)"
+        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+        ondragleave="this.style.borderColor='var(--border2)'"
+        ondrop="handleCSVDrop(event)">
+        <div style="font-size:13px;color:var(--text2);font-weight:500">วาง CSV ที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">ไฟล์ Export จาก Little Hotelier → Reports → Room Revenue</div>
+      </div>
+      <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="handleCSVFile(this)">
+      <div id="csv-result" style="display:none;margin-top:8px;font-size:12px;padding:8px 12px;border-radius:var(--r-md)"></div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-primary" style="flex:1" onclick="saveAndTest()">บันทึกและทดสอบการเชื่อมต่อ</button>
       <button class="btn btn-ghost" onclick="closeSetupModal()">ยกเลิก</button>
@@ -738,63 +839,29 @@ tr:hover td{background:#FAFAF7}
 <!-- ══════════ SCRIPTS ══════════ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-// ── Data ── (realADR + realOcc = ข้อมูลจริง 1 ปี Apr25–Apr26 จาก Little Hotelier · by room type)
-// ── Pricing Phase System ──
-// Phase 1: ADR จริง +20-25% (ตอนนี้)
-// Phase 2: Phase1 +15-20% (1-2 เดือน ถ้า Occ ยังทรงตัว)
-// Phase 3: Target base เต็ม (3-4 เดือน)
-const PRICE_PHASES = {
-  1: { label:'Phase 1 — เริ่มต้น (ADR+20%)',  bases: {Luxury:800,  Retro:700,  Allure:600,  Elegance:600,  Legacy:580}  },
-  2: { label:'Phase 2 — 1-2 เดือน (+15-20%)', bases: {Luxury:950,  Retro:850,  Allure:700,  Elegance:700,  Legacy:700}  },
-  3: { label:'Phase 3 — เต็ม target',          bases: {Luxury:1100, Retro:950,  Allure:800,  Elegance:800,  Legacy:750}  },
-};
-let currentPhase = parseInt(localStorage.getItem('pricingPhase')||'1');
-
 const ROOMS_DATA = [
-  {id:'Luxury',   tier:'Luxury',   chip:'chip-lux', base:PRICE_PHASES[currentPhase].bases.Luxury,   realADR:663, realOcc:70, occ:70, revpar:462, los:9,  count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
-  {id:'Retro',    tier:'Retro',    chip:'chip-ret', base:PRICE_PHASES[currentPhase].bases.Retro,    realADR:554, realOcc:70, occ:70, revpar:385, los:10, count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
-  {id:'Allure',   tier:'Allure',   chip:'chip-all', base:PRICE_PHASES[currentPhase].bases.Allure,   realADR:483, realOcc:83, occ:83, revpar:402, los:10, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
-  {id:'Elegance', tier:'Elegance', chip:'chip-ele', base:PRICE_PHASES[currentPhase].bases.Elegance, realADR:480, realOcc:76, occ:76, revpar:367, los:11, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
-  {id:'Legacy',   tier:'Legacy',   chip:'chip-leg', base:PRICE_PHASES[currentPhase].bases.Legacy,   realADR:476, realOcc:76, occ:76, revpar:360, los:9,  count:2, maxG:3, chPri:'Airbnb',  minStay:3, minWknd:3},
+  {id:'Luxury',   tier:'Luxury',   chip:'chip-lux', base:867, min:450, max:1800, realADR:657, liveADR:557, realOcc:70, occ:43, revpar:462, los:9,  count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
+  {id:'Retro',    tier:'Retro',    chip:'chip-ret', base:865, min:400, max:1500, realADR:560, liveADR:667, realOcc:69, occ:14, revpar:385, los:10, count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
+  {id:'Allure',   tier:'Allure',   chip:'chip-all', base:907, min:500, max:1400, realADR:486, liveADR:677, realOcc:83, occ:71, revpar:402, los:10, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
+  {id:'Elegance', tier:'Elegance', chip:'chip-ele', base:871, min:360, max:1300, realADR:480, liveADR:637, realOcc:77, occ:43, revpar:367, los:11, count:2, maxG:3, chPri:'Booking', minStay:1, minWknd:2},
+  {id:'Legacy',   tier:'Legacy',   chip:'chip-leg', base:882, min:360, max:1300, realADR:478, liveADR:703, realOcc:75, occ:43, revpar:360, los:9,  count:2, maxG:3, chPri:'Airbnb',  minStay:3, minWknd:3},
 ];
 
-// SEASON_RULES — ปรับจากข้อมูลจริง
-// ข้อมูลจริงพบว่า high season ราคาไม่ต่างจาก normal เพราะไม่เคยปรับราคา
-// multiplier ด้านล่างคือ "ควรจะเป็น" เพื่อเริ่ม capture demand จริง
 const SEASON_RULES = {
-  low:    {name:'Low season',    months:[4,5,6,7,8,9], mult:0.82, badge:'sb-low'},   // จากข้อมูลจริง 0.82x
-  normal: {name:'Normal season', months:[2,3,10],      mult:1.0,  badge:'sb-mid'},   // มี.ค. เม.ย. พ.ย.
-  high:   {name:'High season',   months:[11,0,1],      mult:1.25, badge:'sb-high'},  // ธ.ค.–ก.พ. (ยังไม่เคย capture จริง)
-  peak:   {name:'Peak period',   months:[],            mult:1.5,  badge:'sb-peak'},  // สงกรานต์ / ปีใหม่
+  low:    {name:'Low season',    months:[4,5,6,7,8,9], mult:0.85, badge:'sb-low'},
+  normal: {name:'Normal season', months:[0,1,2,8,9],   mult:1.0,  badge:'sb-mid'},
+  high:   {name:'High season',   months:[10,11],       mult:1.25, badge:'sb-high'},
+  peak:   {name:'Peak period',   months:[],            mult:1.5,  badge:'sb-peak'},
 };
 const DOW_MULT = {weekday:1.0, fri:1.15, weekend:1.3, peak:1.6};
-// OCC_RULES — ปรับจากข้อมูลจริง
-// Allure/Legacy มี Airbnb 68-71% ของ booking → occ สูงแต่ราคาต่ำ
-// ควร push ราคาเร็วกว่าเดิมเมื่อ occ เริ่มดี
-const OCC_RULES = [
-  {max:50,  mult:0.82, action:'dn',   label:'ลดราคา 18%',    note:'Occ ต่ำมาก — ลดดึง demand'},
-  {max:65,  mult:0.92, action:'dn',   label:'ลดราคา 8%',     note:'Occ ต่ำกว่าเป้า'},
-  {max:75,  mult:1.0,  action:'hold', label:'คงราคา',        note:'Sweet spot — รักษาราคา'},
-  {max:82,  mult:1.18, action:'up',   label:'เพิ่มราคา 18%', note:'Demand ดี — push ราคา'},
-  {max:90,  mult:1.30, action:'up',   label:'เพิ่มราคา 30%', note:'เกือบเต็ม — maximize revenue'},
-  {max:101, mult:1.45, action:'peak', label:'Peak! +45%',    note:'ห้องสุดท้าย — close arrival'},
-];
-// CH_MULT — ปรับจากข้อมูลจริง + commission structure
-// Booking = Trip.com (commission ~15% เท่ากัน — sync ผ่าน channel manager ได้)
-// Expedia markup 20% ชดเชย commission ~20-25%
-// Airbnb ตั้งต่ำ 10% + cleaning fee แยก
-const CH_MULT = {
-  Airbnb:         0.9,
-  Booking:        1.0,
-  'Trip.com':     1.0,   // เท่า Booking — commission ใกล้กัน
-  'Expedia/Agoda':1.2,   // markup ชดเชย commission สูง
-};
+// (replaced by PriceLabs engine)
+const CH_MULT = {Airbnb:0.9, Booking:1.0, 'Expedia/Agoda':1.2};
 const CH_CONFIG = {
   Luxury:   [{ch:'Expedia',tag:'ch-exp'},{ch:'Agoda',tag:'ch-exp'},{ch:'Booking',tag:'ch-bkc'}],
   Retro:    [{ch:'Expedia',tag:'ch-exp'},{ch:'Booking',tag:'ch-bkc'}],
-  Allure:   [{ch:'Booking',tag:'ch-bkc'},{ch:'Trip.com',tag:'ch-trp'},{ch:'Expedia',tag:'ch-exp'}],
-  Elegance: [{ch:'Booking',tag:'ch-bkc'},{ch:'Trip.com',tag:'ch-trp'},{ch:'Expedia',tag:'ch-exp'}],
-  Legacy:   [{ch:'Airbnb',tag:'ch-airbnb'},{ch:'Booking',tag:'ch-bkc'},{ch:'Expedia',tag:'ch-exp'}],
+  Allure:   [{ch:'Booking',tag:'ch-bkc'},{ch:'Trip.com',tag:'ch-trp'}],
+  Elegance: [{ch:'Booking',tag:'ch-bkc'},{ch:'Trip.com',tag:'ch-trp'}],
+  Legacy:   [{ch:'Airbnb',tag:'ch-airbnb'},{ch:'Booking',tag:'ch-bkc'}],
   Budget:   [{ch:'Airbnb',tag:'ch-airbnb'}],
 };
 const STRAT = {
@@ -807,6 +874,77 @@ let currentWeek = 'weekday';
 let inputOccs = {};
 
 // ── Helpers ──
+
+// ── PriceLabs Price Data (22 Apr 2026) — 90 วันข้างหน้า ──
+const PL_PRICES = {"Luxury": {"2026-04-22": 537, "2026-04-23": 568, "2026-04-24": 628, "2026-04-25": 703, "2026-04-26": 682, "2026-04-27": 679, "2026-04-28": 694, "2026-04-29": 687, "2026-04-30": 751, "2026-05-01": 729, "2026-05-02": 794, "2026-05-03": 800, "2026-05-04": 801, "2026-05-05": 801, "2026-05-06": 774, "2026-05-07": 773, "2026-05-08": 741, "2026-05-09": 739, "2026-05-10": 732, "2026-05-11": 727, "2026-05-12": 728, "2026-05-13": 697, "2026-05-14": 718, "2026-05-15": 718, "2026-05-16": 718, "2026-05-17": 718, "2026-05-18": 739, "2026-05-19": 739, "2026-05-20": 719, "2026-05-21": 697, "2026-05-22": 697, "2026-05-23": 746, "2026-05-24": 723, "2026-05-25": 723, "2026-05-26": 723, "2026-05-27": 723, "2026-05-28": 723, "2026-05-29": 746, "2026-05-30": 768, "2026-05-31": 791, "2026-06-01": 766, "2026-06-02": 791, "2026-06-03": 769, "2026-06-04": 755, "2026-06-05": 757, "2026-06-06": 746, "2026-06-07": 723, "2026-06-08": 701, "2026-06-09": 700, "2026-06-10": 701, "2026-06-11": 701, "2026-06-12": 724, "2026-06-13": 769, "2026-06-14": 746, "2026-06-15": 752, "2026-06-16": 745, "2026-06-17": 765, "2026-06-18": 766, "2026-06-19": 769, "2026-06-20": 769, "2026-06-21": 769, "2026-06-22": 773, "2026-06-23": 775, "2026-06-24": 778, "2026-06-25": 804, "2026-06-26": 830, "2026-06-27": 856, "2026-06-28": 859, "2026-06-29": 869, "2026-06-30": 871, "2026-07-01": 873, "2026-07-02": 876, "2026-07-03": 870, "2026-07-04": 897, "2026-07-05": 875, "2026-07-06": 902, "2026-07-07": 881, "2026-07-08": 882, "2026-07-09": 884, "2026-07-10": 936, "2026-07-11": 914, "2026-07-12": 916, "2026-07-13": 893, "2026-07-14": 895, "2026-07-15": 898, "2026-07-16": 901, "2026-07-17": 878, "2026-07-18": 905, "2026-07-19": 907, "2026-07-20": 884}, "Retro": {"2026-04-22": 488, "2026-04-23": 541, "2026-04-24": 571, "2026-04-25": 645, "2026-04-26": 602, "2026-04-27": 676, "2026-04-28": 667, "2026-04-29": 618, "2026-04-30": 646, "2026-05-01": 675, "2026-05-02": 680, "2026-05-03": 690, "2026-05-04": 700, "2026-05-05": 683, "2026-05-06": 686, "2026-05-07": 767, "2026-05-08": 750, "2026-05-09": 738, "2026-05-10": 732, "2026-05-11": 726, "2026-05-12": 695, "2026-05-13": 716, "2026-05-14": 716, "2026-05-15": 738, "2026-05-16": 738, "2026-05-17": 738, "2026-05-18": 738, "2026-05-19": 738, "2026-05-20": 716, "2026-05-21": 695, "2026-05-22": 767, "2026-05-23": 744, "2026-05-24": 744, "2026-05-25": 721, "2026-05-26": 721, "2026-05-27": 721, "2026-05-28": 721, "2026-05-29": 744, "2026-05-30": 767, "2026-05-31": 814, "2026-06-01": 772, "2026-06-02": 790, "2026-06-03": 772, "2026-06-04": 759, "2026-06-05": 761, "2026-06-06": 745, "2026-06-07": 721, "2026-06-08": 721, "2026-06-09": 721, "2026-06-10": 698, "2026-06-11": 698, "2026-06-12": 721, "2026-06-13": 767, "2026-06-14": 744, "2026-06-15": 751, "2026-06-16": 744, "2026-06-17": 767, "2026-06-18": 767, "2026-06-19": 767, "2026-06-20": 767, "2026-06-21": 795, "2026-06-22": 773, "2026-06-23": 775, "2026-06-24": 777, "2026-06-25": 804, "2026-06-26": 830, "2026-06-27": 857, "2026-06-28": 859, "2026-06-29": 869, "2026-06-30": 871, "2026-07-01": 874, "2026-07-02": 876, "2026-07-03": 871, "2026-07-04": 898, "2026-07-05": 875, "2026-07-06": 903, "2026-07-07": 882, "2026-07-08": 882, "2026-07-09": 885, "2026-07-10": 937, "2026-07-11": 914, "2026-07-12": 917, "2026-07-13": 894, "2026-07-14": 896, "2026-07-15": 898, "2026-07-16": 901, "2026-07-17": 903, "2026-07-18": 905, "2026-07-19": 907, "2026-07-20": 884}, "Elegance": {"2026-04-22": 570, "2026-04-23": 632, "2026-04-24": 667, "2026-04-25": 754, "2026-04-26": 703, "2026-04-27": 790, "2026-04-28": 779, "2026-04-29": 722, "2026-04-30": 755, "2026-05-01": 788, "2026-05-02": 794, "2026-05-03": 806, "2026-05-04": 818, "2026-05-05": 798, "2026-05-06": 802, "2026-05-07": 773, "2026-05-08": 755, "2026-05-09": 743, "2026-05-10": 737, "2026-05-11": 731, "2026-05-12": 699, "2026-05-13": 721, "2026-05-14": 721, "2026-05-15": 743, "2026-05-16": 743, "2026-05-17": 743, "2026-05-18": 743, "2026-05-19": 743, "2026-05-20": 721, "2026-05-21": 699, "2026-05-22": 773, "2026-05-23": 749, "2026-05-24": 749, "2026-05-25": 726, "2026-05-26": 726, "2026-05-27": 726, "2026-05-28": 726, "2026-05-29": 749, "2026-05-30": 773, "2026-05-31": 819, "2026-06-01": 777, "2026-06-02": 796, "2026-06-03": 777, "2026-06-04": 764, "2026-06-05": 766, "2026-06-06": 750, "2026-06-07": 726, "2026-06-08": 726, "2026-06-09": 726, "2026-06-10": 703, "2026-06-11": 703, "2026-06-12": 726, "2026-06-13": 773, "2026-06-14": 749, "2026-06-15": 756, "2026-06-16": 749, "2026-06-17": 772, "2026-06-18": 772, "2026-06-19": 773, "2026-06-20": 773, "2026-06-21": 801, "2026-06-22": 779, "2026-06-23": 781, "2026-06-24": 783, "2026-06-25": 809, "2026-06-26": 836, "2026-06-27": 863, "2026-06-28": 865, "2026-06-29": 875, "2026-06-30": 877, "2026-07-01": 880, "2026-07-02": 882, "2026-07-03": 877, "2026-07-04": 904, "2026-07-05": 881, "2026-07-06": 909, "2026-07-07": 888, "2026-07-08": 888, "2026-07-09": 891, "2026-07-10": 944, "2026-07-11": 921, "2026-07-12": 923, "2026-07-13": 900, "2026-07-14": 902, "2026-07-15": 905, "2026-07-16": 907, "2026-07-17": 909, "2026-07-18": 911, "2026-07-19": 914, "2026-07-20": 890}, "Allure": {"2026-04-22": 655, "2026-04-23": 726, "2026-04-24": 766, "2026-04-25": 866, "2026-04-26": 808, "2026-04-27": 908, "2026-04-28": 895, "2026-04-29": 830, "2026-04-30": 867, "2026-05-01": 906, "2026-05-02": 913, "2026-05-03": 926, "2026-05-04": 940, "2026-05-05": 917, "2026-05-06": 921, "2026-05-07": 805, "2026-05-08": 787, "2026-05-09": 774, "2026-05-10": 767, "2026-05-11": 761, "2026-05-12": 728, "2026-05-13": 751, "2026-05-14": 751, "2026-05-15": 774, "2026-05-16": 774, "2026-05-17": 774, "2026-05-18": 774, "2026-05-19": 774, "2026-05-20": 751, "2026-05-21": 728, "2026-05-22": 805, "2026-05-23": 780, "2026-05-24": 780, "2026-05-25": 756, "2026-05-26": 756, "2026-05-27": 756, "2026-05-28": 756, "2026-05-29": 780, "2026-05-30": 804, "2026-05-31": 853, "2026-06-01": 809, "2026-06-02": 829, "2026-06-03": 809, "2026-06-04": 796, "2026-06-05": 798, "2026-06-06": 781, "2026-06-07": 756, "2026-06-08": 756, "2026-06-09": 756, "2026-06-10": 732, "2026-06-11": 732, "2026-06-12": 756, "2026-06-13": 804, "2026-06-14": 780, "2026-06-15": 788, "2026-06-16": 780, "2026-06-17": 804, "2026-06-18": 804, "2026-06-19": 805, "2026-06-20": 805, "2026-06-21": 834, "2026-06-22": 811, "2026-06-23": 813, "2026-06-24": 815, "2026-06-25": 843, "2026-06-26": 871, "2026-06-27": 899, "2026-06-28": 901, "2026-06-29": 911, "2026-06-30": 914, "2026-07-01": 916, "2026-07-02": 918, "2026-07-03": 913, "2026-07-04": 942, "2026-07-05": 918, "2026-07-06": 946, "2026-07-07": 925, "2026-07-08": 925, "2026-07-09": 927, "2026-07-10": 983, "2026-07-11": 959, "2026-07-12": 961, "2026-07-13": 937, "2026-07-14": 940, "2026-07-15": 942, "2026-07-16": 944, "2026-07-17": 947, "2026-07-18": 949, "2026-07-19": 951, "2026-07-20": 927}, "Legacy": {"2026-04-22": 657, "2026-04-23": 728, "2026-04-24": 768, "2026-04-25": 868, "2026-04-26": 810, "2026-04-27": 910, "2026-04-28": 897, "2026-04-29": 832, "2026-04-30": 870, "2026-05-01": 909, "2026-05-02": 915, "2026-05-03": 929, "2026-05-04": 943, "2026-05-05": 920, "2026-05-06": 924, "2026-05-07": 782, "2026-05-08": 765, "2026-05-09": 752, "2026-05-10": 746, "2026-05-11": 740, "2026-05-12": 708, "2026-05-13": 730, "2026-05-14": 730, "2026-05-15": 752, "2026-05-16": 752, "2026-05-17": 752, "2026-05-18": 752, "2026-05-19": 752, "2026-05-20": 730, "2026-05-21": 708, "2026-05-22": 782, "2026-05-23": 759, "2026-05-24": 759, "2026-05-25": 735, "2026-05-26": 735, "2026-05-27": 735, "2026-05-28": 735, "2026-05-29": 759, "2026-05-30": 782, "2026-05-31": 830, "2026-06-01": 787, "2026-06-02": 806, "2026-06-03": 787, "2026-06-04": 774, "2026-06-05": 776, "2026-06-06": 759, "2026-06-07": 735, "2026-06-08": 735, "2026-06-09": 735, "2026-06-10": 711, "2026-06-11": 711, "2026-06-12": 735, "2026-06-13": 782, "2026-06-14": 759, "2026-06-15": 766, "2026-06-16": 759, "2026-06-17": 782, "2026-06-18": 782, "2026-06-19": 782, "2026-06-20": 782, "2026-06-21": 811, "2026-06-22": 788, "2026-06-23": 791, "2026-06-24": 793, "2026-06-25": 820, "2026-06-26": 847, "2026-06-27": 874, "2026-06-28": 876, "2026-06-29": 886, "2026-06-30": 888, "2026-07-01": 891, "2026-07-02": 893, "2026-07-03": 888, "2026-07-04": 916, "2026-07-05": 893, "2026-07-06": 920, "2026-07-07": 899, "2026-07-08": 900, "2026-07-09": 902, "2026-07-10": 956, "2026-07-11": 932, "2026-07-12": 935, "2026-07-13": 911, "2026-07-14": 914, "2026-07-15": 916, "2026-07-16": 918, "2026-07-17": 921, "2026-07-18": 923, "2026-07-19": 925, "2026-07-20": 901}};
+const PL_BASE   = {"Luxury": 867, "Retro": 865, "Elegance": 871, "Allure": 907, "Legacy": 882};
+const PL_OCC7   = {"Luxury": 43, "Retro": 14, "Elegance": 43, "Allure": 71, "Legacy": 43};
+
+// DOW multipliers derived from PriceLabs pattern analysis
+// PriceLabs ใช้ Wed เป็น baseline ต่ำสุด, Sat สูงสุด
+const PL_DOW_MULT = {
+  Luxury:   [0.906, 0.898, 0.870, 0.880, 0.889, 0.916, 0.909],
+  Retro:    [0.901, 0.885, 0.855, 0.869, 0.892, 0.904, 0.902],
+  Allure:   [0.935, 0.921, 0.900, 0.899, 0.924, 0.937, 0.934],
+  Elegance: [0.920, 0.905, 0.881, 0.886, 0.910, 0.923, 0.920],
+  Legacy:   [0.940, 0.926, 0.906, 0.903, 0.928, 0.942, 0.938],
+};
+
+// OCC multipliers from PriceLabs pattern (low occ = deep discount, high occ = premium)
+const PL_OCC_RULES = [
+  {max:10,  mult:0.55, action:'dn',   label:'ลดราคา 45%', note:'Occ ต่ำมาก — floor price'},
+  {max:20,  mult:0.65, action:'dn',   label:'ลดราคา 35%', note:'Occ ต่ำ — ดึง demand ด่วน'},
+  {max:35,  mult:0.78, action:'dn',   label:'ลดราคา 22%', note:'Occ ต่ำกว่าเป้า'},
+  {max:50,  mult:0.88, action:'dn',   label:'ลดราคา 12%', note:'Occ ปานกลาง-ต่ำ'},
+  {max:65,  mult:0.95, action:'dn',   label:'ลดราคา 5%',  note:'Occ ใกล้เป้า'},
+  {max:75,  mult:1.00, action:'hold', label:'คงราคา',      note:'Sweet spot'},
+  {max:85,  mult:1.10, action:'up',   label:'เพิ่ม 10%',   note:'Demand ดี'},
+  {max:92,  mult:1.20, action:'up',   label:'เพิ่ม 20%',   note:'Occ สูง'},
+  {max:101, mult:1.35, action:'peak', label:'Peak +35%',   note:'Close arrival'},
+];
+
+
+// ── PriceLabs-based price calculation ──
+function getPLPrice(type, dateStr){
+  // Direct lookup if date exists in PL data
+  if(PL_PRICES[type] && PL_PRICES[type][dateStr]) return PL_PRICES[type][dateStr];
+  return null;
+}
+
+function calcPrice(base, occ, dow, season){
+  // dow: 'weekday'=avg(Mon-Thu), 'fri'=Fri, 'weekend'=avg(Sat-Sun), 'peak'=special
+  // Use today's date for direct PL lookup
+  const today = new Date();
+  const type = ROOMS_DATA.find(r => r.base === base)?.id;
+
+  // Try direct PL lookup for today
+  if(type && dow === 'weekday'){
+    const todayStr = today.toISOString().split('T')[0];
+    const plPrice = getPLPrice(type, todayStr);
+    if(plPrice) return applyDOWAndOcc(plPrice, type, 2, occ); // Wed baseline
+  }
+
+  // Fallback: formula-based (PriceLabs pattern)
+  const occRule = PL_OCC_RULES.find(r => occ <= r.max) || PL_OCC_RULES[PL_OCC_RULES.length-1];
+  const dowIdx = {weekday:2, fri:4, weekend:5, peak:5}[dow] || 2;
+  const dowMult = type && PL_DOW_MULT[type] ? PL_DOW_MULT[type][dowIdx] : 0.9;
+  const seasonMult = (SEASON_RULES[season]||{mult:1}).mult;
+  const peakMult = dow === 'peak' ? 1.5 : 1.0;
+  return Math.round(base * dowMult * occRule.mult * seasonMult * peakMult / 50) * 50;
+}
+
+function applyDOWAndOcc(plBasePrice, type, currentDowIdx, occ){
+  // Adjust PL price by current DOW and occ delta
+  const occRule = PL_OCC_RULES.find(r => occ <= r.max) || PL_OCC_RULES[PL_OCC_RULES.length-1];
+  const today = new Date();
+  const realDowIdx = today.getDay() === 0 ? 6 : today.getDay() - 1; // 0=Mon
+  const targDowMult  = PL_DOW_MULT[type] ? PL_DOW_MULT[type][realDowIdx] : 0.9;
+  const baseDowMult  = PL_DOW_MULT[type] ? PL_DOW_MULT[type][currentDowIdx] : 0.9;
+  return Math.round(plBasePrice * (targDowMult/baseDowMult) * occRule.mult / 50) * 50;
+}
+
+function getOccRule(occ){ return PL_OCC_RULES.find(r=>occ<=r.max)||PL_OCC_RULES[PL_OCC_RULES.length-1]; }
+
 function getSeason(){
   const m=new Date().getMonth(), d=new Date();
   const songkran=m===3&&d.getDate()>=13&&d.getDate()<=15;
@@ -816,10 +954,8 @@ function getSeason(){
   if(m>=4&&m<=8) return 'low';
   return 'normal';
 }
-function getOccRule(occ){ return OCC_RULES.find(r=>occ<=r.max)||OCC_RULES[OCC_RULES.length-1]; }
-function calcPrice(base, occ, dow, season){
-  return Math.round(base * (SEASON_RULES[season]?.mult||1) * (DOW_MULT[dow]||1) * getOccRule(occ).mult / 50)*50;
-}
+// (replaced by PriceLabs engine)
+// (replaced by PriceLabs engine)
 function thb(n){ return '฿'+n.toLocaleString(); }
 
 // ── Header date ──
@@ -898,7 +1034,7 @@ function renderPriceTable(){
       const p3     = Math.round(price*1.32/50)*50;
       const p4     = r.maxG>=4?Math.round(price*1.6/50)*50:null;
       const occCol = occ<50?'#2B5FA8':occ<70?'#3A7D44':occ<85?'#C8731A':'#B94040';
-      const gap    = price-(r.realADR||0);
+      const gap    = price-(r.liveADR||r.realADR||0);
       const chipColors = {
         'chip-lux':'#534AB7','chip-ret':'#C8731A','chip-all':'#2B5FA8',
         'chip-ele':'#3A7D44','chip-leg':'#832040'
@@ -925,30 +1061,24 @@ function renderPriceTable(){
             <div style="font-size:10px;color:var(--text3);margin-bottom:2px">ราคาแนะนำ (2 คน)</div>
             <div style="font-size:26px;font-weight:700;letter-spacing:-1px;color:var(--text)">฿${price.toLocaleString()}</div>
             <div style="font-size:11px;color:${gap>=0?'#3A7D44':'#B94040'}">
-              ADR จริง ฿${(r.realADR||0).toLocaleString()} · ${gap>=0?'+':''}${gap.toLocaleString()}/คืน
+              Airbnb เม.ย. ฿${(r.liveADR||r.realADR||0).toLocaleString()} · ${gap>=0?'+':''}${gap.toLocaleString()}/คืน
             </div>
           </div>
-          <!-- Channel prices — 3 ช่อง: Airbnb / Booking+Trip / Expedia -->
-          ${(()=>{
-            const exp2 = Math.round(price*CH_MULT['Expedia/Agoda']/50)*50;
-            const channels = [
-              {label:'AIRBNB',          val:airbnb, mult:CH_MULT['Airbnb'],       bg:'#FDF0E3', tc:'#C8731A', vc:'#7A4A10'},
-              {label:'BOOKING · TRIP',  val:bkc,    mult:CH_MULT['Booking'],       bg:'#EBF1FC', tc:'#2B5FA8', vc:'#2B5FA8'},
-              {label:'EXPEDIA',         val:exp2,   mult:CH_MULT['Expedia/Agoda'], bg:'#EDEAFC', tc:'#534AB7', vc:'#534AB7'},
-            ];
-            return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:10px">
-              ${channels.map(ch=>{
-                const pct = Math.round((ch.mult-1)*100);
-                const pctLabel = pct===0?'±0%':(pct>0?'+':'')+pct+'%';
-                const pctColor = pct<0?'#3A7D44':pct>0?'#B94040':'#6B6560';
-                return `<div style="text-align:center;padding:6px 4px;background:${ch.bg};border-radius:6px">
-                  <div style="font-size:8px;color:${ch.tc};font-weight:700;margin-bottom:1px;letter-spacing:.02em">${ch.label}</div>
-                  <div style="font-size:13px;font-weight:700;color:${ch.vc}">฿${ch.val.toLocaleString()}</div>
-                  <div style="font-size:10px;font-weight:600;color:${pctColor}">${pctLabel}</div>
-                </div>`;
-              }).join('')}
-            </div>`;
-          })()}
+          <!-- Channel prices -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:10px">
+            <div style="text-align:center;padding:6px 4px;background:#FDF0E3;border-radius:6px">
+              <div style="font-size:9px;color:#C8731A;font-weight:600;margin-bottom:2px">AIRBNB</div>
+              <div style="font-size:13px;font-weight:600;color:#7A4A10">฿${airbnb.toLocaleString()}</div>
+            </div>
+            <div style="text-align:center;padding:6px 4px;background:#EBF1FC;border-radius:6px">
+              <div style="font-size:9px;color:#2B5FA8;font-weight:600;margin-bottom:2px">BOOKING</div>
+              <div style="font-size:13px;font-weight:600;color:#2B5FA8">฿${bkc.toLocaleString()}</div>
+            </div>
+            <div style="text-align:center;padding:6px 4px;background:#EDEAFC;border-radius:6px">
+              <div style="font-size:9px;color:#534AB7;font-weight:600;margin-bottom:2px">EXPEDIA</div>
+              <div style="font-size:13px;font-weight:600;color:#534AB7">฿${exp.toLocaleString()}</div>
+            </div>
+          </div>
           <!-- Guest pricing -->
           <div style="display:flex;gap:6px;font-size:11px">
             <div style="flex:1;text-align:center;padding:4px;background:var(--surface2);border-radius:6px">
@@ -1012,14 +1142,13 @@ function renderPriceTable(){
 // ── Rules ──
 function renderRules(){
   const cont=document.getElementById('rules-list'); cont.innerHTML='';
-  const rules=[
-    {cls:'ri-dn',  sym:'↓', t:'< 50% — ลดราคา 15%',       d:'ห้องว่างมาก ลดดึง demand ป้องกันห้องว่างนาน'},
-    {cls:'ri-dn',  sym:'↓', t:'50–65% — ลดราคา 7%',        d:'Occ ต่ำกว่าเป้า ปรับเล็กน้อยเพื่อเร่ง booking'},
-    {cls:'ri-hold',sym:'=', t:'65–75% — คงราคา',           d:'อยู่ใน sweet spot รักษาราคา อย่าลดโดยไม่จำเป็น'},
-    {cls:'ri-up',  sym:'↑', t:'> 75% — เพิ่มราคา 15%',     d:'Demand ดี ลูกค้าพร้อมจ่ายแพงขึ้น'},
-    {cls:'ri-up',  sym:'↑', t:'> 85% — เพิ่มราคา 25%',     d:'เกือบเต็ม ยิ่งห้องน้อย ยิ่งขายแพง'},
-    {cls:'ri-peak',sym:'!', t:'> 90% — Peak +40% + Close', d:'ห้องสุดท้ายราคาสูงสุด ปิดไม่ให้จอง 1 คืน'},
-  ];
+  // Rules derived from PriceLabs OCC_RULES
+  const rules = PL_OCC_RULES.map(r => ({
+    cls: {dn:'ri-dn', hold:'ri-hold', up:'ri-up', peak:'ri-peak'}[r.action]||'ri-hold',
+    sym: {dn:'↓', hold:'=', up:'↑', peak:'!'}[r.action]||'=',
+    t: `Occ ≤${r.max}% — ${r.label}`,
+    d: r.note + ` · ราคา × ${r.mult}`
+  }));
   rules.forEach(r=>{
     cont.innerHTML+=`<div class="rule-row">
       <div class="rule-icon ${r.cls}">${r.sym}</div>
@@ -1075,7 +1204,7 @@ function renderChannels(){
 // ── Checklist ──
 const CHECKLIST = [
   // group 0: คำนวณราคา
-  { group:'📊 คำนวณราคา', text:'กด "คำนวณราคาและ Action Plan"', sub:'ตรวจดูว่า Occ แต่ละห้องถูกต้องก่อนกด', tag:null },
+  { group:'📊 คำนวณราคา', text:'กด "คำนวณราคาและ Action Plan"', sub:'ราคาคำนวณจาก PriceLabs base + DOW multiplier + Occ adjustment', tag:null },
   { group:null, text:'เช็ค Action table — จดราคาห้องที่เปลี่ยน', sub:'ดู tab จ–พฤ / ศุกร์ / เสาร์–อาทิตย์ แยกกัน', tag:null },
   // group 1: อัพเดต Little Hotelier
   { group:'🏨 Little Hotelier', text:'อัพเดตราคาทีละห้องตาม Action table', sub:'เปลี่ยนทุก rate plan ให้ครบ — weekday / weekend / peak', tag:'LH' },
@@ -1248,6 +1377,11 @@ function showStatus(msg, type='info'){
 }
 function hideStatus(){ document.getElementById('sync-status').style.display='none'; }
 
+function showPriceSourceBadge(msg){
+  const el = document.getElementById('price-source-badge');
+  if(el){ el.textContent = '✓ '+msg; el.style.display='inline-flex'; }
+}
+
 async function fetchSheetsData(){
   const s=loadSettings();
   if(!s.url) return {success:false, error:'ยังไม่ได้ตั้งค่า URL — กดปุ่ม ⚙ ตั้งค่า แล้วใส่ Web App URL'};
@@ -1329,10 +1463,40 @@ function detectColumns(rows, settingColRoom, settingColIn, settingColOut) {
   return {colRoom, colIn, colOut};
 }
 
+function applyPrices(prices){
+  if(!prices||!prices.length) return false;
+  const TYPE_KEYS = {
+    'luxury':'Luxury','retro':'Retro','allure':'Allure',
+    'elegance':'Elegance','legacy':'Legacy'
+  };
+  let updated = 0;
+  prices.forEach(p=>{
+    const rawType = String(p.type||p.Type||p.ประเภท||'').trim().toLowerCase();
+    const type = TYPE_KEYS[rawType] || Object.values(TYPE_KEYS).find(t=>t.toLowerCase()===rawType);
+    if(!type) return;
+    const r = ROOMS_DATA.find(x=>x.id===type);
+    if(!r) return;
+    if(p.base_rate||p.base) r.base = parseInt(p.base_rate||p.base)||r.base;
+    if(p.airbnb_rate) r.airbnbOverride = parseInt(p.airbnb_rate)||null;
+    if(p.booking_rate) r.bookingOverride = parseInt(p.booking_rate)||null;
+    if(p.expedia_rate) r.expediaOverride = parseInt(p.expedia_rate)||null;
+    if(p.updated||p.วันที่) r.priceUpdated = p.updated||p.วันที่;
+    updated++;
+  });
+  return updated;
+}
+
 function applySheetData(data){
   const s=loadSettings();
   const {colRoom,colIn,colOut}=detectColumns(data.rows,s.colRoom,s.colIn,s.colOut);
   const {occMap,summary,roomNights}=computeOcc(data.rows,colRoom,colIn,colOut);
+
+  // Apply prices from Prices sheet if available
+  if(data.prices&&data.prices.length){
+    const n = applyPrices(data.prices);
+    if(n) showPriceSourceBadge(`Sheet Prices (${n} types updated)`);
+  }
+
   ROOMS_DATA.forEach(r=>{ if(occMap[r.id]!==undefined){ inputOccs[r.id]=occMap[r.id]; r.currentOcc=occMap[r.id]; } });
   buildOccInputs();
   const avg=Math.round(ROOMS_DATA.map(r=>r.currentOcc||r.occ).reduce((a,b)=>a+b,0)/ROOMS_DATA.length);
@@ -1720,79 +1884,104 @@ function syncSeasonToOps(){
   if(s2b&&srb) s2b.textContent=srb.textContent;
 }
 
-// ── Phase Switcher ──
-const PHASE_HINTS = {
-  1: '🟢 ใช้ตอนนี้ — ขึ้นราคาจาก ADR จริง +20%',
-  2: '🟡 เปลี่ยนเมื่อ Occ ยังทรงตัวหลัง 1–2 เดือน',
-  3: '🔴 เปลี่ยนเมื่อตลาดรับได้ หลัง 3–4 เดือน',
-};
 
-function setPhase(p){
-  currentPhase = p;
-  localStorage.setItem('pricingPhase', p);
-  // อัพเดต base ทุกห้อง
-  const bases = PRICE_PHASES[p].bases;
-  ROOMS_DATA.forEach(r => { r.base = bases[r.id]; r.currentOcc = undefined; });
-  // reset inputOccs
-  inputOccs = {};
-  buildOccInputs();
-  renderPriceTable();
-  renderProjection();
-  renderRules();
-  updatePhaseUI();
-  updateSeasonTable();
+// ── CSV Upload (Little Hotelier export) ──
+function handleCSVDrop(e){
+  e.preventDefault();
+  document.getElementById('csv-drop').style.borderColor='var(--border2)';
+  const file = e.dataTransfer.files[0];
+  if(file) parseCSVFile(file);
 }
-
-function updatePhaseUI(){
-  [1,2,3].forEach(p=>{
-    const btn = document.getElementById('pb'+p);
-    if(!btn) return;
-    if(p === currentPhase){
-      btn.style.background = 'var(--text)';
-      btn.style.color = '#fff';
-      btn.style.borderColor = 'var(--text)';
-      btn.querySelector('span').style.color = 'rgba(255,255,255,.6)';
+function handleCSVFile(input){
+  if(input.files[0]) parseCSVFile(input.files[0]);
+}
+function parseCSVFile(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    const text = e.target.result;
+    const result = parseLHCSV(text);
+    const el = document.getElementById('csv-result');
+    el.style.display = 'block';
+    if(result.updated > 0){
+      el.style.background='var(--green-bg)'; el.style.color='var(--green)';
+      el.textContent = `✓ อัปเดต ${result.updated} ประเภทห้อง: ${result.types.join(', ')} · กด คำนวณราคา เพื่อรีเฟรช`;
+      showPriceSourceBadge(`CSV (${result.updated} types · ${file.name})`);
+      renderPriceTable();
     } else {
-      btn.style.background = 'var(--surface)';
-      btn.style.color = 'var(--text)';
-      btn.style.borderColor = 'var(--border)';
-      btn.querySelector('span').style.color = 'var(--text3)';
+      el.style.background='var(--red-bg)'; el.style.color='var(--red)';
+      el.textContent = 'ไม่พบข้อมูลราคา — ตรวจสอบว่าเป็นไฟล์ Room Revenue จาก Little Hotelier';
     }
-  });
-  const hint = document.getElementById('phase-hint');
-  if(hint) hint.textContent = PHASE_HINTS[currentPhase]||'';
+  };
+  reader.readAsText(file, 'UTF-8');
 }
 
-// อัพเดต Seasonal Pricing table ให้ตรงกับ phase
-function updateSeasonTable(){
-  const bases = PRICE_PHASES[currentPhase].bases;
-  const seasonMults = {low:0.85, normal:1.0, high:1.25, peak:1.5};
-  const weMult = 1.3;
-  const rows = document.querySelectorAll('#seasonal-price-tbody tr');
-  const order = ['Luxury','Retro','Allure','Elegance','Legacy'];
-  if(!rows.length) return;
-  const seasons = ['low','normal','high','peak'];
-  rows.forEach((tr, i)=>{
-    const s = seasons[i];
-    const sm = seasonMults[s];
-    const tds = tr.querySelectorAll('td');
-    if(tds.length < 8) return;
-    const lux = Math.round(bases.Luxury * sm / 50)*50;
-    const luxWe = Math.round(bases.Luxury * sm * weMult / 50)*50;
-    const ret = Math.round(bases.Retro * sm / 50)*50;
-    const all = Math.round(bases.Allure * sm / 50)*50;
-    const ele = Math.round(bases.Elegance * sm / 50)*50;
-    const leg = Math.round(bases.Legacy * sm / 50)*50;
-    tds[2].textContent = '฿'+lux.toLocaleString();
-    tds[3].textContent = '฿'+luxWe.toLocaleString();
-    tds[4].textContent = '฿'+ret.toLocaleString();
-    tds[5].textContent = '฿'+all.toLocaleString();
-    tds[6].textContent = '฿'+ele.toLocaleString();
-    tds[7].textContent = '฿'+leg.toLocaleString();
+function parseLHCSV(text){
+  const lines = text.trim().split('\n').map(l=>l.replace(/\r/,''));
+  if(lines.length < 2) return {updated:0,types:[]};
+
+  // Detect header row
+  const headerIdx = lines.findIndex(l => l.toLowerCase().includes('room') || l.toLowerCase().includes('adr') || l.toLowerCase().includes('ห้อง'));
+  if(headerIdx < 0) return {updated:0,types:[]};
+
+  const headers = lines[headerIdx].split(',').map(h=>h.replace(/"/g,'').trim().toLowerCase());
+  const TYPE_MAP = {
+    'luxury':'Luxury','retro':'Retro','allure':'Allure',
+    'elegance':'Elegance','legacy':'Legacy',
+    'the loft luxury':'Luxury','the loft retro':'Retro',
+    'the loft allure':'Allure','the loft elegance':'Elegance','the loft legacy':'Legacy'
+  };
+
+  // Column index finders
+  const col = (keys) => headers.findIndex(h=>keys.some(k=>h.includes(k)));
+  const iRoom= col(['room number','room','ห้อง','listing']);
+  const iADR = col(['adr','average daily','average_daily']);
+  const iRev = col(['revenue','รายได้']);
+  const iOcc = col(['occupancy','occ','การจอง']);
+
+  let updated=0, types=[];
+  for(let i=headerIdx+1; i<lines.length; i++){
+    if(!lines[i].trim()) continue;
+    const cells = lines[i].split(',').map(c=>c.replace(/"/g,'').trim());
+    if(cells.length < 2) continue;
+
+    const roomRaw = iRoom>=0 ? cells[iRoom] : cells[0];
+    const roomLow = roomRaw.toLowerCase();
+    let type = TYPE_MAP[roomLow];
+    if(!type){
+      // Try partial match
+      for(const [k,v] of Object.entries(TYPE_MAP)){
+        if(roomLow.includes(k)){ type=v; break; }
+      }
+    }
+    if(!type) continue;
+
+    const r = ROOMS_DATA.find(x=>x.id===type);
+    if(!r) continue;
+
+    const adr = iADR>=0 ? parseFloat(cells[iADR].replace(/[฿,]/g,''))||0 : 0;
+    if(adr>100 && adr<5000){
+      r.liveADR = Math.round(adr); // update real ADR display only — do NOT change base rate
+    }
+    updated++; types.push(type);
+  }
+  return {updated, types};
+}
+
+// ── Google Sheet Prices tab template ──
+function copyPricesTemplate(){
+  const tpl = `type,base_rate,airbnb_rate,booking_rate,expedia_rate,updated
+Luxury,1100,850,1100,1300,${new Date().toLocaleDateString('th-TH')}
+Retro,950,750,950,1150,${new Date().toLocaleDateString('th-TH')}
+Allure,800,650,800,950,${new Date().toLocaleDateString('th-TH')}
+Elegance,800,650,800,950,${new Date().toLocaleDateString('th-TH')}
+Legacy,750,600,750,900,${new Date().toLocaleDateString('th-TH')}`;
+  navigator.clipboard.writeText(tpl).then(()=>{
+    const btn = document.getElementById('copy-prices-btn');
+    if(btn){ btn.textContent='Copied ✓'; setTimeout(()=>btn.textContent='Copy template',2000); }
   });
 }
 
-window.addEventListener('load', ()=>{ syncSeasonToOps(); updatePhaseUI(); updateSeasonTable(); setTimeout(drawExecCharts, 800); });
+window.addEventListener('load', ()=>{ syncSeasonToOps(); setTimeout(drawExecCharts, 800); });
 
 </script>
 </body>
