@@ -362,19 +362,20 @@ tr:hover td{background:#FAFAF7}
   <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:12px">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
     <span style="font-size:12px;color:var(--text2);font-weight:500">อัปเดตกราฟ:</span>
-    <button onclick="document.getElementById('ab-csv-file').click()" class="btn btn-ghost" style="font-size:12px;padding:6px 14px">
-      📂 Apartmentery bill
+    <button onclick="document.getElementById('unified-file-input').click()" class="btn btn-ghost" style="font-size:12px;padding:6px 14px">
+      📂 Apartmentery bill (.xlsx)
     </button>
+    <input type="file" id="unified-file-input" accept=".xlsx,.xls" style="display:none" onchange="handleUnifiedUpload(this)">
     <span id="lh-rev-badge" style="display:none;font-size:11px;background:var(--green-bg);color:var(--green);padding:3px 10px;border-radius:20px;border:1px solid #8DC89A;font-weight:500"></span>
-    <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="lh-data-source">📦 Apartmentery receipts · ธ.ค.2024 – พ.ค.2026 · 423 รายการ</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--text3)" id="lh-data-source">📦 Apartmentery bill · ธ.ค.2024 – พ.ค.2026 · อัปเดตล่าสุด พ.ค. 2026</span>
   </div>
 
   <!-- KPI row -->
   <div class="kpi-row">
     <div class="kpi-card kpi-accent">
       <div class="kpi-label">Revenue รวม (ค่าเช่า)</div>
-      <div class="kpi-value">฿1.92M</div>
-      <div class="kpi-sub">ธ.ค.2024 – พ.ค.2026 · 423 bookings</div>
+      <div class="kpi-value">฿2.09M</div>
+      <div class="kpi-sub">ธ.ค.2024 – พ.ค.2026 · 471 bookings</div>
     </div>
     <div class="kpi-card kpi-bad">
       <div class="kpi-label">ADR เฉลี่ยรวม</div>
@@ -527,83 +528,59 @@ tr:hover td{background:#FAFAF7}
     </div>
   </div>
 
-  <!-- ── Airbnb Conversion Analyzer ── -->
-  <div class="sec" style="margin-bottom:14px" id="airbnb-analyzer-sec">
+  <!-- ── Airbnb Performance + Conversion (รวมเป็น 1 section) ── -->
+  <div class="sec" style="margin-bottom:14px" id="airbnb-perf-sec">
     <div class="sec-hdr">
-      <span class="sec-title">Airbnb Conversion Analyzer — วิเคราะห์ด้วย AI</span>
+      <span class="sec-title" id="airbnb-perf-title">Airbnb Performance</span>
       <div style="display:flex;align-items:center;gap:8px">
-        <span id="ab-analyze-badge" style="display:none;font-size:11px;background:var(--green-bg);color:var(--green);padding:3px 10px;border-radius:20px;border:1px solid #8DC89A;font-weight:500"></span>
-        <button onclick="document.getElementById('ab-csv-file').click()" class="btn btn-ghost" style="font-size:12px;gap:6px">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span id="airbnb-perf-badge" style="display:none;font-size:11px;background:var(--green-bg);color:var(--green);padding:3px 10px;border-radius:20px;border:1px solid #8DC89A;font-weight:500"></span>
+        <span id="ab-analyze-badge" style="display:none;font-size:11px;background:var(--blue-bg);color:var(--blue);padding:3px 10px;border-radius:20px;border:1px solid #8BACD8;font-weight:500"></span>
+        <span style="font-size:11px;background:#FDF0E3;color:#C8731A;padding:3px 10px;border-radius:20px;font-weight:500">Airbnb report</span>
+        <button onclick="document.getElementById('ab-csv-file').click()" class="btn btn-ghost" style="font-size:11px;padding:5px 12px;gap:5px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           อัปโหลด Conversion CSV
         </button>
         <input type="file" id="ab-csv-file" accept=".csv" style="display:none" onchange="handleAirbnbCSV(this)">
       </div>
     </div>
-    <div class="sec-body" id="ab-analyzer-body">
-      <!-- Drop zone shown when no file loaded -->
-      <div id="ab-drop-zone"
-        onclick="document.getElementById('ab-csv-file').click()"
-        ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
-        ondragleave="this.style.borderColor='var(--border2)'"
-        ondrop="event.preventDefault();this.style.borderColor='var(--border2)';handleAirbnbCSVDrop(event)"
-        style="border:2px dashed var(--border2);border-radius:var(--r-lg);padding:28px;text-align:center;cursor:pointer;transition:border-color .2s">
-        <div style="font-size:22px;margin-bottom:8px">📊</div>
-        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:4px">วาง Airbnb Conversion Report ที่นี่</div>
-        <div style="font-size:11px;color:var(--text3)">ดาวน์โหลดจาก Airbnb → Performance → Conversion · รองรับ .csv ทุก format</div>
-      </div>
-      <!-- Analysis result shown after file loaded -->
-      <div id="ab-analysis-result" style="display:none">
-        <!-- KPI summary row -->
-        <div id="ab-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
-        <!-- Raw table preview -->
-        <div id="ab-table-wrap" style="margin-bottom:14px;max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-md)"></div>
-        <!-- AI insight panel -->
-        <div id="ab-ai-panel" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)">
-            <div style="display:flex;align-items:center;gap:8px">
-              <div style="width:24px;height:24px;background:var(--text);border-radius:6px;display:flex;align-items:center;justify-content:center">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-              </div>
-              <span style="font-size:12px;font-weight:600;color:var(--text)">AI Analysis — Claude</span>
-            </div>
-            <button id="ab-reanalyze-btn" onclick="runAirbnbAI()" class="btn btn-ghost" style="font-size:11px;padding:5px 12px">วิเคราะห์ใหม่</button>
-          </div>
-          <div id="ab-ai-content" style="padding:16px;font-size:12px;line-height:1.8;color:var(--text)">
-            <span style="color:var(--text3)">⏳ กำลังวิเคราะห์...</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Airbnb Live Performance — dynamic from CSV -->
-  <div class="sec" style="margin-bottom:14px" id="airbnb-perf-sec">
-    <div class="sec-hdr">
-      <span class="sec-title" id="airbnb-perf-title">Airbnb Performance — รอข้อมูล CSV</span>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span id="airbnb-perf-badge" style="display:none;font-size:11px;background:var(--green-bg);color:var(--green);padding:3px 10px;border-radius:20px;border:1px solid #8DC89A;font-weight:500"></span>
-        <span style="font-size:11px;background:#FDF0E3;color:#C8731A;padding:3px 10px;border-radius:20px;font-weight:500">Live · Airbnb report</span>
-      </div>
-    </div>
     <div style="padding:14px 18px" id="airbnb-perf-body">
-      <!-- Drop zone shown when no file loaded -->
+      <!-- Drop zone — แสดงเมื่อยังไม่มีไฟล์ -->
       <div id="airbnb-perf-drop"
         onclick="document.getElementById('ab-csv-file').click()"
         ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
         ondragleave="this.style.borderColor='var(--border2)'"
         ondrop="event.preventDefault();this.style.borderColor='var(--border2)';handleAirbnbCSVDrop(event)"
-        style="border:2px dashed var(--border2);border-radius:var(--r-lg);padding:20px;text-align:center;cursor:pointer;transition:border-color .2s">
-        <div style="font-size:18px;margin-bottom:6px">📂</div>
-        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:3px">อัปโหลด Airbnb Conversion CSV เพื่อดูข้อมูลรายห้อง</div>
-        <div style="font-size:11px;color:var(--text3)">ใช้ไฟล์เดียวกับ Analyzer ด้านบน — หรือวางไฟล์ที่นี่</div>
+        style="border:2px dashed var(--border2);border-radius:var(--r-lg);padding:24px;text-align:center;cursor:pointer;transition:border-color .2s">
+        <div style="font-size:20px;margin-bottom:6px">📊</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:3px">วาง Airbnb Conversion CSV ที่นี่ หรือคลิกเพื่อเลือกไฟล์</div>
+        <div style="font-size:11px;color:var(--text3)">ดาวน์โหลดจาก Airbnb → Performance → Conversion · .csv เท่านั้น</div>
       </div>
-      <!-- Live content populated by applyAirbnbPerformanceCards() -->
+      <!-- Content — แสดงหลังโหลดไฟล์ -->
       <div id="airbnb-perf-content" style="display:none">
+        <!-- Performance cards รายห้อง -->
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px" id="airbnb-cards"></div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px" id="airbnb-summary-bar"></div>
-        <!-- Conversion metrics row -->
-        <div id="airbnb-conv-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px"></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px" id="airbnb-summary-bar"></div>
+        <!-- Conversion metrics -->
+        <div id="airbnb-conv-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px"></div>
+        <!-- KPI summary (Conversion report) -->
+        <div id="ab-kpi-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px"></div>
+        <!-- Raw data table -->
+        <div id="ab-table-wrap" style="margin-bottom:14px;max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r-md)"></div>
+        <!-- AI insight panel -->
+        <div id="ab-ai-panel" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:22px;height:22px;background:var(--text);border-radius:6px;display:flex;align-items:center;justify-content:center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              </div>
+              <span style="font-size:12px;font-weight:600;color:var(--text)">AI Analysis — Claude</span>
+            </div>
+            <button id="ab-reanalyze-btn" onclick="runAirbnbAI()" class="btn btn-ghost" style="font-size:11px;padding:5px 12px">วิเคราะห์ใหม่</button>
+          </div>
+          <div id="ab-ai-content" style="padding:14px 16px;font-size:12px;line-height:1.8;color:var(--text)">
+            <span style="color:var(--text3)">⏳ กำลังวิเคราะห์...</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -997,6 +974,7 @@ tr:hover td{background:#FAFAF7}
 
 <!-- ══════════ SCRIPTS ══════════ -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const ROOMS_DATA = [
   {id:'Luxury',   tier:'Luxury',   chip:'chip-lux', base:867, min:450, max:1800, realADR:657, liveADR:557, realOcc:70, occ:100,revpar:462, los:9,  count:1, maxG:4, chPri:'Expedia', minStay:1, minWknd:2},
@@ -2037,30 +2015,30 @@ let CHART_MONTHS = ["2024-12","2025-01","2025-02","2025-03","2025-04","2025-05",
 let MONTH_LABELS = ["ธ.ค.24","ม.ค.25","ก.พ.25","มี.ค.25","เม.ย.25","พ.ค.25","มิ.ย.25","ก.ค.25","ส.ค.25","ก.ย.25","ต.ค.25","พ.ย.25","ธ.ค.25","ม.ค.26","ก.พ.26","มี.ค.26","เม.ย.26","พ.ค.26"];
 
 let ADR_DATA = {
-  Luxury:   [null,886,754,549,382,608,264,null,353,620,681,1982,659,536,756,456,436,584],
-  Retro:    [1353,1141,909,732,1531,652,568,576,1133,790,211,582,946,619,3021,415,430,null],
-  Allure:   [1111,855,1160,508,589,609,249,623,448,827,536,931,757,1779,272,616,3524,null],
+  Luxury:   [null,886,754,549,382,608,264,null,353,620,681,526,659,536,756,456,436,584],
+  Retro:    [1353,875,618,732,376,652,568,576,719,790,211,582,946,619,407,415,430,null],
+  Allure:   [1111,855,415,508,589,609,249,623,448,827,536,931,757,905,272,616,1092,null],
   Elegance: [221,759,351,580,760,274,578,554,396,566,613,583,916,528,248,502,425,null],
-  Legacy:   [613,456,1135,623,1210,872,331,353,578,512,2794,null,157,776,522,803,652,null]
+  Legacy:   [613,456,1135,623,1210,872,331,353,578,512,644,null,157,776,522,803,652,null]
 };
 
 let REV_DATA = {
-  Luxury:   [null,17480,15080,13583,18091,10560,19105,null,14115,11410,16869,29676,19110,10196,6878,7296,10224,2920],
-  Retro:    [11179,43899,31980,22363,41140,26242,15028,57094,28593,28019,20683,24363,16779,24734,44120,26991,17565,null],
-  Allure:   [2221,38625,39363,11055,25521,29164,35495,10373,64655,19666,27470,27523,46967,37134,34863,22629,38479,null],
+  Luxury:   [null,17480,15080,13583,18091,10560,19105,null,14115,11410,16869,13623,19110,10196,6878,7296,10224,2920],
+  Retro:    [11179,39568,28448,22363,21147,26242,15028,57094,24974,28019,20683,24363,16779,24734,19775,26991,17565,null],
+  Allure:   [2221,38625,35223,11055,25521,29164,35495,10373,64655,19666,27470,27523,46967,30985,34863,22629,13204,null],
   Elegance: [16709,22857,19172,31816,43265,20346,30587,18105,18631,33938,26457,23962,41412,24451,37672,15377,21421,null],
-  Legacy:   [6748,15444,15958,17812,14581,12836,11344,16942,16470,20438,34089,null,19775,16603,10961,11119,16565,null]
+  Legacy:   [6748,15444,15958,17812,14581,12836,11344,16942,16470,20438,20544,null,19775,16603,10961,11119,16565,null]
 };
 
 const TYPE_COLORS  = {Luxury:'#534AB7',Retro:'#C8731A',Allure:'#2B5FA8',Elegance:'#3A7D44',Legacy:'#832040'};
 const TYPE_COLORS2 = {Luxury:'rgba(83,74,183,.18)',Retro:'rgba(200,115,26,.18)',Allure:'rgba(43,95,168,.18)',Elegance:'rgba(58,125,68,.18)',Legacy:'rgba(131,32,64,.18)'};
 
-let PEAK_ADR = {Allure:989,Elegance:504,Legacy:610,Luxury:718,Retro:1332};
-let LOW_ADR  = {Allure:551,Elegance:474,Legacy:529,Luxury:486,Retro:744};
-let LOS_TYPE = {Luxury:9.4,Retro:8.5,Allure:11.7,Elegance:12.9,Legacy:11.4};
-let CH_REV   = {Airbnb:1413040,Booking:229985,Trip:130148,Expedia:124205,Other:21047};
+let PEAK_ADR = {Allure:700,Elegance:464,Legacy:713,Luxury:734,Retro:751};
+let LOW_ADR  = {Allure:533,Elegance:483,Legacy:542,Luxury:444,Retro:664};
+let LOS_TYPE = {Luxury:9.7,Retro:8.9,Allure:12.1,Elegance:12.9,Legacy:11.6};
+let CH_REV   = {Airbnb:1318013,Booking:225846,Trip:130148,Expedia:102391,Other:21047};
 
-let REAL_ADR = {Luxury:657,Retro:918,Allure:906,Elegance:521,Legacy:774};
+let REAL_ADR = {Luxury:584,Retro:430,Allure:1092,Elegance:425,Legacy:652};
 const TARGET_ADR = {Luxury:1100,Retro:950,Allure:800,Elegance:800,Legacy:750};
 
 // ══════════════════════════════════════
@@ -3035,8 +3013,8 @@ function processAirbnbFile(file){
     renderAirbnbKPIs(parsed);
     renderAirbnbTable(parsed);
     applyAirbnbPerformanceCards(parsed, file.name);
-    document.getElementById('ab-drop-zone').style.display = 'none';
-    document.getElementById('ab-analysis-result').style.display = 'block';
+    document.getElementById('airbnb-perf-drop').style.display = 'none';
+    document.getElementById('airbnb-perf-content').style.display = 'block';
     document.getElementById('ab-analyze-badge').textContent = '✓ ' + file.name;
     document.getElementById('ab-analyze-badge').style.display = 'inline-flex';
     runAirbnbAI();
@@ -3402,6 +3380,7 @@ function applyAirbnbPerformanceCards(d, filename){
     });
     // Redraw overview charts
     drawExecCharts();
+    saveChartData();
     // Update source badge
     const srcEl = document.getElementById('lh-data-source');
     if(srcEl){
@@ -3471,7 +3450,337 @@ function runAirbnbAI(){
   }
 }
 
-window.addEventListener('load', ()=>{ syncSeasonToOps(); setTimeout(drawExecCharts, 800); });
+
+// ══════════════════════════════════════
+// UNIFIED UPLOAD — Apartmentery XLSX + Airbnb CSV
+// ══════════════════════════════════════
+function handleUnifiedUpload(input){
+  if(!input.files[0]) return;
+  const file = input.files[0];
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if(ext === 'xlsx' || ext === 'xls'){
+    // ── Apartmentery XLSX ──
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array', cellDates:true});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+        applyApartmenteryXLSX(rows, file.name);
+      } catch(err){
+        alert('ไม่สามารถอ่านไฟล์ได้: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+
+  } else if(ext === 'csv'){
+    // ── Auto-detect: Airbnb or Apartmentery CSV ──
+    const reader = new FileReader();
+    reader.onload = e => {
+      const text = e.target.result;
+      const firstLine = text.slice(0, 500).toLowerCase();
+      if(firstLine.includes('listing') || firstLine.includes('airbnb') ||
+         firstLine.includes('views') || firstLine.includes('conversion') ||
+         firstLine.includes('booking value')){
+        // Airbnb conversion CSV
+        const d = parseAirbnbCSV(text, file.name);
+        if(!d){ alert('ไม่สามารถอ่าน Airbnb CSV ได้'); return; }
+        _abCsvData = d; _abCsvData.filename = file.name;
+        applyAirbnbPerformanceCards(d, file.name);
+        renderAirbnbKPIs(d);
+        const badge = document.getElementById('ab-analyze-badge');
+        if(badge){ badge.textContent = '✓ ' + file.name; badge.style.display = 'inline-flex'; }
+        document.getElementById('airbnb-perf-drop').style.display = 'none';
+        document.getElementById('airbnb-perf-content').style.display = 'block';
+      } else {
+        // Apartmentery CSV fallback
+        alert('CSV นี้ไม่ใช่ Airbnb format — กรุณาใช้ไฟล์ .xlsx สำหรับ Apartmentery bill');
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  } else {
+    alert('รองรับเฉพาะ .xlsx และ .csv เท่านั้น');
+  }
+  // Reset input so same file can be re-uploaded
+  input.value = '';
+}
+
+function applyApartmenteryXLSX(rows, filename){
+  const ROOM_MAP = {'103':'Legacy','108':'Luxury','113':'Retro','203':'Allure','204':'Elegance','205':'Allure','214':'Elegance','300':'Retro'};
+  const TARGET_ADR_LOCAL = {Luxury:1100,Retro:950,Allure:800,Elegance:800,Legacy:750};
+  const TYPE_NAMES = ['Luxury','Retro','Allure','Elegance','Legacy'];
+
+  function getChannel(s){
+    s = String(s||'').toLowerCase();
+    if(s.includes('airbnb')) return 'Airbnb';
+    if(s.includes('booking')) return 'Booking';
+    if(s.includes('trip')) return 'Trip';
+    if(s.includes('expedia')) return 'Expedia';
+    return 'Other';
+  }
+
+  function parseDate(v){
+    if(!v) return null;
+    if(v instanceof Date) return v;
+    // Try parsing string
+    const d = new Date(v);
+    return isNaN(d) ? null : d;
+  }
+
+  // Filter valid rows — ตัด ADR outlier (penalty/ค้างชำระ) ออก threshold ฿3,000/คืน
+  const valid = rows.filter(r => {
+    const room = String(r['ห้อง']||'').trim();
+    const rent = parseFloat(String(r['ค่าเช่า']||'').replace(/[฿,]/g,'')) || 0;
+    if(!ROOM_MAP[room] || rent <= 0) return false;
+    const cin  = r['วันเข้าพัก']  instanceof Date ? r['วันเข้าพัก']  : new Date(r['วันเข้าพัก']);
+    const cout = r['วันย้ายออก'] instanceof Date ? r['วันย้ายออก'] : new Date(r['วันย้ายออก']);
+    const nights = Math.max(1, Math.round((cout - cin) / 86400000));
+    const adr = rent / nights;
+    if(adr > 3000){ console.log('[TheLoft] ตัด outlier:', r['ห้อง'], '฿'+Math.round(adr)+'/คืน'); return false; }
+    return true;
+  });
+
+  if(!valid.length){
+    alert('ไม่พบข้อมูล — ตรวจสอบว่าไฟล์มีคอลัมน์ ห้อง และ ค่าเช่า');
+    return;
+  }
+
+  // Compute stats per room type
+  const statsMap = {};  // type -> {revenue, nights, adrs, bookings, los}
+  TYPE_NAMES.forEach(t => statsMap[t] = {revenue:0, nights:0, adrs:[], bookings:0});
+
+  // Monthly buckets: {YYYY-MM: {type: {rev, adr_list}}}
+  const monthly = {};
+
+  valid.forEach(r => {
+    const room = String(r['ห้อง']).trim();
+    const type = ROOM_MAP[room];
+    const rent = parseFloat(String(r['ค่าเช่า']||'').replace(/[฿,]/g,'')) || 0;
+    const cin  = parseDate(r['วันเข้าพัก']);
+    const cout = parseDate(r['วันย้ายออก']);
+    if(!cin || !cout) return;
+    const nights = Math.max(1, Math.round((cout - cin) / 86400000));
+    const adr = rent / nights;
+    const mo = cin.getFullYear() + '-' + String(cin.getMonth()+1).padStart(2,'0');
+
+    statsMap[type].revenue  += rent;
+    statsMap[type].nights   += nights;
+    statsMap[type].adrs.push(adr);
+    statsMap[type].bookings += 1;
+
+    if(!monthly[mo]) monthly[mo] = {};
+    if(!monthly[mo][type]) monthly[mo][type] = {rev:0, adr_list:[]};
+    monthly[mo][type].rev += rent;
+    monthly[mo][type].adr_list.push(adr);
+  });
+
+  // Update global ADR_DATA, REV_DATA for any month in this file
+  Object.entries(monthly).forEach(([mo, types]) => {
+    const idx = CHART_MONTHS.indexOf(mo);
+    if(idx < 0) return;
+    TYPE_NAMES.forEach(t => {
+      if(!types[t]) return;
+      const avgADR = Math.round(types[t].adr_list.reduce((a,b)=>a+b,0)/types[t].adr_list.length);
+      ADR_DATA[t][idx] = avgADR;
+      REV_DATA[t][idx] = Math.round(types[t].rev);
+    });
+  });
+
+  // Update REAL_ADR from most recent month in file
+  const latestMo = Object.keys(monthly).sort().pop();
+  if(latestMo){
+    const lm = monthly[latestMo];
+    TYPE_NAMES.forEach(t => {
+      if(!lm[t] || !lm[t].adr_list.length) return;
+      REAL_ADR[t] = Math.round(lm[t].adr_list.reduce((a,b)=>a+b,0)/lm[t].adr_list.length);
+    });
+  }
+
+  // Update LOS
+  TYPE_NAMES.forEach(t => {
+    const s = statsMap[t];
+    if(s.bookings > 0) LOS_TYPE[t] = +(s.nights/s.bookings).toFixed(1);
+  });
+
+  // Recompute CH_REV from this file
+  const chRev = {Airbnb:0,Booking:0,Trip:0,Expedia:0,Other:0};
+  valid.forEach(r => {
+    const ch = getChannel(r['ลูกค้า']);
+    const rent = parseFloat(String(r['ค่าเช่า']||'').replace(/[฿,]/g,'')) || 0;
+    if(chRev[ch] !== undefined) chRev[ch] += rent;
+  });
+  Object.assign(CH_REV, chRev);
+
+  // Redraw charts + save
+  drawExecCharts();
+  saveChartData();
+
+  // Update source badge
+  const totalRev = valid.reduce((s,r)=>s+parseFloat(String(r['ค่าเช่า']||'').replace(/[฿,]/g,''))||0, 0);
+  const srcEl = document.getElementById('lh-data-source');
+  if(srcEl) srcEl.textContent = '📦 Apartmentery bill · ' + valid.length + ' รายการ · ฿' + Math.round(totalRev).toLocaleString();
+
+  const badge = document.getElementById('lh-rev-badge');
+  if(badge){ badge.textContent = '✓ ' + filename + ' · ' + valid.length + ' rows'; badge.style.display = 'inline-flex'; }
+
+  // Also populate the Airbnb Performance section from this data (Airbnb rows only)
+  const abRows = valid.filter(r => getChannel(r['ลูกค้า']) === 'Airbnb');
+  if(abRows.length){
+    const abStats = {};
+    TYPE_NAMES.forEach(t => abStats[t] = {bookings:0,nights:0,revenue:0,adrs:[],los_list:[]});
+    abRows.forEach(r => {
+      const type = ROOM_MAP[String(r['ห้อง']).trim()];
+      const rent = parseFloat(String(r['ค่าเช่า']||'').replace(/[฿,]/g,'')) || 0;
+      const cin  = parseDate(r['วันเข้าพัก']);
+      const cout = parseDate(r['วันย้ายออก']);
+      if(!cin||!cout) return;
+      const nights = Math.max(1,Math.round((cout-cin)/86400000));
+      abStats[type].bookings += 1;
+      abStats[type].nights   += nights;
+      abStats[type].revenue  += rent;
+      abStats[type].adrs.push(rent/nights);
+      abStats[type].los_list.push(nights);
+    });
+
+    const roomStats = {};
+    TYPE_NAMES.forEach(t => {
+      const s = abStats[t];
+      if(!s.bookings) return;
+      roomStats[t] = {
+        bookings: s.bookings, nights: s.nights, revenue: s.revenue,
+        adr: s.adrs.length ? Math.round(s.adrs.reduce((a,b)=>a+b,0)/s.adrs.length) : 0,
+        los: s.los_list.length ? +(s.los_list.reduce((a,b)=>a+b,0)/s.los_list.length).toFixed(1) : 0,
+        v2c: 0, c2b: 0, v2cList: [], c2bList: [], bwList: [],
+        adrList: s.adrs, losList: s.los_list
+      };
+    });
+
+    const totalBook = Object.values(abStats).reduce((a,s)=>a+s.bookings,0);
+    const totalNights = Object.values(abStats).reduce((a,s)=>a+s.nights,0);
+    const totalRev2 = Object.values(abStats).reduce((a,s)=>a+s.revenue,0);
+    const allADRs = Object.values(abStats).flatMap(s=>s.adrs);
+    const avgADR2 = allADRs.length ? totalRev2/totalNights : 0;
+
+    const synth = {
+      summary: {totalViews:0, totalBookings:totalBook, totalRevenue:totalRev2,
+                totalNights, overallConv:0, avgADR:avgADR2},
+      roomStats, reportType:'performance',
+      raw: 'Apartmentery bill: ' + filename,
+      filename
+    };
+
+    // Show Airbnb performance section
+    document.getElementById('airbnb-perf-drop').style.display = 'none';
+    document.getElementById('airbnb-perf-content').style.display = 'block';
+    document.getElementById('airbnb-perf-title').textContent = 'Airbnb Performance — Apartmentery bill';
+    const ab_badge = document.getElementById('airbnb-perf-badge');
+    if(ab_badge){ ab_badge.textContent = '✓ ' + filename; ab_badge.style.display = 'inline-flex'; }
+    applyAirbnbPerformanceCards(synth, filename);
+    _abCsvData = synth;
+  }
+
+  alert('✓ โหลด ' + filename + ' แล้ว · ' + valid.length + ' รายการ · บันทึกข้อมูลไว้แล้ว (ไม่หายเมื่อ refresh)');
+}
+
+
+// ══════════════════════════════════════
+// DATA PERSISTENCE — localStorage
+// โหลดไฟล์เดือนใหม่ทีละเดือน ของเก่าไม่หาย
+// ══════════════════════════════════════
+const STORAGE_KEY = 'theloft_chart_data_v1';
+
+function saveChartData(){
+  try {
+    const payload = {
+      ADR_DATA: ADR_DATA,
+      REV_DATA: REV_DATA,
+      REAL_ADR: REAL_ADR,
+      LOS_TYPE: LOS_TYPE,
+      CH_REV:   CH_REV,
+      CHART_MONTHS: CHART_MONTHS,
+      MONTH_LABELS: MONTH_LABELS,
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    console.log('[TheLoft] Saved chart data to localStorage:', new Date().toLocaleString());
+  } catch(e){ console.warn('[TheLoft] localStorage save failed:', e); }
+}
+
+function loadChartData(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const saved = JSON.parse(raw);
+
+    // Merge saved months into current arrays (add new months, keep existing if not in saved)
+    const savedMonths = saved.CHART_MONTHS || [];
+    const TYPES = ['Luxury','Retro','Allure','Elegance','Legacy'];
+
+    savedMonths.forEach((mo, savedIdx) => {
+      let curIdx = CHART_MONTHS.indexOf(mo);
+
+      // ถ้าเดือนนี้ยังไม่มีใน array → เพิ่มต่อท้าย
+      if(curIdx < 0){
+        CHART_MONTHS.push(mo);
+        // สร้าง Thai label
+        const yr = parseInt(mo.split('-')[0]);
+        const mth = parseInt(mo.split('-')[1]);
+        const thMap = {1:'ม.ค.',2:'ก.พ.',3:'มี.ค.',4:'เม.ย.',5:'พ.ค.',6:'มิ.ย.',7:'ก.ค.',8:'ส.ค.',9:'ก.ย.',10:'ต.ค.',11:'พ.ย.',12:'ธ.ค.'};
+        MONTH_LABELS.push(thMap[mth] + String(yr % 100));
+        curIdx = CHART_MONTHS.length - 1;
+        TYPES.forEach(t => { ADR_DATA[t].push(null); REV_DATA[t].push(null); });
+      }
+
+      // Merge: เขียนทับเฉพาะถ้า saved มีข้อมูล (ไม่ใช่ null)
+      TYPES.forEach(t => {
+        if(saved.ADR_DATA && saved.ADR_DATA[t] && saved.ADR_DATA[t][savedIdx] !== null && saved.ADR_DATA[t][savedIdx] !== undefined){
+          ADR_DATA[t][curIdx] = saved.ADR_DATA[t][savedIdx];
+        }
+        if(saved.REV_DATA && saved.REV_DATA[t] && saved.REV_DATA[t][savedIdx] !== null && saved.REV_DATA[t][savedIdx] !== undefined){
+          REV_DATA[t][curIdx] = saved.REV_DATA[t][savedIdx];
+        }
+      });
+    });
+
+    // Restore scalar objects
+    if(saved.REAL_ADR) Object.assign(REAL_ADR, saved.REAL_ADR);
+    if(saved.LOS_TYPE) Object.assign(LOS_TYPE, saved.LOS_TYPE);
+    if(saved.CH_REV)   Object.assign(CH_REV,   saved.CH_REV);
+
+    const savedDate = saved.savedAt ? new Date(saved.savedAt).toLocaleDateString('th-TH') : '—';
+    console.log('[TheLoft] Loaded saved data from', savedDate, '·', savedMonths.length, 'months');
+
+    // Show restore badge
+    const srcEl = document.getElementById('lh-data-source');
+    if(srcEl) srcEl.textContent = '💾 บันทึกไว้ · ' + savedDate + ' · ' + savedMonths.length + ' เดือน';
+    return true;
+  } catch(e){
+    console.warn('[TheLoft] localStorage load failed:', e);
+    return false;
+  }
+}
+
+function clearChartData(){
+  if(!confirm('ล้างข้อมูลที่บันทึกไว้ทั้งหมด แล้ว reload หน้า?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// Storage info badge
+function updateStorageInfo(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const saved = JSON.parse(raw);
+    const months = (saved.CHART_MONTHS||[]).length;
+    const savedDate = saved.savedAt ? new Date(saved.savedAt).toLocaleString('th-TH',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+    const srcEl = document.getElementById('lh-data-source');
+    if(srcEl) srcEl.innerHTML = '💾 บันทึกไว้ · ' + savedDate + ' · ' + months + ' เดือน &nbsp;<button onclick="clearChartData()" style="font-size:10px;padding:1px 7px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);color:var(--text3);cursor:pointer">ล้าง</button>';
+  } catch(e){}
+}
+
+window.addEventListener('load', ()=>{ syncSeasonToOps(); loadChartData(); setTimeout(()=>{ drawExecCharts(); updateStorageInfo(); }, 800); });
 
 </script>
 
