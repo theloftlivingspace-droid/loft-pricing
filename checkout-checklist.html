@@ -680,7 +680,13 @@ const repairItems = [
 ];
 
 // ===== SETTINGS =====
-let settings = {sheetsUrl:'',lineToken:'',autoSheets:false,criticalOnly:true,defaultInspector:''};
+let settings = {
+  sheetsUrl:'https://script.google.com/macros/s/AKfycbwGKKPMTJ1lrbvrqgTsG-iVNCeFviA3GJUkIDsClJScIH6jTn0VCZhhvF8h6AVyA98/exec',
+  lineToken:'',
+  autoSheets:true,
+  criticalOnly:true,
+  defaultInspector:''
+};
 function loadSettings(){
   const s=localStorage.getItem('loft_settings');
   if(s) settings=JSON.parse(s);
