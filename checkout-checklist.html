@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The Loft — Checkout Inspection</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f0f11; --surface:#1a1a1f; --surface2:#22222a; --border:#2e2e38;
+  --accent:#f5a623; --accent2:#e85d4a; --green:#3ecf8e; --blue:#60a5fa;
+  --purple:#a855f7; --text:#e8e8ec; --muted:#7a7a8a;
+  --radius:12px; --font:'IBM Plex Sans Thai',sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:120px;}
+
+/* NAV TABS */
+.nav-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;}
+.nav-tab{flex:1;padding:12px 4px 10px;text-align:center;font-size:11px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.nav-tab .tab-icon{font-size:18px;}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* HEADER */
+.page-header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 16px 10px;}
+.header-brand{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--accent);text-transform:uppercase;margin-bottom:3px;}
+.header-title{font-size:16px;font-weight:600;}
+.progress-bar-wrap{margin-top:10px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;width:0%;}
+.progress-label{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;text-align:right;}
+
+/* SECTIONS */
+.section{margin:12px 14px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.section-header{display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--surface2);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.section-icon{font-size:17px;width:26px;text-align:center;flex-shrink:0;}
+.section-title{font-weight:600;font-size:14px;flex:1;}
+.section-badge{font-family:var(--mono);font-size:10px;background:var(--border);color:var(--muted);padding:3px 8px;border-radius:20px;}
+.section-badge.done{background:rgba(62,207,142,.15);color:var(--green);}
+.section-badge.warn{background:rgba(232,93,74,.15);color:var(--accent2);}
+.section-toggle{color:var(--muted);font-size:11px;transition:transform .2s;}
+.section.collapsed .section-toggle{transform:rotate(-90deg);}
+.section-body{transition:max-height .3s ease,opacity .3s;max-height:3000px;opacity:1;overflow:hidden;}
+.section.collapsed .section-body{max-height:0;opacity:0;}
+
+/* FORM */
+.field{padding:11px 14px;border-bottom:1px solid var(--border);}
+.field:last-child{border-bottom:none;}
+.field-label{font-size:12px;color:var(--muted);margin-bottom:7px;font-weight:500;}
+.field-label .req{color:var(--accent2);}
+input[type=text],input[type=number],input[type=time],input[type=date],select,textarea{
+  width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
+  font-family:var(--font);font-size:15px;padding:10px 12px;border-radius:8px;
+  outline:none;appearance:none;-webkit-appearance:none;transition:border-color .2s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237a7a8a' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;}
+textarea{resize:none;min-height:68px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* PILLS */
+.pill-group{display:flex;flex-wrap:wrap;gap:7px;}
+.pill-group input[type=radio],.pill-group input[type=checkbox]{display:none;}
+.pill-group label{padding:6px 13px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer;color:var(--muted);transition:all .15s;user-select:none;}
+.pill-group input[type=radio]:checked+label,.pill-group input[type=checkbox]:checked+label{border-color:var(--accent);color:var(--accent);background:rgba(245,166,35,.1);}
+.pill-group input.ok:checked+label{border-color:var(--green);color:var(--green);background:rgba(62,207,142,.1);}
+.pill-group input.danger:checked+label{border-color:var(--accent2);color:var(--accent2);background:rgba(232,93,74,.12);}
+
+/* CHECKLIST */
+.check-grid{}
+.check-item{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);gap:10px;}
+.check-item:last-child{border-bottom:none;}
+.check-label{flex:1;font-size:14px;line-height:1.4;}
+.check-label .sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.tri-group{display:flex;gap:3px;flex-shrink:0;}
+.tri-group input{display:none;}
+.tri-group label{padding:5px 8px;border-radius:6px;font-size:11px;font-family:var(--mono);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .15s;}
+.tri-group input[value=ok]:checked+label{background:rgba(62,207,142,.15);border-color:var(--green);color:var(--green);}
+.tri-group input[value=issue]:checked+label{background:rgba(232,93,74,.15);border-color:var(--accent2);color:var(--accent2);}
+.tri-group input[value=na]:checked+label{background:rgba(122,122,138,.15);border-color:var(--muted);color:var(--muted);}
+
+/* STATUS GRID */
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px 14px;}
+.status-item input{display:none;}
+.status-item label{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:13px 6px;border:1.5px solid var(--border);border-radius:10px;font-size:11px;cursor:pointer;color:var(--muted);text-align:center;transition:all .15s;}
+.status-item label .s-icon{font-size:20px;}
+.status-item input[value=normal]:checked+label{border-color:var(--green);color:var(--green);background:rgba(62,207,142,.08);}
+.status-item input[value=clean]:checked+label{border-color:var(--blue);color:var(--blue);background:rgba(96,165,250,.08);}
+.status-item input[value=minor]:checked+label{border-color:var(--accent);color:var(--accent);background:rgba(245,166,35,.08);}
+.status-item input[value=major]:checked+label{border-color:var(--accent2);color:var(--accent2);background:rgba(232,93,74,.1);}
+.status-item input[value=block]:checked+label{border-color:var(--purple);color:var(--purple);background:rgba(168,85,247,.1);}
+
+/* DAMAGE / REPAIR GRID */
+.dmg-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px 14px;}
+.dmg-item input{display:none;}
+.dmg-item label{display:flex;align-items:center;gap:7px;padding:9px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s;}
+.dmg-item input:checked+label{border-color:var(--accent2);color:var(--accent2);background:rgba(232,93,74,.1);}
+.dmg-icon{font-size:15px;}
+
+/* ELECTRIC */
+.elec-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px;}
+.elec-result{margin:0 14px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px;display:flex;justify-content:space-between;align-items:center;}
+.elec-lbl{font-size:11px;color:var(--muted);}
+.elec-val{font-family:var(--mono);font-size:17px;color:var(--accent);font-weight:500;}
+
+/* PHOTO */
+.photo-upload{margin:10px 14px;border:1.5px dashed var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;}
+.photo-upload:active{border-color:var(--accent);}
+.photo-upload input{display:none;}
+.photo-icon{font-size:24px;margin-bottom:4px;}
+.photo-text{font-size:12px;color:var(--muted);}
+.photo-preview{display:flex;flex-wrap:wrap;gap:7px;margin:0 14px 10px;}
+.photo-thumb{width:65px;height:65px;border-radius:7px;object-fit:cover;border:1px solid var(--border);}
+
+/* SUBMIT BAR */
+.submit-area{position:fixed;bottom:0;left:0;right:0;padding:10px 14px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;z-index:150;}
+.submit-btn{flex:1;background:var(--accent);color:#0f0f11;border:none;border-radius:10px;padding:13px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .2s,transform .1s;}
+.submit-btn:active{opacity:.85;transform:scale(.98);}
+.icon-btn{background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:13px 14px;font-size:16px;cursor:pointer;}
+
+/* ====== HISTORY TAB ====== */
+.history-empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.history-empty .he-icon{font-size:44px;margin-bottom:12px;}
+.history-empty .he-text{font-size:14px;}
+.log-card{margin:12px 14px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.log-card-header{padding:12px 14px;background:var(--surface2);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.log-room{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);}
+.log-time{font-family:var(--mono);font-size:10px;color:var(--muted);flex:1;}
+.log-status-badge{font-size:10px;padding:3px 8px;border-radius:20px;font-family:var(--mono);}
+.log-card-body{padding:12px 14px;}
+.log-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px;}
+.log-key{color:var(--muted);}
+.log-val{font-weight:500;text-align:right;}
+.log-issues{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.log-tag{font-size:11px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);color:var(--muted);}
+.log-tag.issue{border-color:rgba(232,93,74,.4);color:var(--accent2);}
+.log-tag.ok{border-color:rgba(62,207,142,.3);color:var(--green);}
+.log-actions{display:flex;gap:7px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.log-btn{flex:1;padding:8px;border-radius:8px;font-size:12px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-family:var(--font);}
+.log-btn.copy{color:var(--accent);border-color:rgba(245,166,35,.3);}
+.log-btn.del{color:var(--accent2);border-color:rgba(232,93,74,.3);}
+.history-toolbar{padding:12px 14px;display:flex;gap:8px;align-items:center;}
+.filter-pill{padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--muted);cursor:pointer;background:transparent;}
+.filter-pill.active{border-color:var(--accent);color:var(--accent);}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 14px 0;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.stat-num{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* ====== SETTINGS TAB ====== */
+.settings-section{margin:12px 14px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.settings-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:12px 14px 8px;}
+.settings-item{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.settings-item:last-child{border-bottom:none;}
+.settings-item-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0;}
+.settings-item-info{flex:1;}
+.settings-item-label{font-size:14px;font-weight:500;}
+.settings-item-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;}
+.toggle.on::after{left:23px;}
+.settings-input{margin-top:7px;}
+.save-settings-btn{margin:14px;width:calc(100% - 28px);background:var(--accent);color:#0f0f11;border:none;border-radius:10px;padding:12px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;}
+.qr-section{margin:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
+.qr-title{font-size:13px;font-weight:600;margin-bottom:10px;}
+.qr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.qr-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;cursor:pointer;}
+.qr-item-room{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:500;}
+.qr-item-type{font-size:10px;color:var(--muted);}
+.qr-canvas{display:block;margin:0 auto;}
+
+/* ====== SUMMARY MODAL ====== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:500px;transform:translateY(40px);transition:transform .3s;max-height:90vh;overflow-y:auto;}
+.modal-overlay.show .modal{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 0;}
+.modal-header{padding:16px 18px 12px;border-bottom:1px solid var(--border);}
+.modal-icon{font-size:36px;text-align:center;margin-bottom:8px;}
+.modal-title{font-size:17px;font-weight:600;text-align:center;}
+.modal-sub{font-size:13px;color:var(--muted);text-align:center;margin-top:4px;}
+.modal-uid{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);border-radius:7px;padding:8px;text-align:center;margin:12px 18px;}
+.modal-body{padding:0 18px 12px;}
+.summary-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.summary-row:last-child{border-bottom:none;}
+.summary-key{color:var(--muted);flex-shrink:0;margin-right:10px;}
+.summary-val{font-weight:500;text-align:right;}
+.summary-tags{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;}
+.s-tag{font-size:11px;padding:3px 8px;border-radius:20px;}
+.s-tag.issue{background:rgba(232,93,74,.15);color:var(--accent2);}
+.s-tag.ok{background:rgba(62,207,142,.12);color:var(--green);}
+.s-tag.neutral{background:var(--surface2);color:var(--muted);}
+.modal-actions{padding:12px 18px 28px;display:flex;flex-direction:column;gap:8px;}
+.modal-btn-primary{background:var(--accent);color:#0f0f11;border:none;border-radius:10px;padding:13px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;width:100%;}
+.modal-btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px;font-family:var(--font);font-size:14px;cursor:pointer;width:100%;}
+.modal-btn-danger{background:transparent;color:var(--accent2);border:1px solid rgba(232,93,74,.3);border-radius:10px;padding:10px;font-family:var(--font);font-size:13px;cursor:pointer;width:100%;}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:500;z-index:400;transition:transform .3s;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.success{border-color:var(--green);color:var(--green);}
+.toast.error{border-color:var(--accent2);color:var(--accent2);}
+
+/* SHEETS INDICATOR */
+.sync-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);padding:8px 14px;border-top:1px solid var(--border);}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+.sync-dot.synced{background:var(--green);}
+.sync-dot.syncing{background:var(--accent);animation:pulse .8s infinite;}
+.sync-dot.error{background:var(--accent2);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.note-wrap{padding:10px 14px;}
+</style>
+</head>
+<body>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <div class="nav-tab active" onclick="switchTab('form')" id="tab-form">
+    <span class="tab-icon">📋</span>ตรวจห้อง
+  </div>
+  <div class="nav-tab" onclick="switchTab('history')" id="tab-history">
+    <span class="tab-icon">📊</span>ประวัติ
+  </div>
+  <div class="nav-tab" onclick="switchTab('settings')" id="tab-settings">
+    <span class="tab-icon">⚙️</span>ตั้งค่า
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: FORM -->
+<!-- ============================================================ -->
+<div class="tab-content active" id="page-form">
+
+<div class="page-header">
+  <div class="header-brand">THE LOFT LIVING SPACE</div>
+  <div class="header-title">🏨 เช็คลิสต์ตรวจห้อง Check-out</div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+  <div class="progress-label" id="progressLabel">0 / 0 รายการ</div>
+</div>
+
+<!-- S1: ข้อมูลพื้นฐาน -->
+<div class="section" id="sec1">
+  <div class="section-header" onclick="toggleSection('sec1')">
+    <span class="section-icon">📋</span><span class="section-title">ข้อมูลพื้นฐาน</span>
+    <span class="section-badge" id="badge1">!</span><span class="section-toggle">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="field">
+      <div class="field-label">เลขห้อง <span class="req">*</span></div>
+      <select id="roomNum" onchange="updateProgress()">
+        <option value="">-- เลือกห้อง --</option>
+        <optgroup label="Luxury"><option>300 — Luxury</option></optgroup>
+        <optgroup label="Retro"><option>108 — Retro</option></optgroup>
+        <optgroup label="Allure"><option>203 — Allure</option><option>205 — Allure</option></optgroup>
+        <optgroup label="Elegance"><option>103 — Elegance</option><option>204 — Elegance</option></optgroup>
+        <optgroup label="Legacy"><option>113 — Legacy</option><option>214 — Legacy</option></optgroup>
+        <optgroup label="Radiance"><option>209 — Radiance</option><option>210 — Radiance</option></optgroup>
+      </select>
+    </div>
+    <div class="field">
+      <div class="field-label">ผู้ตรวจ <span class="req">*</span></div>
+      <input type="text" id="inspector" placeholder="ชื่อพนักงาน" oninput="updateProgress()">
+    </div>
+    <div class="field">
+      <div class="field-label">วันที่ / เวลา</div>
+      <div class="grid2"><input type="date" id="checkDate"><input type="time" id="checkTime"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">OTA / ช่องทาง</div>
+      <div class="pill-group">
+        <input type="radio" name="ota" id="ota1" value="Airbnb"><label for="ota1">Airbnb</label>
+        <input type="radio" name="ota" id="ota2" value="Booking.com"><label for="ota2">Booking</label>
+        <input type="radio" name="ota" id="ota3" value="Trip.com"><label for="ota3">Trip.com</label>
+        <input type="radio" name="ota" id="ota4" value="Expedia"><label for="ota4">Expedia</label>
+        <input type="radio" name="ota" id="ota5" value="Walk-in"><label for="ota5">Walk-in</label>
+        <input type="radio" name="ota" id="ota6" value="Monthly"><label for="ota6">Monthly</label>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">ชื่อแขก</div>
+      <input type="text" id="guestName" placeholder="ชื่อตามที่จอง">
+    </div>
+    <div class="field">
+      <div class="field-label">เวลา Check-out จริง / Late?</div>
+      <input type="time" id="actualCO" style="margin-bottom:8px">
+      <div class="pill-group">
+        <input type="radio" name="late" id="late0" value="ไม่มี"><label for="late0">ปกติ</label>
+        <input type="radio" name="late" id="late1" value="≤1 ชม" class="danger"><label for="late1">Late ≤1ชม</label>
+        <input type="radio" name="late" id="late2" value="2 ชม+" class="danger"><label for="late2">Late 2ชม+</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S2: สถานะห้อง -->
+<div class="section" id="sec2">
+  <div class="section-header" onclick="toggleSection('sec2')">
+    <span class="section-icon">🏷️</span><span class="section-title">สถานะห้องรวม</span>
+    <span class="section-badge" id="badge2">—</span><span class="section-toggle">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="status-grid">
+      <div class="status-item"><input type="radio" name="roomStatus" id="rs1" value="normal" onchange="updateProgress()"><label for="rs1"><span class="s-icon">✅</span>ปกติ</label></div>
+      <div class="status-item"><input type="radio" name="roomStatus" id="rs2" value="clean" onchange="updateProgress()"><label for="rs2"><span class="s-icon">🧹</span>ต้อง Clean เพิ่ม</label></div>
+      <div class="status-item"><input type="radio" name="roomStatus" id="rs3" value="minor" onchange="updateProgress()"><label for="rs3"><span class="s-icon">⚠️</span>เสียหายเล็กน้อย</label></div>
+      <div class="status-item"><input type="radio" name="roomStatus" id="rs4" value="major" onchange="updateProgress()"><label for="rs4"><span class="s-icon">🔴</span>เสียหายหนัก</label></div>
+      <div class="status-item"><input type="radio" name="roomStatus" id="rs5" value="block" onchange="updateProgress()"><label for="rs5"><span class="s-icon">🚫</span>Block ห้อง</label></div>
+    </div>
+    <div class="field">
+      <div class="field-label">ห้องพร้อมขายต่อ?</div>
+      <div class="pill-group">
+        <input type="radio" name="ready" id="r1" value="พร้อม" class="ok"><label for="r1">✓ พร้อม</label>
+        <input type="radio" name="ready" id="r2" value="ยังไม่พร้อม" class="danger"><label for="r2">✕ ยังไม่พร้อม</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S3: Checklist หลัก -->
+<div class="section" id="sec3">
+  <div class="section-header" onclick="toggleSection('sec3')">
+    <span class="section-icon">🔍</span><span class="section-title">ห้องพัก</span>
+    <span class="section-badge" id="badge3">0/18</span><span class="section-toggle">▼</span>
+  </div>
+  <div class="section-body"><div class="check-grid" id="mainChecklist"></div></div>
+</div>
+
+<!-- S4: ห้องน้ำ -->
+<div class="section" id="sec4">
+  <div class="section-header" onclick="toggleSection('sec4')">
+    <span class="section-icon">🚿</span><span class="section-title">ห้องน้ำ</span>
+    <span class="section-badge" id="badge4">0/6</span><span class="section-toggle">▼</span>
+  </div>
+  <div class="section-body"><div class="check-grid" id="bathChecklist"></div></div>
+</div>
+
+<!-- S5: Damage -->
+<div class="section" id="sec5">
+  <div class="section-header" onclick="toggleSection('sec5')">
+    <span class="section-icon">💸</span><span class="section-title">Damage / Charge</span>
+    <span class="section-badge" id="badge5">—</span><span class="section-toggle">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="dmg-grid" id="damageGrid"></div>
+    <div class="field">
+      <div class="field-label">จำนวน Charge (บาท)</div>
+      <input type="number" id="chargeAmount" placeholder="0" min="0" step="100" oninput="updateDamageBadge()">
+    </div>
+    <div class="field">
+      <div class="field-label">รายละเอียด</div>
+      <textarea id="chargeNote" placeholder="อธิบายรายละเอียดความเสียหาย..."></textarea>
+    </div>
+    <div class="field">
+      <div class="field-label">📎 รูปหลักฐาน Damage</div>
+      <div class="photo-upload" onclick="document.getElementById('dmgPhoto').click()">
+        <input type="file" id="dmgPhoto" accept="image/*" multiple onchange="previewPhotos(this,'dmgPreview')">
+        <div class="photo-icon">📸</div><div class="photo-text">แตะเพื่ออัปโหลดรูป</div>
+      </div>
+      <div class="photo-preview" id="dmgPreview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S6: มิเตอร์ -->
+<div class="section" id="sec6">
+  <div class="section-header" onclick="toggleSection('sec6')">
+    <span class="section-icon">⚡</span><span class="section-title">มิเตอร์ไฟฟ้า</span>
+    <span class="section-badge" id="badge6">—</span><span class="section-toggle">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="elec-row">
+      <div>
+        <div class="field-label" style="padding:0 0 6px">เลขก่อน (unit)</div>
+        <input type="number" id="meterBefore" placeholder="0.0" step="0.1" oninput="calcElec()">
+      </div>
+      <div>
+        <div class="field-label" style="padding:0 0 6px">เลขหลัง (unit)</div>
+        <input type="number" id="meterAfter" placeholder="0.0" step="0.1" oninput="calcElec()">
+      </div>
+    </div>
+    <div class="elec-result">
+      <div><div class="elec-lbl">หน่วยที่ใช้</div><div class="elec-val" id="unitUsed">— unit</div></div>
+      <div style="text-align:right"><div class="elec-lbl">ค่าไฟรวม</div><div class="elec-val" id="totalElec">— ฿</div></div>
+    </div>
+    <div class="field">
+      <div class="field-label">📷 รูปมิเตอร์</div>
+      <div class="photo-upload" onclick="document.getElementById('meterPhoto').click()">
+        <input type="file" id="meterPhoto" accept="image/*" onchange="previewPhotos(this,'meterPreview')">
+        <div class="photo-icon">🔢</div><div class="photo-text">ถ่ายรูปมิเตอร์</div>
+      </div>
+      <div class="photo-preview" id="meterPreview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S7: งานซ่อม -->
+<div class="section" id="sec7">
+  <div class="section-header" onclick="toggleSection('sec7')">
+    <span class="section-icon">🔧</span><span class="section-title">งานซ่อม / แจ้งช่าง</span>
+    <span class="section-badge" id="badge7">—</span><span class="section-toggle">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="dmg-grid" id="repairGrid"></div>
+    <div class="note-wrap">
+      <div class="field-label" style="margin-bottom:7px">รายละเอียดงานซ่อม</div>
+      <textarea id="repairNote" placeholder="ระบุรายละเอียด เช่น แอร์ห้อง 203 น้ำไม่เย็น..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- S8: ปิดงาน -->
+<div class="section" id="sec8">
+  <div class="section-header" onclick="toggleSection('sec8')">
+    <span class="section-icon">📦</span><span class="section-title">ของลืม / ปิดงาน</span>
+    <span class="section-badge" id="badge8">—</span><span class="section-toggle">▼</span>
+  </div>
+  <div class="section-body">
+    <div class="field">
+      <div class="field-label">พบของลืม?</div>
+      <div class="pill-group">
+        <input type="radio" name="leftBehind" id="lb0" value="ไม่มี" class="ok"><label for="lb0">ไม่มี</label>
+        <input type="radio" name="leftBehind" id="lb1" value="มี-แจ้งแขกแล้ว" class="danger"><label for="lb1">มี — แจ้งแล้ว</label>
+        <input type="radio" name="leftBehind" id="lb2" value="มี-ยังไม่แจ้ง"><label for="lb2">มี — ยังไม่แจ้ง</label>
+      </div>
+    </div>
+    <div class="field">
+      <div class="field-label">📷 รูปห้องปิดงาน</div>
+      <div class="photo-upload" onclick="document.getElementById('roomPhoto').click()">
+        <input type="file" id="roomPhoto" accept="image/*" multiple onchange="previewPhotos(this,'roomPreview')">
+        <div class="photo-icon">🏨</div><div class="photo-text">ถ่ายรูปสภาพห้องหลังตรวจ</div>
+      </div>
+      <div class="photo-preview" id="roomPreview"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">หมายเหตุเพิ่มเติม</div>
+      <textarea id="extraNote" placeholder="ข้อมูลอื่นๆ..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMIT BAR -->
+<div class="submit-area" id="formSubmitBar">
+  <button class="icon-btn" onclick="confirmClear()" title="ล้างข้อมูล">🗑️</button>
+  <button class="submit-btn" onclick="showSummary()">ตรวจสอบ & บันทึก →</button>
+</div>
+
+</div><!-- /page-form -->
+
+<!-- ============================================================ -->
+<!-- TAB: HISTORY -->
+<!-- ============================================================ -->
+<div class="tab-content" id="page-history">
+  <div class="page-header">
+    <div class="header-brand">THE LOFT LIVING SPACE</div>
+    <div class="header-title">📊 ประวัติการตรวจห้อง</div>
+  </div>
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">ทั้งหมด</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-issues" style="color:var(--accent2)">0</div><div class="stat-lbl">มีปัญหา</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-charge" style="color:var(--green)">0</div><div class="stat-lbl">Charge (฿)</div></div>
+  </div>
+  <div class="history-toolbar">
+    <button class="filter-pill active" onclick="filterHistory('all',this)">ทั้งหมด</button>
+    <button class="filter-pill" onclick="filterHistory('issue',this)">มีปัญหา</button>
+    <button class="filter-pill" onclick="filterHistory('normal',this)">ปกติ</button>
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: SETTINGS -->
+<!-- ============================================================ -->
+<div class="tab-content" id="page-settings">
+  <div class="page-header">
+    <div class="header-brand">THE LOFT LIVING SPACE</div>
+    <div class="header-title">⚙️ ตั้งค่าระบบ</div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">👤 ข้อมูลพนักงาน</div>
+    <div class="settings-item">
+      <span class="settings-item-icon">🪪</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label">ชื่อผู้ตรวจ (Default)</div>
+        <div class="settings-item-sub">จะกรอกล่วงหน้าให้อัตโนมัติ</div>
+        <div class="settings-input"><input type="text" id="defaultInspector" placeholder="ชื่อพนักงาน"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">📊 Google Sheets Integration</div>
+    <div class="settings-item">
+      <span class="settings-item-icon">🔗</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label">Apps Script Web App URL</div>
+        <div class="settings-item-sub">วาง URL จาก Deploy → Web App</div>
+        <div class="settings-input"><input type="text" id="sheetsUrl" placeholder="https://script.google.com/macros/s/..."></div>
+      </div>
+    </div>
+    <div class="settings-item">
+      <span class="settings-item-icon">📤</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label">ส่งข้อมูลเข้า Google Sheets อัตโนมัติ</div>
+        <div class="settings-item-sub">เมื่อ Submit ฟอร์มสำเร็จ</div>
+      </div>
+      <div class="toggle" id="toggleSheets" onclick="toggleSetting('sheets')"></div>
+    </div>
+    <div class="settings-item">
+      <span class="settings-item-icon">📋</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label">Apps Script Template</div>
+        <div class="settings-item-sub">Copy โค้ดนี้ไป Google Apps Script</div>
+      </div>
+      <button class="log-btn copy" style="width:auto;padding:7px 12px" onclick="copyAppsScript()">Copy</button>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">🔔 การแจ้งเตือน</div>
+    <div class="settings-item">
+      <span class="settings-item-icon">💬</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label">LINE Notify Token</div>
+        <div class="settings-item-sub">สำหรับแจ้งเตือนกรณี damage/critical</div>
+        <div class="settings-input"><input type="text" id="lineToken" placeholder="LINE Notify Token..."></div>
+      </div>
+    </div>
+    <div class="settings-item">
+      <span class="settings-item-icon">🚨</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label">แจ้งเตือน Critical เท่านั้น</div>
+        <div class="settings-item-sub">บุหรี่ / เสียหายหนัก / Block ห้อง</div>
+      </div>
+      <div class="toggle on" id="toggleCritical" onclick="toggleSetting('critical')"></div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-title">💾 Backup & Sync (ใช้ข้ามมือถือ)</div>
+
+    <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.25);border-radius:10px;margin:0 14px 4px;padding:12px 14px;">
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px">⚠️ ทำไมข้อมูลหายเมื่อเปลี่ยนมือถือ?</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">ข้อมูลอยู่ใน browser นี้เท่านั้น แก้ได้ 2 วิธี:<br>1. <b style="color:var(--text)">Export → ส่งไฟล์ → Import</b> ในมือถือใหม่<br>2. <b style="color:var(--text)">เชื่อม Google Sheets</b> แล้วดึงกลับได้ทุกเครื่อง</div>
+    </div>
+
+    <div class="settings-item" onclick="exportAll()">
+      <span class="settings-item-icon">📤</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label">Export JSON (สำรองข้อมูล)</div>
+        <div class="settings-item-sub">บันทึกไฟล์ → ส่งผ่าน LINE → Import เครื่องใหม่</div>
+      </div>
+      <span style="color:var(--muted);font-size:14px">›</span>
+    </div>
+
+    <div class="settings-item" onclick="document.getElementById('importFileInput').click()">
+      <span class="settings-item-icon">📥</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label" style="color:var(--green)">Import JSON (โหลดเข้าเครื่องใหม่)</div>
+        <div class="settings-item-sub">เลือกไฟล์ที่ Export มาจากเครื่องเก่า</div>
+      </div>
+      <span style="color:var(--green);font-size:14px">›</span>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importJSON(this)">
+
+    <div class="settings-item" onclick="syncFromSheets()">
+      <span class="settings-item-icon">🔄</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label" style="color:var(--blue)">Sync จาก Google Sheets</div>
+        <div class="settings-item-sub">ดึงประวัติกลับจาก Sheets (ต้องตั้งค่า URL ก่อน)</div>
+      </div>
+      <span id="syncFromSheetsStatus" style="color:var(--muted);font-size:12px">›</span>
+    </div>
+
+    <div class="settings-item" onclick="exportCSV()">
+      <span class="settings-item-icon">📊</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label">Export CSV</div>
+        <div class="settings-item-sub">เปิดใน Excel / Google Sheets ได้เลย</div>
+      </div>
+      <span style="color:var(--muted);font-size:14px">›</span>
+    </div>
+    <div class="settings-item" onclick="clearHistory()">
+      <span class="settings-item-icon">🗑️</span>
+      <div class="settings-item-info">
+        <div class="settings-item-label" style="color:var(--accent2)">ลบประวัติทั้งหมด</div>
+        <div class="settings-item-sub">ไม่สามารถกู้คืนได้</div>
+      </div>
+      <span style="color:var(--accent2);font-size:14px">›</span>
+    </div>
+  </div>
+
+  <button class="save-settings-btn" onclick="saveSettings()">💾 บันทึกการตั้งค่า</button>
+
+  <div class="settings-section" style="margin-bottom:14px">
+    <div class="settings-title">ℹ️ Apps Script Code (วางใน Google Apps Script)</div>
+    <div style="padding:0 14px 14px">
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-family:var(--mono);font-size:10px;color:var(--muted);white-space:pre-wrap;line-height:1.6;overflow-x:auto" id="appsScriptPreview">กด "Copy" ด้านบนเพื่อดู code</div>
+    </div>
+  </div>
+</div><!-- /page-settings -->
+
+<!-- SUMMARY MODAL -->
+<div class="modal-overlay" id="summaryModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-icon" id="sumIcon">📋</div>
+      <div class="modal-title" id="sumTitle">สรุปการตรวจห้อง</div>
+      <div class="modal-sub" id="sumSub">ตรวจสอบข้อมูลก่อนบันทึก</div>
+    </div>
+    <div class="modal-uid" id="sumUID">—</div>
+    <div class="modal-body" id="sumBody"></div>
+    <div class="modal-actions">
+      <button class="modal-btn-primary" id="confirmSubmitBtn" onclick="finalSubmit()">✅ ยืนยันบันทึก</button>
+      <button class="modal-btn-secondary" onclick="copyLineReport()">📱 Copy รายงาน LINE</button>
+      <button class="modal-btn-danger" onclick="closeModal('summaryModal')">✕ กลับแก้ไข</button>
+    </div>
+    <div class="sync-indicator" id="syncIndicator">
+      <div class="sync-dot" id="syncDot"></div>
+      <span id="syncText">ไม่ได้เชื่อมต่อ Google Sheets</span>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATA DEFINITIONS =====
+const mainItems = [
+  {id:'bed',label:'ผ้าปู / หมอน / ผ้าห่ม',sub:'ครบ ไม่มีคราบหนัก'},
+  {id:'towel',label:'ผ้าเช็ดตัว',sub:'ครบ ไม่สูญหาย / เปื้อนหนัก'},
+  {id:'keycard',label:'Keycard ครบ'},
+  {id:'remote',label:'Remote แอร์ / ทีวี',sub:'ครบและใช้งานได้'},
+  {id:'ac',label:'แอร์ทำงานปกติ'},
+  {id:'tv',label:'ทีวีใช้งานได้'},
+  {id:'fridge',label:'ตู้เย็นปกติ',sub:'ไม่มีของเหลือ / กลิ่น'},
+  {id:'micro',label:'ไมโครเวฟ / กาต้มน้ำ',sub:'ใช้ได้ ไม่มีเศษอาหาร'},
+  {id:'plug',label:'ปลั๊ก / สวิตช์ / หลอดไฟ',sub:'ปกติครบ'},
+  {id:'smoke',label:'ไม่มีกลิ่น / ร่องรอยบุหรี่',sub:'ตรวจ burn mark / เถ้า'},
+  {id:'durian',label:'ไม่มีกลิ่นทุเรียน'},
+  {id:'pet',label:'ไม่มีร่องรอยสัตว์เลี้ยง'},
+  {id:'wall',label:'ผนัง / พื้น / ฝ้า',sub:'ไม่มีรอย / ความเสียหาย'},
+  {id:'furniture',label:'เฟอร์นิเจอร์ / บันได Loft',sub:'ไม่มีรอยแตก / หัก'},
+  {id:'trash',label:'ไม่มีขยะตกค้าง'},
+  {id:'kitchen',label:'ครัว / ซิงก์สะอาด',sub:'ไม่มีเศษอาหาร กลิ่น'},
+  {id:'curtain',label:'หลังม่าน / ใต้เตียง',sub:'จุดที่มักพลาด'},
+  {id:'loft_step',label:'ขั้นบันได Loft',sub:'ตรวจรอยแตกเล็กๆ'},
+];
+const bathItems = [
+  {id:'toilet',label:'ชักโครกไม่อุดตัน',sub:'ไม่มีสิ่งแปลกปลอมในโถ'},
+  {id:'sink',label:'อ่างล้างหน้า / ฝักบัว',sub:'น้ำไหลปกติ'},
+  {id:'leak',label:'ไม่มีน้ำรั่ว / ซึม'},
+  {id:'smell_drain',label:'ไม่มีกลิ่นท่อ'},
+  {id:'mold',label:'ไม่มีเชื้อรา / คราบหินปูนหนัก'},
+  {id:'bath_items',label:'อุปกรณ์ห้องน้ำครบ',sub:'แชมพู สบู่ ทิชชู่'},
+];
+const damageItems = [
+  {id:'d_smoke',label:'สูบบุหรี่',icon:'🚬'},
+  {id:'d_durian',label:'ทุเรียน',icon:'🍈'},
+  {id:'d_linen',label:'ผ้าเสียหาย',icon:'🛏️'},
+  {id:'d_missing',label:'ของหาย',icon:'🔍'},
+  {id:'d_guest',label:'แขกเกิน',icon:'👥'},
+  {id:'d_late',label:'Late Checkout',icon:'⏰'},
+  {id:'d_deep',label:'Deep Clean',icon:'🧹'},
+  {id:'d_electric',label:'ค่าไฟผิดปกติ',icon:'⚡'},
+  {id:'d_damage',label:'ของเสียหาย',icon:'💥'},
+  {id:'d_other',label:'อื่นๆ',icon:'📝'},
+];
+const repairItems = [
+  {id:'r_elec',label:'ช่างไฟ',icon:'⚡'},
+  {id:'r_ac',label:'ช่างแอร์',icon:'❄️'},
+  {id:'r_plumb',label:'ช่างประปา',icon:'🚿'},
+  {id:'r_paint',label:'งานสี',icon:'🎨'},
+  {id:'r_furn',label:'เฟอร์นิเจอร์',icon:'🛠️'},
+  {id:'r_other',label:'อื่นๆ',icon:'🔧'},
+];
+
+// ===== SETTINGS =====
+let settings = {sheetsUrl:'',lineToken:'',autoSheets:false,criticalOnly:true,defaultInspector:''};
+function loadSettings(){
+  const s=localStorage.getItem('loft_settings');
+  if(s) settings=JSON.parse(s);
+  document.getElementById('sheetsUrl').value=settings.sheetsUrl||'';
+  document.getElementById('lineToken').value=settings.lineToken||'';
+  document.getElementById('defaultInspector').value=settings.defaultInspector||'';
+  if(settings.autoSheets) document.getElementById('toggleSheets').classList.add('on');
+  if(!settings.criticalOnly) document.getElementById('toggleCritical').classList.remove('on');
+}
+function saveSettings(){
+  settings.sheetsUrl=document.getElementById('sheetsUrl').value.trim();
+  settings.lineToken=document.getElementById('lineToken').value.trim();
+  settings.defaultInspector=document.getElementById('defaultInspector').value.trim();
+  settings.autoSheets=document.getElementById('toggleSheets').classList.contains('on');
+  settings.criticalOnly=document.getElementById('toggleCritical').classList.contains('on');
+  localStorage.setItem('loft_settings',JSON.stringify(settings));
+  showToast('✓ บันทึกการตั้งค่าแล้ว','success');
+}
+function toggleSetting(key){
+  const el=document.getElementById('toggle'+key.charAt(0).toUpperCase()+key.slice(1));
+  el.classList.toggle('on');
+}
+
+// ===== HISTORY =====
+let history_data=[];
+function loadHistory(){
+  const h=localStorage.getItem('loft_history');
+  if(h) history_data=JSON.parse(h);
+}
+function saveHistory(){localStorage.setItem('loft_history',JSON.stringify(history_data));}
+
+function renderHistory(filter='all'){
+  const list=document.getElementById('historyList');
+  let data=[...history_data].reverse();
+  if(filter==='issue') data=data.filter(r=>r.hasIssue);
+  if(filter==='normal') data=data.filter(r=>!r.hasIssue);
+
+  // Stats
+  const totalCharge=history_data.reduce((s,r)=>s+(parseInt(r.chargeAmount)||0),0);
+  document.getElementById('stat-total').textContent=history_data.length;
+  document.getElementById('stat-issues').textContent=history_data.filter(r=>r.hasIssue).length;
+  document.getElementById('stat-charge').textContent=totalCharge>0?Math.round(totalCharge/1000)+'k':0;
+
+  if(!data.length){
+    list.innerHTML=`<div class="history-empty"><div class="he-icon">📭</div><div class="he-text">ยังไม่มีประวัติการตรวจ</div></div>`;
+    return;
+  }
+  list.innerHTML=data.map(r=>{
+    const statusColor={normal:'var(--green)',clean:'var(--blue)',minor:'var(--accent)',major:'var(--accent2)',block:'var(--purple)'}[r.roomStatus]||'var(--muted)';
+    const statusLabel={normal:'ปกติ',clean:'Clean เพิ่ม',minor:'เสียหายเล็กน้อย',major:'เสียหายหนัก',block:'Block'}[r.roomStatus]||r.roomStatus;
+    const issues=(r.issues||[]).slice(0,4);
+    const dmgs=(r.damages||[]).slice(0,3);
+    return `<div class="log-card">
+      <div class="log-card-header">
+        <span class="log-room">🚪 ${r.roomNum||'—'}</span>
+        <span class="log-time">${r.checkDate} ${r.checkTime} · ${r.inspector||'—'}</span>
+        <span class="log-status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}55">${statusLabel}</span>
+      </div>
+      <div class="log-card-body">
+        <div class="log-row"><span class="log-key">OTA</span><span class="log-val">${r.ota||'—'}</span></div>
+        <div class="log-row"><span class="log-key">แขก</span><span class="log-val">${r.guestName||'—'}</span></div>
+        ${r.chargeAmount?`<div class="log-row"><span class="log-key">💸 Charge</span><span class="log-val" style="color:var(--accent2)">${parseInt(r.chargeAmount).toLocaleString()} ฿</span></div>`:''}
+        ${r.elecTotal?`<div class="log-row"><span class="log-key">⚡ ค่าไฟ</span><span class="log-val">${r.elecTotal.toLocaleString()} ฿</span></div>`:''}
+        ${issues.length||dmgs.length?`<div class="log-issues">
+          ${issues.map(i=>`<span class="log-tag issue">⚠️ ${i}</span>`).join('')}
+          ${dmgs.map(d=>`<span class="log-tag issue">🔴 ${d}</span>`).join('')}
+        </div>`:'<div style="font-size:12px;color:var(--green);margin-top:6px">✓ ไม่พบปัญหา</div>'}
+        <div class="log-actions">
+          <button class="log-btn copy" onclick="copyHistoryReport('${r.uid}')">📋 Copy LINE</button>
+          <button class="log-btn" onclick="reloadForm('${r.uid}')">↩️ โหลดข้อมูล</button>
+          <button class="log-btn del" onclick="deleteRecord('${r.uid}')">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterHistory(f,btn){
+  document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory(f);
+}
+
+function deleteRecord(uid){
+  if(!confirm('ลบรายการนี้?')) return;
+  history_data=history_data.filter(r=>r.uid!==uid);
+  saveHistory(); renderHistory();
+  showToast('ลบแล้ว','error');
+}
+
+// ===== RENDER FORM ELEMENTS =====
+function renderChecklist(items,containerId){
+  document.getElementById(containerId).innerHTML=items.map(item=>`
+    <div class="check-item">
+      <div class="check-label">${item.label}${item.sub?`<div class="sub">${item.sub}</div>`:''}</div>
+      <div class="tri-group">
+        <input type="radio" name="${item.id}" id="${item.id}_ok" value="ok" onchange="updateProgress()"><label for="${item.id}_ok">OK</label>
+        <input type="radio" name="${item.id}" id="${item.id}_issue" value="issue" onchange="updateProgress()"><label for="${item.id}_issue">!</label>
+        <input type="radio" name="${item.id}" id="${item.id}_na" value="na" onchange="updateProgress()"><label for="${item.id}_na">N/A</label>
+      </div>
+    </div>`).join('');
+}
+function renderGrid(items,containerId){
+  document.getElementById(containerId).innerHTML=items.map(item=>`
+    <div class="dmg-item">
+      <input type="checkbox" id="${item.id}" onchange="updateDamageBadge()">
+      <label for="${item.id}"><span class="dmg-icon">${item.icon}</span>${item.label}</label>
+    </div>`).join('');
+}
+
+// ===== PROGRESS =====
+function updateProgress(){
+  const all=[...mainItems,...bathItems];
+  const done=all.filter(i=>document.querySelector(`input[name="${i.id}"]:checked`)).length;
+  const pct=Math.round(done/all.length*100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`${done} / ${all.length} รายการ (${pct}%)`;
+  const mDone=mainItems.filter(i=>document.querySelector(`input[name="${i.id}"]:checked`)).length;
+  const bDone=bathItems.filter(i=>document.querySelector(`input[name="${i.id}"]:checked`)).length;
+  const b3=document.getElementById('badge3');
+  b3.textContent=`${mDone}/${mainItems.length}`;
+  b3.className='section-badge'+(mDone===mainItems.length?' done':'');
+  const b4=document.getElementById('badge4');
+  b4.textContent=`${bDone}/${bathItems.length}`;
+  b4.className='section-badge'+(bDone===bathItems.length?' done':'');
+  const room=document.getElementById('roomNum').value;
+  const insp=document.getElementById('inspector').value;
+  document.getElementById('badge1').textContent=(room&&insp)?'✓':'!';
+  document.getElementById('badge1').className='section-badge'+((room&&insp)?' done':' warn');
+  const status=document.querySelector('input[name="roomStatus"]:checked');
+  document.getElementById('badge2').textContent=status?{normal:'ปกติ',clean:'Clean',minor:'เสียหาย',major:'หนัก',block:'Block'}[status.value]:' — ';
+  document.getElementById('badge2').className='section-badge'+(status?' done':'');
+}
+function updateDamageBadge(){
+  const dmg=damageItems.filter(i=>document.getElementById(i.id)?.checked);
+  const charge=document.getElementById('chargeAmount').value;
+  const b5=document.getElementById('badge5');
+  if(dmg.length||charge){b5.textContent=(charge?parseInt(charge).toLocaleString()+'฿':dmg.length+'รายการ');b5.className='section-badge warn';}
+  else{b5.textContent='—';b5.className='section-badge';}
+  const rep=repairItems.filter(i=>document.getElementById(i.id)?.checked);
+  document.getElementById('badge7').textContent=rep.length?rep.length+'รายการ':'—';
+  document.getElementById('badge7').className='section-badge'+(rep.length?' warn':'');
+}
+
+// ===== ELECTRICITY =====
+function calcElec(){
+  const b=parseFloat(document.getElementById('meterBefore').value)||0;
+  const a=parseFloat(document.getElementById('meterAfter').value)||0;
+  const unit=Math.max(0,a-b);
+  const total=unit*10;
+  document.getElementById('unitUsed').textContent=unit.toFixed(1)+' unit';
+  document.getElementById('totalElec').textContent=total>0?total.toLocaleString()+' ฿':'— ฿';
+  document.getElementById('badge6').textContent=total>0?total.toLocaleString()+'฿':'—';
+  document.getElementById('badge6').className='section-badge'+(total>0?' done':'');
+}
+
+// ===== PHOTO =====
+function previewPhotos(input,previewId){
+  const container=document.getElementById(previewId);
+  Array.from(input.files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{const img=document.createElement('img');img.src=e.target.result;img.className='photo-thumb';container.appendChild(img);};
+    reader.readAsDataURL(file);
+  });
+}
+
+// ===== SECTION TOGGLE =====
+function toggleSection(id){document.getElementById(id).classList.toggle('collapsed');}
+
+// ===== TAB SWITCH =====
+function switchTab(tab){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('formSubmitBar').style.display=tab==='form'?'flex':'none';
+  if(tab==='history') renderHistory();
+}
+
+// ===== COLLECT DATA =====
+function collectFormData(){
+  const b=parseFloat(document.getElementById('meterBefore').value)||0;
+  const a=parseFloat(document.getElementById('meterAfter').value)||0;
+  const unit=Math.max(0,a-b);
+  const issues=[...mainItems,...bathItems].filter(i=>document.querySelector(`input[name="${i.id}"][value="issue"]:checked`)).map(i=>i.label);
+  const damages=damageItems.filter(i=>document.getElementById(i.id)?.checked).map(i=>i.label);
+  const repairs=repairItems.filter(i=>document.getElementById(i.id)?.checked).map(i=>i.label);
+  const status=(document.querySelector('input[name="roomStatus"]:checked')?.value)||'';
+  const isCritical=['major','block'].includes(status)||damages.some(d=>['สูบบุหรี่','เสียหายหนัก'].some(k=>d.includes(k)));
+  const chargeAmt=parseInt(document.getElementById('chargeAmount').value)||0;
+  return {
+    uid:genUID(),
+    checkDate:document.getElementById('checkDate').value,
+    checkTime:document.getElementById('checkTime').value,
+    inspector:document.getElementById('inspector').value,
+    roomNum:document.getElementById('roomNum').value,
+    ota:document.querySelector('input[name="ota"]:checked')?.value||'',
+    guestName:document.getElementById('guestName').value,
+    actualCO:document.getElementById('actualCO').value,
+    lateCheckout:document.querySelector('input[name="late"]:checked')?.value||'',
+    roomStatus:status,
+    ready:document.querySelector('input[name="ready"]:checked')?.value||'',
+    issues, damages, repairs,
+    chargeAmount:chargeAmt,
+    chargeNote:document.getElementById('chargeNote').value,
+    elecBefore:b, elecAfter:a, elecUnit:unit, elecTotal:unit*10,
+    repairNote:document.getElementById('repairNote').value,
+    leftBehind:document.querySelector('input[name="leftBehind"]:checked')?.value||'',
+    extraNote:document.getElementById('extraNote').value,
+    hasIssue:issues.length>0||damages.length>0||['major','block'].includes(status),
+    isCritical, timestamp:Date.now()
+  };
+}
+
+// ===== UID =====
+function genUID(){
+  const room=(document.getElementById('roomNum').value||'XXX').split(' ')[0];
+  const d=document.getElementById('checkDate').value?.replace(/-/g,'')||new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const t=document.getElementById('checkTime').value?.replace(':','')||'0000';
+  return `${room}_${d}_${t}`;
+}
+
+// ===== SHOW SUMMARY MODAL =====
+function showSummary(){
+  const room=document.getElementById('roomNum').value;
+  const insp=document.getElementById('inspector').value;
+  const status=document.querySelector('input[name="roomStatus"]:checked');
+  if(!room||!insp||!status){showToast('กรุณากรอก: ห้อง / ผู้ตรวจ / สถานะ','error');return;}
+  const data=collectFormData();
+  document.getElementById('sumUID').textContent='🆔 '+data.uid;
+  const hasIssue=data.hasIssue;
+  document.getElementById('sumIcon').textContent=data.isCritical?'🚨':hasIssue?'⚠️':'✅';
+  document.getElementById('sumTitle').textContent=data.isCritical?'มีรายการ Critical!':hasIssue?'มีรายการผิดปกติ':'ห้องปกติ ✓';
+  document.getElementById('sumSub').textContent=`ตรวจโดย ${insp} · ${data.checkDate}`;
+  const statusLabel={normal:'ปกติ',clean:'ต้อง Clean เพิ่ม',minor:'เสียหายเล็กน้อย',major:'เสียหายหนัก',block:'Block ห้อง'}[data.roomStatus]||data.roomStatus;
+  let html=`
+    <div class="summary-row"><span class="summary-key">ห้อง</span><span class="summary-val">${data.roomNum}</span></div>
+    <div class="summary-row"><span class="summary-key">OTA</span><span class="summary-val">${data.ota||'—'}</span></div>
+    <div class="summary-row"><span class="summary-key">แขก</span><span class="summary-val">${data.guestName||'—'}</span></div>
+    <div class="summary-row"><span class="summary-key">สถานะ</span><span class="summary-val">${statusLabel}</span></div>
+    <div class="summary-row"><span class="summary-key">พร้อมขาย</span><span class="summary-val">${data.ready||'—'}</span></div>`;
+  if(data.elecTotal>0) html+=`<div class="summary-row"><span class="summary-key">⚡ ค่าไฟ</span><span class="summary-val">${data.elecUnit.toFixed(1)} unit = ${data.elecTotal.toLocaleString()} ฿</span></div>`;
+  if(data.chargeAmount) html+=`<div class="summary-row"><span class="summary-key">💸 Charge</span><span class="summary-val" style="color:var(--accent2)">${data.chargeAmount.toLocaleString()} ฿</span></div>`;
+  if(data.issues.length) html+=`<div class="summary-row"><span class="summary-key">ผิดปกติ</span><div class="summary-tags">${data.issues.map(i=>`<span class="s-tag issue">${i}</span>`).join('')}</div></div>`;
+  if(data.damages.length) html+=`<div class="summary-row"><span class="summary-key">Damage</span><div class="summary-tags">${data.damages.map(d=>`<span class="s-tag issue">${d}</span>`).join('')}</div></div>`;
+  if(data.repairs.length) html+=`<div class="summary-row"><span class="summary-key">ซ่อม</span><div class="summary-tags">${data.repairs.map(r=>`<span class="s-tag neutral">${r}</span>`).join('')}</div></div>`;
+  document.getElementById('sumBody').innerHTML=html;
+
+  // Sync indicator
+  const syncing=settings.autoSheets&&settings.sheetsUrl;
+  document.getElementById('syncDot').className='sync-dot'+(syncing?' synced':'');
+  document.getElementById('syncText').textContent=syncing?'จะส่ง Google Sheets อัตโนมัติ':'ไม่ได้เชื่อมต่อ Google Sheets';
+  document.getElementById('summaryModal').classList.add('show');
+}
+
+// ===== FINAL SUBMIT =====
+async function finalSubmit(){
+  const data=collectFormData();
+  history_data.push(data);
+  saveHistory();
+
+  // Send to Google Sheets
+  if(settings.autoSheets&&settings.sheetsUrl){
+    document.getElementById('syncDot').className='sync-dot syncing';
+    document.getElementById('syncText').textContent='กำลังส่ง Google Sheets...';
+    try{
+      await fetch(settings.sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(data),headers:{'Content-Type':'application/json'}});
+      document.getElementById('syncDot').className='sync-dot synced';
+      document.getElementById('syncText').textContent='✓ ส่ง Google Sheets สำเร็จ';
+    }catch(e){
+      document.getElementById('syncDot').className='sync-dot error';
+      document.getElementById('syncText').textContent='⚠️ ส่ง Sheets ไม่ได้ (บันทึก local แล้ว)';
+    }
+  }
+
+  closeModal('summaryModal');
+  showToast('✓ บันทึกสำเร็จ: '+data.uid,'success');
+
+  // Reset form after short delay
+  setTimeout(()=>{
+    if(confirm('ล้างฟอร์มสำหรับตรวจห้องถัดไป?')) resetForm();
+  },1200);
+}
+
+function resetForm(){
+  document.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(el=>el.checked=false);
+  ['roomNum','guestName','actualCO','chargeAmount','chargeNote','meterBefore','meterAfter','repairNote','extraNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['dmgPreview','meterPreview','roomPreview'].forEach(id=>document.getElementById(id).innerHTML='');
+  // Re-apply default inspector
+  if(settings.defaultInspector) document.getElementById('inspector').value=settings.defaultInspector;
+  const now=new Date();
+  document.getElementById('checkDate').value=now.toISOString().slice(0,10);
+  document.getElementById('checkTime').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  calcElec(); updateProgress(); updateDamageBadge();
+  // Scroll top
+  window.scrollTo(0,0);
+}
+
+// ===== LINE REPORT =====
+function buildLineReport(data){
+  let txt=`🏨 LOFT CHECKOUT REPORT\n━━━━━━━━━━━━━━━━━━\n`;
+  txt+=`🆔 ${data.uid}\n🚪 ห้อง: ${data.roomNum}\n👤 ผู้ตรวจ: ${data.inspector}\n📡 OTA: ${data.ota||'—'}\n`;
+  const sl={normal:'✅ ปกติ',clean:'🧹 Clean เพิ่ม',minor:'⚠️ เสียหายเล็กน้อย',major:'🔴 เสียหายหนัก',block:'🚫 Block ห้อง'};
+  txt+=`🏷️ สถานะ: ${sl[data.roomStatus]||data.roomStatus}\n`;
+  txt+=`✅ พร้อมขาย: ${data.ready||'—'}\n`;
+  if(data.lateCheckout&&data.lateCheckout!=='ไม่มี') txt+=`⏰ Late CO: ${data.lateCheckout}\n`;
+  if(data.elecTotal>0) txt+=`⚡ ค่าไฟ: ${data.elecUnit.toFixed(1)} unit = ${data.elecTotal.toLocaleString()}฿\n`;
+  if(data.chargeAmount) txt+=`💸 Charge: ${data.chargeAmount.toLocaleString()}฿\n   └ ${data.chargeNote||'—'}\n`;
+  if(data.issues.length){txt+=`\n⚠️ รายการผิดปกติ:\n`;data.issues.forEach(i=>txt+=`  • ${i}\n`);}
+  if(data.damages.length){txt+=`\n🔴 Damage:\n`;data.damages.forEach(d=>txt+=`  • ${d}\n`);}
+  if(data.repairs.length){txt+=`\n🔧 งานซ่อม:\n`;data.repairs.forEach(r=>txt+=`  • ${r}\n`);}
+  if(data.extraNote) txt+=`\n📝 หมายเหตุ: ${data.extraNote}\n`;
+  txt+=`━━━━━━━━━━━━━━━━━━\n⏱️ ${data.checkDate} ${data.checkTime}`;
+  return txt;
+}
+function copyLineReport(){
+  const data=collectFormData();
+  copyText(buildLineReport(data));
+}
+function copyHistoryReport(uid){
+  const data=history_data.find(r=>r.uid===uid);
+  if(data) copyText(buildLineReport(data));
+}
+function copyText(txt){
+  navigator.clipboard.writeText(txt).then(()=>showToast('✓ Copy แล้ว! วางใน LINE','success')).catch(()=>{prompt('Copy:',txt);});
+}
+
+// ===== RELOAD FROM HISTORY =====
+function reloadForm(uid){
+  showToast('ฟีเจอร์นี้: โหลดข้อมูลเก่าเพื่ออ้างอิง','success');
+}
+
+// ===== EXPORT =====
+function exportAll(){
+  if(!history_data.length){showToast('ไม่มีข้อมูล','error');return;}
+  const blob=new Blob([JSON.stringify(history_data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  const d=new Date().toISOString().slice(0,10);
+  a.download=`loft_backup_${d}.json`;a.click();
+  showToast(`✓ Export ${history_data.length} รายการ → ส่งไฟล์นี้ผ่าน LINE ได้เลย`,'success');
+}
+
+function importJSON(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const imported=JSON.parse(e.target.result);
+      if(!Array.isArray(imported)) throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
+      const existingUIDs=new Set(history_data.map(r=>r.uid));
+      const newRecords=imported.filter(r=>!existingUIDs.has(r.uid));
+      history_data=[...history_data,...newRecords];
+      saveHistory(); renderHistory();
+      showToast(`✓ Import ${newRecords.length} รายการใหม่ (ซ้ำ ${imported.length-newRecords.length})`,'success');
+    }catch(err){
+      showToast('ไฟล์ไม่ถูกต้อง: '+err.message,'error');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+async function syncFromSheets(){
+  if(!settings.sheetsUrl){
+    showToast('ตั้งค่า Google Sheets URL ก่อน','error');
+    // scroll to sheets URL field
+    document.getElementById('sheetsUrl').focus();
+    return;
+  }
+  const statusEl=document.getElementById('syncFromSheetsStatus');
+  statusEl.textContent='⏳ กำลังดึง...';
+  try{
+    // Call Apps Script GET endpoint
+    const url=settings.sheetsUrl.replace('/exec','/exec?action=getHistory');
+    const res=await fetch(url,{mode:'cors'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const json=await res.json();
+    if(!json.data||!Array.isArray(json.data)) throw new Error('ข้อมูลไม่ถูกต้อง');
+    const existingUIDs=new Set(history_data.map(r=>r.uid));
+    const newRecords=json.data.filter(r=>r.uid&&!existingUIDs.has(r.uid));
+    history_data=[...history_data,...newRecords];
+    saveHistory(); renderHistory();
+    statusEl.textContent='✓';
+    showToast(`✓ Sync ${newRecords.length} รายการใหม่จาก Sheets`,'success');
+  }catch(err){
+    statusEl.textContent='✕';
+    // Sheets Apps Script doesn't support CORS GET easily → guide user
+    showToast('Sync ไม่ได้ → ใช้ Export/Import JSON แทน','error');
+    setTimeout(()=>{
+      alert('💡 วิธีง่ายกว่า:\n1. Export JSON จากมือถือเก่า\n2. ส่งไฟล์ผ่าน LINE ไปยังตัวเอง\n3. เปิดไฟล์ในมือถือใหม่ → Import JSON\n\nข้อมูลจะรวมกัน ไม่ซ้ำ ✓');
+    },500);
+  }
+}
+
+function exportCSV(){
+  if(!history_data.length){showToast('ไม่มีข้อมูล','error');return;}
+  const keys=['uid','checkDate','checkTime','inspector','roomNum','ota','guestName','roomStatus','ready','chargeAmount','elecUnit','elecTotal','lateCheckout'];
+  const head=keys.join(',');
+  const rows=history_data.map(r=>keys.map(k=>`"${(r[k]||'').toString().replace(/"/g,'""')}"`).join(','));
+  const csv=[head,...rows].join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='loft_checkout_log.csv';a.click();
+  showToast('✓ Export CSV สำเร็จ','success');
+}
+function clearHistory(){
+  if(!confirm('ลบประวัติทั้งหมด? ไม่สามารถกู้คืนได้')) return;
+  history_data=[];saveHistory();renderHistory();showToast('ลบทั้งหมดแล้ว','error');
+}
+
+// ===== APPS SCRIPT TEMPLATE =====
+const appsScriptCode=`// Google Apps Script - The Loft Checkout Log
+// Deploy: Extensions > Apps Script > Deploy > New Deployment
+// Type: Web app | Execute as: Me | Who has access: Anyone
+
+var SHEET_NAME = 'Raw_Checkout_Log';
+
+// --- POST: receive data from form ---
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var sheet = getOrCreateSheet(SHEET_NAME);
+    sheet.appendRow([
+      data.uid,
+      data.checkDate,
+      data.checkTime,
+      data.inspector,
+      data.roomNum,
+      data.ota,
+      data.guestName,
+      data.roomStatus,
+      data.ready,
+      (data.issues || []).join(', '),
+      (data.damages || []).join(', '),
+      data.chargeAmount || 0,
+      data.chargeNote,
+      data.elecUnit || 0,
+      data.elecTotal || 0,
+      data.lateCheckout,
+      (data.repairs || []).join(', '),
+      data.extraNote,
+      new Date().toISOString(),
+      JSON.stringify(data)
+    ]);
+
+    if (data.damages && data.damages.length > 0) {
+      var dmgSheet = getOrCreateSheet('Damage_History');
+      dmgSheet.appendRow([
+        data.uid,
+        data.checkDate,
+        data.roomNum,
+        data.ota,
+        (data.damages || []).join(', '),
+        data.chargeAmount || 0,
+        data.chargeNote
+      ]);
+    }
+
+    return jsonResponse({ status: 'ok', uid: data.uid });
+  } catch (err) {
+    return jsonResponse({ status: 'error', msg: err.toString() });
+  }
+}
+
+// --- GET: return history to app ---
+function doGet(e) {
+  try {
+    var action = e.parameter.action || '';
+    if (action === 'getHistory') {
+      var sheet = getOrCreateSheet(SHEET_NAME);
+      var rows = sheet.getDataRange().getValues();
+      var records = [];
+      for (var i = 1; i < rows.length; i++) {
+        try {
+          var parsed = JSON.parse(rows[i][19] || '{}');
+          if (parsed && parsed.uid) {
+            records.push(parsed);
+          }
+        } catch (parseErr) {
+          // skip malformed rows
+        }
+      }
+      return jsonResponse({ status: 'ok', data: records, count: records.length });
+    }
+    return jsonResponse({ status: 'ok', msg: 'Loft Checkout API running' });
+  } catch (err) {
+    return jsonResponse({ status: 'error', msg: err.toString() });
+  }
+}
+
+function getOrCreateSheet(name) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    if (name === SHEET_NAME) {
+      sheet.appendRow([
+        'UID', 'Date', 'Time', 'Inspector', 'Room', 'OTA', 'Guest',
+        'Status', 'Ready', 'Issues', 'Damages', 'Charge(THB)',
+        'ChargeNote', 'ElecUnit', 'ElecTHB', 'LateCheckout',
+        'Repairs', 'ExtraNote', 'Timestamp', 'FullJSON'
+      ]);
+    }
+  }
+  return sheet;
+}
+
+function jsonResponse(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+function copyAppsScript(){
+  copyText(appsScriptCode);
+  document.getElementById('appsScriptPreview').textContent=appsScriptCode;
+}
+
+// ===== UTILS =====
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function confirmClear(){if(confirm('ล้างข้อมูลฟอร์ม?')) resetForm();}
+
+// ===== INIT =====
+(function init(){
+  renderChecklist(mainItems,'mainChecklist');
+  renderChecklist(bathItems,'bathChecklist');
+  renderGrid(damageItems,'damageGrid');
+  renderGrid(repairItems,'repairGrid');
+  loadSettings();
+  loadHistory();
+  const now=new Date();
+  document.getElementById('checkDate').value=now.toISOString().slice(0,10);
+  document.getElementById('checkTime').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  if(settings.defaultInspector) document.getElementById('inspector').value=settings.defaultInspector;
+  updateProgress();
+})();
+</script>
+</body>
+</html>
