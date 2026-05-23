@@ -1012,36 +1012,55 @@ async function finalSubmit(){
   history_data.push(data);
   try{ saveHistory(); }catch(lsErr){ showToast('⚠️ localStorage เต็ม — ลบประวัติเก่าออกบ้าง','error'); }
 
-  // Send to Sheets + upload photos to Drive
+  // Send to Sheets + Drive
   if(settings.autoSheets&&settings.sheetsUrl){
-    document.getElementById('syncDot').className='sync-dot syncing';
-    document.getElementById('syncText').textContent='กำลังส่ง...';
-    const hasPhotos=(photoStore.dmgPreview||[]).length+(photoStore.meterPreview||[]).length+(photoStore.roomPreview||[]).length;
-    if(hasPhotos) document.getElementById('syncText').textContent='กำลังอัปโหลดรูป '+hasPhotos+' รูป...';
+    const dot=document.getElementById('syncDot');
+    const txt=document.getElementById('syncText');
+    dot.className='sync-dot syncing';
+
+    const allPhotos=[
+      ...(photoStore.dmgPreview||[]).map(function(p){return{data:p,label:'Damage'};}),
+      ...(photoStore.meterPreview||[]).map(function(p){return{data:p,label:'Meter'};}),
+      ...(photoStore.roomPreview||[]).map(function(p){return{data:p,label:'Room'};}),
+    ];
+
+    // STEP 1: Send text data only (no-cors = always works)
+    txt.textContent='กำลังส่ง Sheets...';
     try{
-      const payload=Object.assign({},data,{
-        photos:{
-          damage:[...(photoStore.dmgPreview||[])],
-          meter:[...(photoStore.meterPreview||[])],
-          room:[...(photoStore.roomPreview||[])]
-        }
-      });
-      const res=await fetch(settings.sheetsUrl,{
-        method:'POST',
-        body:JSON.stringify(payload),
+      await fetch(settings.sheetsUrl,{
+        method:'POST',mode:'no-cors',
+        body:JSON.stringify(Object.assign({},data,{action:'saveData'})),
         headers:{'Content-Type':'text/plain'}
       });
-      let driveLinks=[];
-      try{ const json=await res.json(); if(json.driveLinks) driveLinks=json.driveLinks; }catch(e2){}
-      if(driveLinks.length){
-        const rec=history_data.find(r=>r.uid===data.uid);
-        if(rec){ rec.driveLinks=driveLinks; try{ saveHistory(); }catch(e3){} }
-      }
-      document.getElementById('syncDot').className='sync-dot synced';
-      document.getElementById('syncText').textContent=hasPhotos?'✓ Sheets + Drive สำเร็จ':'✓ Sheets สำเร็จ';
+      dot.className='sync-dot synced';
+      txt.textContent='✓ Sheets สำเร็จ';
     }catch(e){
-      document.getElementById('syncDot').className='sync-dot error';
-      document.getElementById('syncText').textContent='⚠️ Sheets ไม่ได้ (บันทึก local แล้ว)';
+      dot.className='sync-dot error';
+      txt.textContent='⚠️ Sheets ไม่ได้';
+    }
+
+    // STEP 2: Upload photos one by one (with cors to get links back)
+    if(allPhotos.length){
+      txt.textContent='อัปโหลดรูป 0/'+allPhotos.length+'...';
+      const driveLinks=[];
+      for(var i=0;i<allPhotos.length;i++){
+        try{
+          const r2=await fetch(settings.sheetsUrl,{
+            method:'POST',
+            body:JSON.stringify({action:'uploadPhoto',uid:data.uid,photoData:allPhotos[i].data,label:allPhotos[i].label,index:i+1}),
+            headers:{'Content-Type':'text/plain'}
+          });
+          const j2=await r2.json();
+          if(j2.url) driveLinks.push({label:allPhotos[i].label+' '+(i+1),url:j2.url});
+          txt.textContent='อัปโหลดรูป '+(i+1)+'/'+allPhotos.length+'...';
+        }catch(pe){}
+      }
+      if(driveLinks.length){
+        const rec=history_data.find(function(r){return r.uid===data.uid;});
+        if(rec){rec.driveLinks=driveLinks;try{saveHistory();}catch(e3){}}
+        dot.className='sync-dot synced';
+        txt.textContent='✓ Sheets + Drive '+driveLinks.length+' รูป';
+      }
     }
   }
 
@@ -1214,45 +1233,30 @@ const appsScriptCode=`// Google Apps Script - The Loft Checkout Log
 var SHEET_NAME = 'Raw_Checkout_Log';
 var DRIVE_FOLDER_ID = '1tZzYWZ6MUYnjXGRMVHtg_vYLlHcF_H80';
 
-// --- POST: receive data + photos, save to Sheets + Drive ---
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
-    var driveLinks = [];
+    var action = data.action || 'saveData';
 
-    // Upload photos to Google Drive
-    if (data.photos) {
-      var folder = getOrCreateFolder(data.uid);
-      var categories = [
-        { key: 'damage', label: 'Damage' },
-        { key: 'meter',  label: 'Meter'  },
-        { key: 'room',   label: 'Room'   }
-      ];
-      for (var c = 0; c < categories.length; c++) {
-        var cat = categories[c];
-        var imgs = data.photos[cat.key] || [];
-        for (var i = 0; i < imgs.length; i++) {
-          try {
-            var base64 = imgs[i].split(',')[1];
-            var blob = Utilities.newBlob(
-              Utilities.base64Decode(base64),
-              'image/jpeg',
-              cat.label + '_' + (i+1) + '.jpg'
-            );
-            var file = folder.createFile(blob);
-            file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-            driveLinks.push({
-              label: cat.label + ' ' + (i+1),
-              url: 'https://drive.google.com/file/d/' + file.getId() + '/view'
-            });
-          } catch (imgErr) {}
-        }
-      }
+    // --- Upload single photo ---
+    if (action === 'uploadPhoto') {
+      var base64 = data.photoData.split(',')[1];
+      var blob = Utilities.newBlob(
+        Utilities.base64Decode(base64),
+        'image/jpeg',
+        data.label + '_' + data.index + '.jpg'
+      );
+      var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+      var subs = root.getFoldersByName(data.uid);
+      var folder = subs.hasNext() ? subs.next() : root.createFolder(data.uid);
+      var file = folder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      var url = 'https://drive.google.com/file/d/' + file.getId() + '/view';
+      return jsonResponse({ status: 'ok', url: url });
     }
 
-    // Save to Sheet
+    // --- Save form data to Sheet ---
     var sheet = getOrCreateSheet(SHEET_NAME);
-    var linkStr = driveLinks.map(function(l){ return l.url; }).join(', ');
     sheet.appendRow([
       data.uid, data.checkDate, data.checkTime,
       data.inspector, data.roomNum, data.ota,
@@ -1264,7 +1268,6 @@ function doPost(e) {
       data.lateCheckout,
       (data.repairs || []).join(', '),
       data.extraNote,
-      linkStr,
       new Date().toISOString(),
       JSON.stringify(data)
     ]);
@@ -1274,22 +1277,17 @@ function doPost(e) {
       dmgSheet.appendRow([
         data.uid, data.checkDate, data.roomNum, data.ota,
         (data.damages || []).join(', '),
-        data.chargeAmount || 0, data.chargeNote, linkStr
+        data.chargeAmount || 0, data.chargeNote
       ]);
     }
 
-    return jsonResponse({ status: 'ok', uid: data.uid, driveLinks: driveLinks });
+    return jsonResponse({ status: 'ok', uid: data.uid });
   } catch (err) {
     return jsonResponse({ status: 'error', msg: err.toString() });
   }
 }
 
-function getOrCreateFolder(uid) {
-  var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-  return root.createFolder(uid);
-}
-
-// --- GET: return history to app (supports JSONP for cross-origin) ---
+// --- GET: sync history back to app ---
 function doGet(e) {
   try {
     var action = e.parameter.action || '';
@@ -1302,30 +1300,20 @@ function doGet(e) {
         try {
           var parsed = JSON.parse(rows[i][19] || '{}');
           if (parsed && parsed.uid) {
-            // strip photos from sync (too large) - photos stay local only
             delete parsed.photos;
             records.push(parsed);
           }
-        } catch (parseErr) {
-          // skip malformed rows
-        }
+        } catch (pe) {}
       }
       var result = { status: 'ok', data: records, count: records.length };
       if (callback) {
-        // JSONP response
         return ContentService
           .createTextOutput(callback + '(' + JSON.stringify(result) + ')')
           .setMimeType(ContentService.MimeType.JAVASCRIPT);
       }
       return jsonResponse(result);
     }
-    var ok = { status: 'ok', msg: 'Loft Checkout API running' };
-    if (callback) {
-      return ContentService
-        .createTextOutput(callback + '(' + JSON.stringify(ok) + ')')
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
-    return jsonResponse(ok);
+    return jsonResponse({ status: 'ok', msg: 'Loft API running' });
   } catch (err) {
     return jsonResponse({ status: 'error', msg: err.toString() });
   }
@@ -1338,10 +1326,10 @@ function getOrCreateSheet(name) {
     sheet = ss.insertSheet(name);
     if (name === SHEET_NAME) {
       sheet.appendRow([
-        'UID', 'Date', 'Time', 'Inspector', 'Room', 'OTA', 'Guest',
-        'Status', 'Ready', 'Issues', 'Damages', 'Charge(THB)',
-        'ChargeNote', 'ElecUnit', 'ElecTHB', 'LateCheckout',
-        'Repairs', 'ExtraNote', 'Timestamp', 'FullJSON'
+        'UID','Date','Time','Inspector','Room','OTA','Guest',
+        'Status','Ready','Issues','Damages','Charge(THB)',
+        'ChargeNote','ElecUnit','ElecTHB','LateCheckout',
+        'Repairs','ExtraNote','Timestamp','FullJSON'
       ]);
     }
   }
@@ -1352,7 +1340,7 @@ function jsonResponse(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
-}`;
+}`
 
 function copyAppsScript(){
   copyText(appsScriptCode);
