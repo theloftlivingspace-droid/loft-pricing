@@ -689,7 +689,11 @@ let settings = {
 };
 function loadSettings(){
   const s=localStorage.getItem('loft_settings');
-  if(s) settings=JSON.parse(s);
+  if(s){
+    const saved=JSON.parse(s);
+    // merge: keep hardcoded sheetsUrl always
+    settings=Object.assign({},settings,saved,{sheetsUrl:settings.sheetsUrl,autoSheets:true});
+  }
   document.getElementById('sheetsUrl').value=settings.sheetsUrl||'';
   document.getElementById('lineToken').value=settings.lineToken||'';
   document.getElementById('defaultInspector').value=settings.defaultInspector||'';
@@ -754,6 +758,10 @@ function renderHistory(filter='all'){
           ${issues.map(i=>`<span class="log-tag issue">⚠️ ${i}</span>`).join('')}
           ${dmgs.map(d=>`<span class="log-tag issue">🔴 ${d}</span>`).join('')}
         </div>`:'<div style="font-size:12px;color:var(--green);margin-top:6px">✓ ไม่พบปัญหา</div>'}
+        ${(()=>{
+          const allPhotos=[...(r.photos&&r.photos.damage||[]),...(r.photos&&r.photos.meter||[]),...(r.photos&&r.photos.room||[])];
+          return allPhotos.length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">${allPhotos.map(p=>`<img src="${p}" style="width:56px;height:56px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">`).join('')}</div>`:'';
+        })()}
         <div class="log-actions">
           <button class="log-btn copy" onclick="copyHistoryReport('${r.uid}')">📋 Copy LINE</button>
           <button class="log-btn" onclick="reloadForm('${r.uid}')">↩️ โหลดข้อมูล</button>
@@ -844,13 +852,40 @@ function calcElec(){
 }
 
 // ===== PHOTO =====
+// photo store: { dmgPreview:[], meterPreview:[], roomPreview:[] }
+var photoStore={dmgPreview:[],meterPreview:[],roomPreview:[]};
+
 function previewPhotos(input,previewId){
   const container=document.getElementById(previewId);
+  const MAX=3; // max photos per slot
+  const current=photoStore[previewId]||[];
   Array.from(input.files).forEach(file=>{
+    if(current.length>=MAX){showToast('รูปสูงสุด '+MAX+' รูปต่อหัวข้อ','error');return;}
     const reader=new FileReader();
-    reader.onload=e=>{const img=document.createElement('img');img.src=e.target.result;img.className='photo-thumb';container.appendChild(img);};
+    reader.onload=e=>{
+      compressImage(e.target.result,400,function(compressed){
+        current.push(compressed);
+        photoStore[previewId]=current;
+        const img=document.createElement('img');
+        img.src=compressed;img.className='photo-thumb';container.appendChild(img);
+      });
+    };
     reader.readAsDataURL(file);
   });
+}
+
+function compressImage(dataUrl,maxSize,callback){
+  const img=new Image();
+  img.onload=function(){
+    const canvas=document.createElement('canvas');
+    let w=img.width,h=img.height;
+    if(w>h){if(w>maxSize){h=h*maxSize/w;w=maxSize;}}
+    else{if(h>maxSize){w=w*maxSize/h;h=maxSize;}}
+    canvas.width=w;canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    callback(canvas.toDataURL('image/jpeg',0.6));
+  };
+  img.src=dataUrl;
 }
 
 // ===== SECTION TOGGLE =====
@@ -897,7 +932,12 @@ function collectFormData(){
     leftBehind:document.querySelector('input[name="leftBehind"]:checked')?.value||'',
     extraNote:document.getElementById('extraNote').value,
     hasIssue:issues.length>0||damages.length>0||['major','block'].includes(status),
-    isCritical, timestamp:Date.now()
+    isCritical, timestamp:Date.now(),
+    photos:{
+      damage:[...(photoStore.dmgPreview||[])],
+      meter:[...(photoStore.meterPreview||[])],
+      room:[...(photoStore.roomPreview||[])]
+    }
   };
 }
 
@@ -953,7 +993,8 @@ async function finalSubmit(){
     document.getElementById('syncDot').className='sync-dot syncing';
     document.getElementById('syncText').textContent='กำลังส่ง Google Sheets...';
     try{
-      await fetch(settings.sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(data),headers:{'Content-Type':'application/json'}});
+      // text/plain bypasses CORS preflight but Apps Script still reads e.postData.contents
+      await fetch(settings.sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(data),headers:{'Content-Type':'text/plain'}});
       document.getElementById('syncDot').className='sync-dot synced';
       document.getElementById('syncText').textContent='✓ ส่ง Google Sheets สำเร็จ';
     }catch(e){
@@ -975,6 +1016,7 @@ function resetForm(){
   document.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(el=>el.checked=false);
   ['roomNum','guestName','actualCO','chargeAmount','chargeNote','meterBefore','meterAfter','repairNote','extraNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['dmgPreview','meterPreview','roomPreview'].forEach(id=>document.getElementById(id).innerHTML='');
+  photoStore={dmgPreview:[],meterPreview:[],roomPreview:[]};
   // Re-apply default inspector
   if(settings.defaultInspector) document.getElementById('inspector').value=settings.defaultInspector;
   const now=new Date();
@@ -1050,35 +1092,36 @@ function importJSON(input){
   reader.readAsText(file);
 }
 async function syncFromSheets(){
-  if(!settings.sheetsUrl){
-    showToast('ตั้งค่า Google Sheets URL ก่อน','error');
-    // scroll to sheets URL field
-    document.getElementById('sheetsUrl').focus();
-    return;
-  }
   const statusEl=document.getElementById('syncFromSheetsStatus');
-  statusEl.textContent='⏳ กำลังดึง...';
+  statusEl.textContent='⏳';
   try{
-    // Call Apps Script GET endpoint
-    const url=settings.sheetsUrl.replace('/exec','/exec?action=getHistory');
-    const res=await fetch(url,{mode:'cors'});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const json=await res.json();
-    if(!json.data||!Array.isArray(json.data)) throw new Error('ข้อมูลไม่ถูกต้อง');
+    const url=settings.sheetsUrl+'?action=getHistory';
+    // Use script tag (JSONP-style) to bypass CORS on GET
+    const json=await fetchJSONP(url);
+    if(!json||!Array.isArray(json.data)) throw new Error('no data');
     const existingUIDs=new Set(history_data.map(r=>r.uid));
     const newRecords=json.data.filter(r=>r.uid&&!existingUIDs.has(r.uid));
     history_data=[...history_data,...newRecords];
     saveHistory(); renderHistory();
     statusEl.textContent='✓';
-    showToast(`✓ Sync ${newRecords.length} รายการใหม่จาก Sheets`,'success');
+    showToast('✓ Sync '+newRecords.length+' รายการใหม่จาก Sheets','success');
   }catch(err){
     statusEl.textContent='✕';
-    // Sheets Apps Script doesn't support CORS GET easily → guide user
-    showToast('Sync ไม่ได้ → ใช้ Export/Import JSON แทน','error');
-    setTimeout(()=>{
-      alert('💡 วิธีง่ายกว่า:\n1. Export JSON จากมือถือเก่า\n2. ส่งไฟล์ผ่าน LINE ไปยังตัวเอง\n3. เปิดไฟล์ในมือถือใหม่ → Import JSON\n\nข้อมูลจะรวมกัน ไม่ซ้ำ ✓');
-    },500);
+    showToast('Sync ไม่ได้: '+err.message,'error');
   }
+}
+
+function fetchJSONP(url){
+  return new Promise(function(resolve,reject){
+    const id='cb_'+Date.now();
+    window[id]=function(data){ resolve(data); cleanup(); };
+    const script=document.createElement('script');
+    script.src=url+'&callback='+id;
+    script.onerror=function(){ reject(new Error('Network error')); cleanup(); };
+    document.head.appendChild(script);
+    const timer=setTimeout(function(){ reject(new Error('Timeout')); cleanup(); },10000);
+    function cleanup(){ clearTimeout(timer); delete window[id]; if(script.parentNode) script.parentNode.removeChild(script); }
+  });
 }
 
 function exportCSV(){
@@ -1150,10 +1193,11 @@ function doPost(e) {
   }
 }
 
-// --- GET: return history to app ---
+// --- GET: return history to app (supports JSONP for cross-origin) ---
 function doGet(e) {
   try {
     var action = e.parameter.action || '';
+    var callback = e.parameter.callback || '';
     if (action === 'getHistory') {
       var sheet = getOrCreateSheet(SHEET_NAME);
       var rows = sheet.getDataRange().getValues();
@@ -1162,15 +1206,30 @@ function doGet(e) {
         try {
           var parsed = JSON.parse(rows[i][19] || '{}');
           if (parsed && parsed.uid) {
+            // strip photos from sync (too large) - photos stay local only
+            delete parsed.photos;
             records.push(parsed);
           }
         } catch (parseErr) {
           // skip malformed rows
         }
       }
-      return jsonResponse({ status: 'ok', data: records, count: records.length });
+      var result = { status: 'ok', data: records, count: records.length };
+      if (callback) {
+        // JSONP response
+        return ContentService
+          .createTextOutput(callback + '(' + JSON.stringify(result) + ')')
+          .setMimeType(ContentService.MimeType.JAVASCRIPT);
+      }
+      return jsonResponse(result);
     }
-    return jsonResponse({ status: 'ok', msg: 'Loft Checkout API running' });
+    var ok = { status: 'ok', msg: 'Loft Checkout API running' };
+    if (callback) {
+      return ContentService
+        .createTextOutput(callback + '(' + JSON.stringify(ok) + ')')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    return jsonResponse(ok);
   } catch (err) {
     return jsonResponse({ status: 'error', msg: err.toString() });
   }
