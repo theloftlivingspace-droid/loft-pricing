@@ -718,9 +718,27 @@ function toggleSetting(key){
 let history_data=[];
 function loadHistory(){
   const h=localStorage.getItem('loft_history');
-  if(h) history_data=JSON.parse(h);
+  if(h){
+    const all=JSON.parse(h);
+    // deduplicate by UID (keep last occurrence)
+    const seen=new Map();
+    all.forEach(r=>seen.set(r.uid,r));
+    history_data=Array.from(seen.values());
+    saveHistory();
+  }
 }
-function saveHistory(){localStorage.setItem('loft_history',JSON.stringify(history_data));}
+function saveHistory(){
+  try{
+    localStorage.setItem('loft_history',JSON.stringify(history_data));
+  }catch(e){
+    // localStorage full - trim oldest records and retry
+    if(history_data.length>20){
+      history_data=history_data.slice(-20);
+      try{ localStorage.setItem('loft_history',JSON.stringify(history_data)); }catch(e2){}
+    }
+    showToast('⚠️ พื้นที่เต็ม เก็บแค่ 20 รายการล่าสุด','error');
+  }
+}
 
 function renderHistory(filter='all'){
   const list=document.getElementById('historyList');
@@ -758,10 +776,7 @@ function renderHistory(filter='all'){
           ${issues.map(i=>`<span class="log-tag issue">⚠️ ${i}</span>`).join('')}
           ${dmgs.map(d=>`<span class="log-tag issue">🔴 ${d}</span>`).join('')}
         </div>`:'<div style="font-size:12px;color:var(--green);margin-top:6px">✓ ไม่พบปัญหา</div>'}
-        ${(()=>{
-          const allPhotos=[...(r.photos&&r.photos.damage||[]),...(r.photos&&r.photos.meter||[]),...(r.photos&&r.photos.room||[])];
-          return allPhotos.length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">${allPhotos.map(p=>`<img src="${p}" style="width:56px;height:56px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">`).join('')}</div>`:'';
-        })()}
+        ${(r.driveLinks&&r.driveLinks.length)?`<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">${r.driveLinks.map(l=>`<a href="${l.url}" target="_blank" style="font-size:11px;padding:4px 9px;border:1px solid rgba(96,165,250,.4);border-radius:20px;color:var(--blue);text-decoration:none">📷 ${l.label}</a>`).join('')}</div>`:(r.photoCount?`<div style="font-size:11px;color:var(--muted);margin-top:6px">📷 ${r.photoCount} รูป (รออัป Drive)</div>`:'')}
         <div class="log-actions">
           <button class="log-btn copy" onclick="copyHistoryReport('${r.uid}')">📋 Copy LINE</button>
           <button class="log-btn" onclick="reloadForm('${r.uid}')">↩️ โหลดข้อมูล</button>
@@ -933,11 +948,8 @@ function collectFormData(){
     extraNote:document.getElementById('extraNote').value,
     hasIssue:issues.length>0||damages.length>0||['major','block'].includes(status),
     isCritical, timestamp:Date.now(),
-    photos:{
-      damage:[...(photoStore.dmgPreview||[])],
-      meter:[...(photoStore.meterPreview||[])],
-      room:[...(photoStore.roomPreview||[])]
-    }
+    driveLinks:[], // filled after upload
+    photoCount:(photoStore.dmgPreview||[]).length+(photoStore.meterPreview||[]).length+(photoStore.roomPreview||[]).length
   };
 }
 
@@ -984,14 +996,28 @@ function showSummary(){
 
 // ===== FINAL SUBMIT =====
 async function finalSubmit(){
-  const data=collectFormData();
-  history_data.push(data);
-  saveHistory();
+  const btn=document.getElementById('confirmSubmitBtn');
+  if(btn.disabled) return;
+  btn.disabled=true;
+  btn.textContent='⏳ กำลังบันทึก...';
 
-  // Send to Google Sheets
+  const data=collectFormData();
+
+  if(history_data.some(r=>r.uid===data.uid)){
+    btn.disabled=false; btn.textContent='✅ ยืนยันบันทึก';
+    showToast('⚠️ บันทึกซ้ำ — UID นี้มีอยู่แล้ว','error'); return;
+  }
+
+  // Save record immediately (no photos = small size)
+  history_data.push(data);
+  try{ saveHistory(); }catch(lsErr){ showToast('⚠️ localStorage เต็ม — ลบประวัติเก่าออกบ้าง','error'); }
+
+  // Send to Sheets + upload photos to Drive
   if(settings.autoSheets&&settings.sheetsUrl){
     document.getElementById('syncDot').className='sync-dot syncing';
-    document.getElementById('syncText').textContent='กำลังส่ง Google Sheets...';
+    document.getElementById('syncText').textContent='กำลังส่ง...';
+    const hasPhotos=(photoStore.dmgPreview||[]).length+(photoStore.meterPreview||[]).length+(photoStore.roomPreview||[]).length;
+    if(hasPhotos) document.getElementById('syncText').textContent='กำลังอัปโหลดรูป '+hasPhotos+' รูป...';
     try{
       const payload=Object.assign({},data,{
         photos:{
@@ -1006,24 +1032,21 @@ async function finalSubmit(){
         headers:{'Content-Type':'text/plain'}
       });
       let driveLinks=[];
-      try{
-        const json=await res.json();
-        if(json.driveLinks) driveLinks=json.driveLinks;
-      }catch(e2){}
-      // store drive links back into the saved record
+      try{ const json=await res.json(); if(json.driveLinks) driveLinks=json.driveLinks; }catch(e2){}
       if(driveLinks.length){
         const rec=history_data.find(r=>r.uid===data.uid);
-        if(rec) rec.driveLinks=driveLinks;
-        saveHistory();
+        if(rec){ rec.driveLinks=driveLinks; try{ saveHistory(); }catch(e3){} }
       }
       document.getElementById('syncDot').className='sync-dot synced';
-      document.getElementById('syncText').textContent='✓ ส่ง Sheets + Drive สำเร็จ';
+      document.getElementById('syncText').textContent=hasPhotos?'✓ Sheets + Drive สำเร็จ':'✓ Sheets สำเร็จ';
     }catch(e){
       document.getElementById('syncDot').className='sync-dot error';
-      document.getElementById('syncText').textContent='⚠️ ส่ง Sheets ไม่ได้ (บันทึก local แล้ว)';
+      document.getElementById('syncText').textContent='⚠️ Sheets ไม่ได้ (บันทึก local แล้ว)';
     }
   }
 
+  btn.disabled=false;
+  btn.textContent='✅ ยืนยันบันทึก';
   closeModal('summaryModal');
   showToast('✓ บันทึกสำเร็จ: '+data.uid,'success');
 
