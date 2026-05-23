@@ -993,10 +993,31 @@ async function finalSubmit(){
     document.getElementById('syncDot').className='sync-dot syncing';
     document.getElementById('syncText').textContent='กำลังส่ง Google Sheets...';
     try{
-      // text/plain bypasses CORS preflight but Apps Script still reads e.postData.contents
-      await fetch(settings.sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(data),headers:{'Content-Type':'text/plain'}});
+      const payload=Object.assign({},data,{
+        photos:{
+          damage:[...(photoStore.dmgPreview||[])],
+          meter:[...(photoStore.meterPreview||[])],
+          room:[...(photoStore.roomPreview||[])]
+        }
+      });
+      const res=await fetch(settings.sheetsUrl,{
+        method:'POST',
+        body:JSON.stringify(payload),
+        headers:{'Content-Type':'text/plain'}
+      });
+      let driveLinks=[];
+      try{
+        const json=await res.json();
+        if(json.driveLinks) driveLinks=json.driveLinks;
+      }catch(e2){}
+      // store drive links back into the saved record
+      if(driveLinks.length){
+        const rec=history_data.find(r=>r.uid===data.uid);
+        if(rec) rec.driveLinks=driveLinks;
+        saveHistory();
+      }
       document.getElementById('syncDot').className='sync-dot synced';
-      document.getElementById('syncText').textContent='✓ ส่ง Google Sheets สำเร็จ';
+      document.getElementById('syncText').textContent='✓ ส่ง Sheets + Drive สำเร็จ';
     }catch(e){
       document.getElementById('syncDot').className='sync-dot error';
       document.getElementById('syncText').textContent='⚠️ ส่ง Sheets ไม่ได้ (บันทึก local แล้ว)';
@@ -1041,6 +1062,10 @@ function buildLineReport(data){
   if(data.damages.length){txt+=`\n🔴 Damage:\n`;data.damages.forEach(d=>txt+=`  • ${d}\n`);}
   if(data.repairs.length){txt+=`\n🔧 งานซ่อม:\n`;data.repairs.forEach(r=>txt+=`  • ${r}\n`);}
   if(data.extraNote) txt+=`\n📝 หมายเหตุ: ${data.extraNote}\n`;
+  if(data.driveLinks&&data.driveLinks.length){
+    txt+=`\n📸 รูปหลักฐาน:\n`;
+    data.driveLinks.forEach(function(l){ txt+=`• ${l.label}: ${l.url}\n`; });
+  }
   txt+=`━━━━━━━━━━━━━━━━━━\n⏱️ ${data.checkDate} ${data.checkTime}`;
   return txt;
 }
@@ -1094,32 +1119,51 @@ function importJSON(input){
 async function syncFromSheets(){
   const statusEl=document.getElementById('syncFromSheetsStatus');
   statusEl.textContent='⏳';
+
+  // Try method 1: direct fetch (works when Apps Script CORS is enabled)
   try{
     const url=settings.sheetsUrl+'?action=getHistory';
-    // Use script tag (JSONP-style) to bypass CORS on GET
-    const json=await fetchJSONP(url);
-    if(!json||!Array.isArray(json.data)) throw new Error('no data');
-    const existingUIDs=new Set(history_data.map(r=>r.uid));
-    const newRecords=json.data.filter(r=>r.uid&&!existingUIDs.has(r.uid));
-    history_data=[...history_data,...newRecords];
-    saveHistory(); renderHistory();
-    statusEl.textContent='✓';
-    showToast('✓ Sync '+newRecords.length+' รายการใหม่จาก Sheets','success');
-  }catch(err){
-    statusEl.textContent='✕';
-    showToast('Sync ไม่ได้: '+err.message,'error');
-  }
+    const res=await fetch(url,{method:'GET',redirect:'follow'});
+    const text=await res.text();
+    const json=JSON.parse(text);
+    if(json&&Array.isArray(json.data)){
+      applySync(json.data,statusEl);
+      return;
+    }
+  }catch(e1){}
+
+  // Try method 2: JSONP (fallback)
+  try{
+    const json=await fetchJSONP(settings.sheetsUrl+'?action=getHistory');
+    if(json&&Array.isArray(json.data)){
+      applySync(json.data,statusEl);
+      return;
+    }
+  }catch(e2){}
+
+  // Both failed
+  statusEl.textContent='✕';
+  showToast('Sync ไม่ได้ — ตรวจสอบว่า Deploy Apps Script ใหม่แล้วหรือยัง','error');
+}
+
+function applySync(data,statusEl){
+  const existingUIDs=new Set(history_data.map(r=>r.uid));
+  const newRecords=data.filter(function(r){return r.uid&&!existingUIDs.has(r.uid);});
+  history_data=[...history_data,...newRecords];
+  saveHistory(); renderHistory();
+  statusEl.textContent='✓';
+  showToast('✓ Sync '+newRecords.length+' รายการใหม่จาก Sheets','success');
 }
 
 function fetchJSONP(url){
   return new Promise(function(resolve,reject){
-    const id='cb_'+Date.now();
+    var id='cb_'+Date.now();
     window[id]=function(data){ resolve(data); cleanup(); };
-    const script=document.createElement('script');
+    var script=document.createElement('script');
     script.src=url+'&callback='+id;
     script.onerror=function(){ reject(new Error('Network error')); cleanup(); };
     document.head.appendChild(script);
-    const timer=setTimeout(function(){ reject(new Error('Timeout')); cleanup(); },10000);
+    var timer=setTimeout(function(){ reject(new Error('Timeout')); cleanup(); },10000);
     function cleanup(){ clearTimeout(timer); delete window[id]; if(script.parentNode) script.parentNode.removeChild(script); }
   });
 }
@@ -1145,31 +1189,59 @@ const appsScriptCode=`// Google Apps Script - The Loft Checkout Log
 // Type: Web app | Execute as: Me | Who has access: Anyone
 
 var SHEET_NAME = 'Raw_Checkout_Log';
+var DRIVE_FOLDER_ID = '1tZzYWZ6MUYnjXGRMVHtg_vYLlHcF_H80';
 
-// --- POST: receive data from form ---
+// --- POST: receive data + photos, save to Sheets + Drive ---
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
+    var driveLinks = [];
+
+    // Upload photos to Google Drive
+    if (data.photos) {
+      var folder = getOrCreateFolder(data.uid);
+      var categories = [
+        { key: 'damage', label: 'Damage' },
+        { key: 'meter',  label: 'Meter'  },
+        { key: 'room',   label: 'Room'   }
+      ];
+      for (var c = 0; c < categories.length; c++) {
+        var cat = categories[c];
+        var imgs = data.photos[cat.key] || [];
+        for (var i = 0; i < imgs.length; i++) {
+          try {
+            var base64 = imgs[i].split(',')[1];
+            var blob = Utilities.newBlob(
+              Utilities.base64Decode(base64),
+              'image/jpeg',
+              cat.label + '_' + (i+1) + '.jpg'
+            );
+            var file = folder.createFile(blob);
+            file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+            driveLinks.push({
+              label: cat.label + ' ' + (i+1),
+              url: 'https://drive.google.com/file/d/' + file.getId() + '/view'
+            });
+          } catch (imgErr) {}
+        }
+      }
+    }
+
+    // Save to Sheet
     var sheet = getOrCreateSheet(SHEET_NAME);
+    var linkStr = driveLinks.map(function(l){ return l.url; }).join(', ');
     sheet.appendRow([
-      data.uid,
-      data.checkDate,
-      data.checkTime,
-      data.inspector,
-      data.roomNum,
-      data.ota,
-      data.guestName,
-      data.roomStatus,
-      data.ready,
+      data.uid, data.checkDate, data.checkTime,
+      data.inspector, data.roomNum, data.ota,
+      data.guestName, data.roomStatus, data.ready,
       (data.issues || []).join(', '),
       (data.damages || []).join(', '),
-      data.chargeAmount || 0,
-      data.chargeNote,
-      data.elecUnit || 0,
-      data.elecTotal || 0,
+      data.chargeAmount || 0, data.chargeNote,
+      data.elecUnit || 0, data.elecTotal || 0,
       data.lateCheckout,
       (data.repairs || []).join(', '),
       data.extraNote,
+      linkStr,
       new Date().toISOString(),
       JSON.stringify(data)
     ]);
@@ -1177,20 +1249,21 @@ function doPost(e) {
     if (data.damages && data.damages.length > 0) {
       var dmgSheet = getOrCreateSheet('Damage_History');
       dmgSheet.appendRow([
-        data.uid,
-        data.checkDate,
-        data.roomNum,
-        data.ota,
+        data.uid, data.checkDate, data.roomNum, data.ota,
         (data.damages || []).join(', '),
-        data.chargeAmount || 0,
-        data.chargeNote
+        data.chargeAmount || 0, data.chargeNote, linkStr
       ]);
     }
 
-    return jsonResponse({ status: 'ok', uid: data.uid });
+    return jsonResponse({ status: 'ok', uid: data.uid, driveLinks: driveLinks });
   } catch (err) {
     return jsonResponse({ status: 'error', msg: err.toString() });
   }
+}
+
+function getOrCreateFolder(uid) {
+  var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+  return root.createFolder(uid);
 }
 
 // --- GET: return history to app (supports JSONP for cross-origin) ---
