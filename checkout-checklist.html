@@ -1012,624 +1012,55 @@ async function finalSubmit(){
   history_data.push(data);
   try{ saveHistory(); }catch(lsErr){ showToast('⚠️ localStorage เต็ม — ลบประวัติเก่าออกบ้าง','error'); }
 
-  // Send to Sheets + Drive (single no-cors POST, photos bundled)
+  // Send to Sheets + Drive
   if(settings.autoSheets&&settings.sheetsUrl){
     const dot=document.getElementById('syncDot');
     const txt=document.getElementById('syncText');
     dot.className='sync-dot syncing';
 
     const allPhotos=[
-      ...(photoStore.dmgPreview||[]).map(function(p,i){return{data:p,label:'Damage',index:i+1};}),
-      ...(photoStore.meterPreview||[]).map(function(p,i){return{data:p,label:'Meter',index:i+1};}),
-      ...(photoStore.roomPreview||[]).map(function(p,i){return{data:p,label:'Room',index:i+1};}),
+      ...(photoStore.dmgPreview||[]).map(function(p){return{data:p,label:'Damage'};}),
+      ...(photoStore.meterPreview||[]).map(function(p){return{data:p,label:'Meter'};}),
+      ...(photoStore.roomPreview||[]).map(function(p){return{data:p,label:'Room'};}),
     ];
 
-    txt.textContent=allPhotos.length?'กำลังส่ง + อัปโหลด '+allPhotos.length+' รูป...':'กำลังส่ง Sheets...';
-
+    // STEP 1: Send text data only (no-cors = always works)
+    txt.textContent='กำลังส่ง Sheets...';
     try{
-      const payload=Object.assign({},data,{
-        action:'saveData',
-        photos:allPhotos  // send all photos in one POST
-      });
       await fetch(settings.sheetsUrl,{
         method:'POST',mode:'no-cors',
-        body:JSON.stringify(payload),
+        body:JSON.stringify(Object.assign({},data,{action:'saveData'})),
         headers:{'Content-Type':'text/plain'}
       });
       dot.className='sync-dot synced';
-      txt.textContent=allPhotos.length?'✓ ส่งแล้ว — Sync เพื่อดูลิงค์รูป':'✓ Sheets สำเร็จ';
-      // Mark photos as pending — links come back after sync
-      if(allPhotos.length){
-        const rec=history_data.find(function(r){return r.uid===data.uid;});
-        if(rec){rec.photosPending=true;try{saveHistory();}catch(e3){}}
-      }
+      txt.textContent='✓ Sheets สำเร็จ';
     }catch(e){
       dot.className='sync-dot error';
-      txt.textContent='⚠️ Sheets ไม่ได้ (บันทึก local แล้ว)';
-    }
-  }
-
-  btn.disabled=false;
-  btn.textContent='✅ ยืนยันบันทึก';
-  closeModal('summaryModal');
-  showToast('✓ บันทึกสำเร็จ: '+data.uid,'success');
-
-  // Reset form after short delay
-  setTimeout(()=>{
-    if(confirm('ล้างฟอร์มสำหรับตรวจห้องถัดไป?')) resetForm();
-  },1200);
-}
-
-function resetForm(){
-  document.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(el=>el.checked=false);
-  ['roomNum','guestName','actualCO','chargeAmount','chargeNote','meterBefore','meterAfter','repairNote','extraNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['dmgPreview','meterPreview','roomPreview'].forEach(id=>document.getElementById(id).innerHTML='');
-  photoStore={dmgPreview:[],meterPreview:[],roomPreview:[]};
-  // Re-apply default inspector
-  if(settings.defaultInspector) document.getElementById('inspector').value=settings.defaultInspector;
-  const now=new Date();
-  document.getElementById('checkDate').value=now.toISOString().slice(0,10);
-  document.getElementById('checkTime').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  calcElec(); updateProgress(); updateDamageBadge();
-  // Scroll top
-  window.scrollTo(0,0);
-}
-
-// ===== LINE REPORT =====
-function buildLineReport(data){
-  let txt=`🏨 LOFT CHECKOUT REPORT\n━━━━━━━━━━━━━━━━━━\n`;
-  txt+=`🆔 ${data.uid}\n🚪 ห้อง: ${data.roomNum}\n👤 ผู้ตรวจ: ${data.inspector}\n📡 OTA: ${data.ota||'—'}\n`;
-  const sl={normal:'✅ ปกติ',clean:'🧹 Clean เพิ่ม',minor:'⚠️ เสียหายเล็กน้อย',major:'🔴 เสียหายหนัก',block:'🚫 Block ห้อง'};
-  txt+=`🏷️ สถานะ: ${sl[data.roomStatus]||data.roomStatus}\n`;
-  txt+=`✅ พร้อมขาย: ${data.ready||'—'}\n`;
-  if(data.lateCheckout&&data.lateCheckout!=='ไม่มี') txt+=`⏰ Late CO: ${data.lateCheckout}\n`;
-  if(data.elecTotal>0) txt+=`⚡ ค่าไฟ: ${data.elecUnit.toFixed(1)} unit = ${data.elecTotal.toLocaleString()}฿\n`;
-  if(data.chargeAmount) txt+=`💸 Charge: ${data.chargeAmount.toLocaleString()}฿\n   └ ${data.chargeNote||'—'}\n`;
-  if(data.issues.length){txt+=`\n⚠️ รายการผิดปกติ:\n`;data.issues.forEach(i=>txt+=`  • ${i}\n`);}
-  if(data.damages.length){txt+=`\n🔴 Damage:\n`;data.damages.forEach(d=>txt+=`  • ${d}\n`);}
-  if(data.repairs.length){txt+=`\n🔧 งานซ่อม:\n`;data.repairs.forEach(r=>txt+=`  • ${r}\n`);}
-  if(data.extraNote) txt+=`\n📝 หมายเหตุ: ${data.extraNote}\n`;
-  if(data.driveLinks&&data.driveLinks.length){
-    txt+=`\n📸 รูปหลักฐาน:\n`;
-    data.driveLinks.forEach(function(l){ txt+=`• ${l.label}: ${l.url}\n`; });
-  }
-  txt+=`━━━━━━━━━━━━━━━━━━\n⏱️ ${data.checkDate} ${data.checkTime}`;
-  return txt;
-}
-function copyLineReport(){
-  const data=collectFormData();
-  copyText(buildLineReport(data));
-}
-function copyHistoryReport(uid){
-  const data=history_data.find(r=>r.uid===uid);
-  if(data) copyText(buildLineReport(data));
-}
-function copyText(txt){
-  navigator.clipboard.writeText(txt).then(()=>showToast('✓ Copy แล้ว! วางใน LINE','success')).catch(()=>{prompt('Copy:',txt);});
-}
-
-// ===== RELOAD FROM HISTORY =====
-function reloadForm(uid){
-  showToast('ฟีเจอร์นี้: โหลดข้อมูลเก่าเพื่ออ้างอิง','success');
-}
-
-// ===== EXPORT =====
-function exportAll(){
-  if(!history_data.length){showToast('ไม่มีข้อมูล','error');return;}
-  const blob=new Blob([JSON.stringify(history_data,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  const d=new Date().toISOString().slice(0,10);
-  a.download=`loft_backup_${d}.json`;a.click();
-  showToast(`✓ Export ${history_data.length} รายการ → ส่งไฟล์นี้ผ่าน LINE ได้เลย`,'success');
-}
-
-function importJSON(input){
-  const file=input.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const imported=JSON.parse(e.target.result);
-      if(!Array.isArray(imported)) throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
-      const existingUIDs=new Set(history_data.map(r=>r.uid));
-      const newRecords=imported.filter(r=>!existingUIDs.has(r.uid));
-      history_data=[...history_data,...newRecords];
-      saveHistory(); renderHistory();
-      showToast(`✓ Import ${newRecords.length} รายการใหม่ (ซ้ำ ${imported.length-newRecords.length})`,'success');
-    }catch(err){
-      showToast('ไฟล์ไม่ถูกต้อง: '+err.message,'error');
-    }
-    input.value='';
-  };
-  reader.readAsText(file);
-}
-async function syncFromSheets(){
-  const statusEl=document.getElementById('syncFromSheetsStatus');
-  statusEl.textContent='⏳';
-
-  // Try method 1: direct fetch (works when Apps Script CORS is enabled)
-  try{
-    const url=settings.sheetsUrl+'?action=getHistory';
-    const res=await fetch(url,{method:'GET',redirect:'follow'});
-    const text=await res.text();
-    const json=JSON.parse(text);
-    if(json&&Array.isArray(json.data)){
-      applySync(json.data,statusEl);
-      return;
-    }
-  }catch(e1){}
-
-  // Try method 2: JSONP (fallback)
-  try{
-    const json=await fetchJSONP(settings.sheetsUrl+'?action=getHistory');
-    if(json&&Array.isArray(json.data)){
-      applySync(json.data,statusEl);
-      return;
-    }
-  }catch(e2){}
-
-  // Both failed
-  statusEl.textContent='✕';
-  showToast('Sync ไม่ได้ — ตรวจสอบว่า Deploy Apps Script ใหม่แล้วหรือยัง','error');
-}
-
-function applySync(data,statusEl){
-  var existingUIDs=new Set(history_data.map(function(r){return r.uid;}));
-  var newRecords=data.filter(function(r){return r.uid&&!existingUIDs.has(r.uid);});
-  var updated=0;
-  // Merge driveLinks into existing records that are pending
-  data.forEach(function(remote){
-    if(!remote.uid) return;
-    var local=history_data.find(function(r){return r.uid===remote.uid;});
-    if(local&&remote.driveLinks&&remote.driveLinks.length&&(!local.driveLinks||!local.driveLinks.length)){
-      local.driveLinks=remote.driveLinks;
-      local.photosPending=false;
-      updated++;
-    }
-  });
-  history_data=[...history_data,...newRecords];
-  try{saveHistory();}catch(e){}
-  renderHistory();
-  statusEl.textContent='✓';
-  var msg='✓ Sync '+newRecords.length+' ใหม่';
-  if(updated) msg+=' + อัปเดต '+updated+' ลิงค์รูป';
-  showToast(msg,'success');
-}
-
-function fetchJSONP(url){
-  return new Promise(function(resolve,reject){
-    var id='cb_'+Date.now();
-    window[id]=function(data){ resolve(data); cleanup(); };
-    var script=document.createElement('script');
-    script.src=url+'&callback='+id;
-    script.onerror=function(){ reject(new Error('Network error')); cleanup(); };
-    document.head.appendChild(script);
-    var timer=setTimeout(function(){ reject(new Error('Timeout')); cleanup(); },10000);
-    function cleanup(){ clearTimeout(timer); delete window[id]; if(script.parentNode) script.parentNode.removeChild(script); }
-  });
-}
-
-function exportCSV(){
-  if(!history_data.length){showToast('ไม่มีข้อมูล','error');return;}
-  const keys=['uid','checkDate','checkTime','inspector','roomNum','ota','guestName','roomStatus','ready','chargeAmount','elecUnit','elecTotal','lateCheckout'];
-  const head=keys.join(',');
-  const rows=history_data.map(r=>keys.map(k=>`"${(r[k]||'').toString().replace(/"/g,'""')}"`).join(','));
-  const csv=[head,...rows].join('\n');
-  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='loft_checkout_log.csv';a.click();
-  showToast('✓ Export CSV สำเร็จ','success');
-}
-function clearHistory(){
-  if(!confirm('ลบประวัติทั้งหมด? ไม่สามารถกู้คืนได้')) return;
-  history_data=[];saveHistory();renderHistory();showToast('ลบทั้งหมดแล้ว','error');
-}
-
-// ===== APPS SCRIPT TEMPLATE =====
-const appsScriptCode=`// Google Apps Script - The Loft Checkout Log
-// Deploy: Extensions > Apps Script > Deploy > New Deployment
-// Type: Web app | Execute as: Me | Who has access: Anyone
-
-var SHEET_NAME = 'Raw_Checkout_Log';
-var DRIVE_FOLDER_ID = '1tZzYWZ6MUYnjXGRMVHtg_vYLlHcF_H80';
-
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-
-    // Save to Sheet
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(SHEET_NAME);
-    if (!sheet) {
-      sheet = ss.insertSheet(SHEET_NAME);
-      sheet.appendRow(['UID','Date','Time','Inspector','Room','OTA','Guest',
-        'Status','Ready','Issues','Damages','Charge','ChargeNote',
-        'ElecUnit','ElecTHB','LateCheckout','Repairs','ExtraNote',
-        'DriveLinks','Timestamp','JSON']);
+      txt.textContent='⚠️ Sheets ไม่ได้';
     }
 
-    // Upload photos to Drive
-    var driveLinks = [];
-    var photos = data.photos || [];
-    if (photos.length > 0) {
-      var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-      var subs = root.getFoldersByName(data.uid);
-      var folder = subs.hasNext() ? subs.next() : root.createFolder(data.uid);
-      for (var i = 0; i < photos.length; i++) {
-        try {
-          var base64 = photos[i].data.split(',')[1];
-          var blob = Utilities.newBlob(
-            Utilities.base64Decode(base64), 'image/jpeg',
-            photos[i].label + '_' + photos[i].index + '.jpg'
-          );
-          var file = folder.createFile(blob);
-          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-          driveLinks.push({
-            label: photos[i].label + ' ' + photos[i].index,
-            url: 'https://drive.google.com/file/d/' + file.getId() + '/view'
+    // STEP 2: Upload photos one by one (with cors to get links back)
+    if(allPhotos.length){
+      txt.textContent='อัปโหลดรูป 0/'+allPhotos.length+'...';
+      const driveLinks=[];
+      for(var i=0;i<allPhotos.length;i++){
+        try{
+          const r2=await fetch(settings.sheetsUrl,{
+            method:'POST',
+            body:JSON.stringify({action:'uploadPhoto',uid:data.uid,photoData:allPhotos[i].data,label:allPhotos[i].label,index:i+1}),
+            headers:{'Content-Type':'text/plain'}
           });
-        } catch (photoErr) {
-          // skip failed photo
-        }
+          const j2=await r2.json();
+          if(j2.url) driveLinks.push({label:allPhotos[i].label+' '+(i+1),url:j2.url});
+          txt.textContent='อัปโหลดรูป '+(i+1)+'/'+allPhotos.length+'...';
+        }catch(pe){}
       }
-    }
-
-    var linkStr = driveLinks.map(function(l){ return l.label+': '+l.url; }).join(' | ');
-    data.driveLinks = driveLinks;
-
-    sheet.appendRow([
-      data.uid, data.checkDate, data.checkTime, data.inspector,
-      data.roomNum, data.ota, data.guestName, data.roomStatus, data.ready,
-      (data.issues||[]).join(', '), (data.damages||[]).join(', '),
-      data.chargeAmount||0, data.chargeNote,
-      data.elecUnit||0, data.elecTotal||0, data.lateCheckout,
-      (data.repairs||[]).join(', '), data.extraNote,
-      linkStr, new Date().toISOString(), JSON.stringify(data)
-    ]);
-
-    if (data.damages && data.damages.length > 0) {
-      var dmgSheet = ss.getSheetByName('Damage_History') || ss.insertSheet('Damage_History');
-      dmgSheet.appendRow([data.uid, data.checkDate, data.roomNum, data.ota,
-        (data.damages||[]).join(', '), data.chargeAmount||0, data.chargeNote, linkStr]);
-    }
-
-    return ContentService
-      .createTextOutput(JSON.stringify({status:'ok', uid:data.uid, driveLinks:driveLinks}))
-      .setMimeType(ContentService.MimeType.JSON);
-
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({status:'error', msg:err.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doGet(e) {
-  try {
-    var action = e.parameter.action || '';
-    var callback = e.parameter.callback || '';
-    var result = {status:'ok', msg:'Loft API running'};
-
-    if (action === 'getHistory') {
-      var ss = SpreadsheetApp.getActiveSpreadsheet();
-      var sheet = ss.getSheetByName(SHEET_NAME);
-      var records = [];
-      if (sheet) {
-        var rows = sheet.getDataRange().getValues();
-        for (var i = 1; i < rows.length; i++) {
-          try {
-            // JSON is last column
-            var parsed = JSON.parse(rows[i][rows[i].length-1] || '{}');
-            if (parsed && parsed.uid) {
-              delete parsed.photos;
-              records.push(parsed);
-            }
-          } catch (pe) {}
-        }
-      }
-      result = {status:'ok', data:records, count:records.length};
-    }
-
-    var out = callback ? callback+'('+JSON.stringify(result)+')' : JSON.stringify(result);
-    var mime = callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;
-    return ContentService.createTextOutput(out).setMimeType(mime);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({status:'error', msg:err.toString()}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}`
-    return;
-  }
-  list.innerHTML=data.map(r=>{
-    const statusColor={normal:'var(--green)',clean:'var(--blue)',minor:'var(--accent)',major:'var(--accent2)',block:'var(--purple)'}[r.roomStatus]||'var(--muted)';
-    const statusLabel={normal:'ปกติ',clean:'Clean เพิ่ม',minor:'เสียหายเล็กน้อย',major:'เสียหายหนัก',block:'Block'}[r.roomStatus]||r.roomStatus;
-    const issues=(r.issues||[]).slice(0,4);
-    const dmgs=(r.damages||[]).slice(0,3);
-    return `<div class="log-card">
-      <div class="log-card-header">
-        <span class="log-room">🚪 ${r.roomNum||'—'}</span>
-        <span class="log-time">${r.checkDate} ${r.checkTime} · ${r.inspector||'—'}</span>
-        <span class="log-status-badge" style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}55">${statusLabel}</span>
-      </div>
-      <div class="log-card-body">
-        <div class="log-row"><span class="log-key">OTA</span><span class="log-val">${r.ota||'—'}</span></div>
-        <div class="log-row"><span class="log-key">แขก</span><span class="log-val">${r.guestName||'—'}</span></div>
-        ${r.chargeAmount?`<div class="log-row"><span class="log-key">💸 Charge</span><span class="log-val" style="color:var(--accent2)">${parseInt(r.chargeAmount).toLocaleString()} ฿</span></div>`:''}
-        ${r.elecTotal?`<div class="log-row"><span class="log-key">⚡ ค่าไฟ</span><span class="log-val">${r.elecTotal.toLocaleString()} ฿</span></div>`:''}
-        ${issues.length||dmgs.length?`<div class="log-issues">
-          ${issues.map(i=>`<span class="log-tag issue">⚠️ ${i}</span>`).join('')}
-          ${dmgs.map(d=>`<span class="log-tag issue">🔴 ${d}</span>`).join('')}
-        </div>`:'<div style="font-size:12px;color:var(--green);margin-top:6px">✓ ไม่พบปัญหา</div>'}
-        ${(r.driveLinks&&r.driveLinks.length)?`<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">${r.driveLinks.map(l=>`<a href="${l.url}" target="_blank" style="font-size:11px;padding:4px 9px;border:1px solid rgba(96,165,250,.4);border-radius:20px;color:var(--blue);text-decoration:none">📷 ${l.label}</a>`).join('')}</div>`:(r.photoCount?`<div style="font-size:11px;color:var(--muted);margin-top:6px">📷 ${r.photoCount} รูป (รออัป Drive)</div>`:'')}
-        <div class="log-actions">
-          <button class="log-btn copy" onclick="copyHistoryReport('${r.uid}')">📋 Copy LINE</button>
-          <button class="log-btn" onclick="reloadForm('${r.uid}')">↩️ โหลดข้อมูล</button>
-          <button class="log-btn del" onclick="deleteRecord('${r.uid}')">🗑️</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function filterHistory(f,btn){
-  document.querySelectorAll('.filter-pill').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderHistory(f);
-}
-
-function deleteRecord(uid){
-  if(!confirm('ลบรายการนี้?')) return;
-  history_data=history_data.filter(r=>r.uid!==uid);
-  saveHistory(); renderHistory();
-  showToast('ลบแล้ว','error');
-}
-
-// ===== RENDER FORM ELEMENTS =====
-function renderChecklist(items,containerId){
-  document.getElementById(containerId).innerHTML=items.map(item=>`
-    <div class="check-item">
-      <div class="check-label">${item.label}${item.sub?`<div class="sub">${item.sub}</div>`:''}</div>
-      <div class="tri-group">
-        <input type="radio" name="${item.id}" id="${item.id}_ok" value="ok" onchange="updateProgress()"><label for="${item.id}_ok">OK</label>
-        <input type="radio" name="${item.id}" id="${item.id}_issue" value="issue" onchange="updateProgress()"><label for="${item.id}_issue">!</label>
-        <input type="radio" name="${item.id}" id="${item.id}_na" value="na" onchange="updateProgress()"><label for="${item.id}_na">N/A</label>
-      </div>
-    </div>`).join('');
-}
-function renderGrid(items,containerId){
-  document.getElementById(containerId).innerHTML=items.map(item=>`
-    <div class="dmg-item">
-      <input type="checkbox" id="${item.id}" onchange="updateDamageBadge()">
-      <label for="${item.id}"><span class="dmg-icon">${item.icon}</span>${item.label}</label>
-    </div>`).join('');
-}
-
-// ===== PROGRESS =====
-function updateProgress(){
-  const all=[...mainItems,...bathItems];
-  const done=all.filter(i=>document.querySelector(`input[name="${i.id}"]:checked`)).length;
-  const pct=Math.round(done/all.length*100);
-  document.getElementById('progressBar').style.width=pct+'%';
-  document.getElementById('progressLabel').textContent=`${done} / ${all.length} รายการ (${pct}%)`;
-  const mDone=mainItems.filter(i=>document.querySelector(`input[name="${i.id}"]:checked`)).length;
-  const bDone=bathItems.filter(i=>document.querySelector(`input[name="${i.id}"]:checked`)).length;
-  const b3=document.getElementById('badge3');
-  b3.textContent=`${mDone}/${mainItems.length}`;
-  b3.className='section-badge'+(mDone===mainItems.length?' done':'');
-  const b4=document.getElementById('badge4');
-  b4.textContent=`${bDone}/${bathItems.length}`;
-  b4.className='section-badge'+(bDone===bathItems.length?' done':'');
-  const room=document.getElementById('roomNum').value;
-  const insp=document.getElementById('inspector').value;
-  document.getElementById('badge1').textContent=(room&&insp)?'✓':'!';
-  document.getElementById('badge1').className='section-badge'+((room&&insp)?' done':' warn');
-  const status=document.querySelector('input[name="roomStatus"]:checked');
-  document.getElementById('badge2').textContent=status?{normal:'ปกติ',clean:'Clean',minor:'เสียหาย',major:'หนัก',block:'Block'}[status.value]:' — ';
-  document.getElementById('badge2').className='section-badge'+(status?' done':'');
-}
-function updateDamageBadge(){
-  const dmg=damageItems.filter(i=>document.getElementById(i.id)?.checked);
-  const charge=document.getElementById('chargeAmount').value;
-  const b5=document.getElementById('badge5');
-  if(dmg.length||charge){b5.textContent=(charge?parseInt(charge).toLocaleString()+'฿':dmg.length+'รายการ');b5.className='section-badge warn';}
-  else{b5.textContent='—';b5.className='section-badge';}
-  const rep=repairItems.filter(i=>document.getElementById(i.id)?.checked);
-  document.getElementById('badge7').textContent=rep.length?rep.length+'รายการ':'—';
-  document.getElementById('badge7').className='section-badge'+(rep.length?' warn':'');
-}
-
-// ===== ELECTRICITY =====
-function calcElec(){
-  const b=parseFloat(document.getElementById('meterBefore').value)||0;
-  const a=parseFloat(document.getElementById('meterAfter').value)||0;
-  const unit=Math.max(0,a-b);
-  const total=unit*10;
-  document.getElementById('unitUsed').textContent=unit.toFixed(1)+' unit';
-  document.getElementById('totalElec').textContent=total>0?total.toLocaleString()+' ฿':'— ฿';
-  document.getElementById('badge6').textContent=total>0?total.toLocaleString()+'฿':'—';
-  document.getElementById('badge6').className='section-badge'+(total>0?' done':'');
-}
-
-// ===== PHOTO =====
-// photo store: { dmgPreview:[], meterPreview:[], roomPreview:[] }
-var photoStore={dmgPreview:[],meterPreview:[],roomPreview:[]};
-
-function previewPhotos(input,previewId){
-  const container=document.getElementById(previewId);
-  const MAX=3; // max photos per slot
-  const current=photoStore[previewId]||[];
-  Array.from(input.files).forEach(file=>{
-    if(current.length>=MAX){showToast('รูปสูงสุด '+MAX+' รูปต่อหัวข้อ','error');return;}
-    const reader=new FileReader();
-    reader.onload=e=>{
-      compressImage(e.target.result,400,function(compressed){
-        current.push(compressed);
-        photoStore[previewId]=current;
-        const img=document.createElement('img');
-        img.src=compressed;img.className='photo-thumb';container.appendChild(img);
-      });
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function compressImage(dataUrl,maxSize,callback){
-  const img=new Image();
-  img.onload=function(){
-    const canvas=document.createElement('canvas');
-    let w=img.width,h=img.height;
-    if(w>h){if(w>maxSize){h=h*maxSize/w;w=maxSize;}}
-    else{if(h>maxSize){w=w*maxSize/h;h=maxSize;}}
-    canvas.width=w;canvas.height=h;
-    canvas.getContext('2d').drawImage(img,0,0,w,h);
-    callback(canvas.toDataURL('image/jpeg',0.6));
-  };
-  img.src=dataUrl;
-}
-
-// ===== SECTION TOGGLE =====
-function toggleSection(id){document.getElementById(id).classList.toggle('collapsed');}
-
-// ===== TAB SWITCH =====
-function switchTab(tab){
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+tab).classList.add('active');
-  document.getElementById('tab-'+tab).classList.add('active');
-  document.getElementById('formSubmitBar').style.display=tab==='form'?'flex':'none';
-  if(tab==='history') renderHistory();
-}
-
-// ===== COLLECT DATA =====
-function collectFormData(){
-  const b=parseFloat(document.getElementById('meterBefore').value)||0;
-  const a=parseFloat(document.getElementById('meterAfter').value)||0;
-  const unit=Math.max(0,a-b);
-  const issues=[...mainItems,...bathItems].filter(i=>document.querySelector(`input[name="${i.id}"][value="issue"]:checked`)).map(i=>i.label);
-  const damages=damageItems.filter(i=>document.getElementById(i.id)?.checked).map(i=>i.label);
-  const repairs=repairItems.filter(i=>document.getElementById(i.id)?.checked).map(i=>i.label);
-  const status=(document.querySelector('input[name="roomStatus"]:checked')?.value)||'';
-  const isCritical=['major','block'].includes(status)||damages.some(d=>['สูบบุหรี่','เสียหายหนัก'].some(k=>d.includes(k)));
-  const chargeAmt=parseInt(document.getElementById('chargeAmount').value)||0;
-  return {
-    uid:genUID(),
-    checkDate:document.getElementById('checkDate').value,
-    checkTime:document.getElementById('checkTime').value,
-    inspector:document.getElementById('inspector').value,
-    roomNum:document.getElementById('roomNum').value,
-    ota:document.querySelector('input[name="ota"]:checked')?.value||'',
-    guestName:document.getElementById('guestName').value,
-    actualCO:document.getElementById('actualCO').value,
-    lateCheckout:document.querySelector('input[name="late"]:checked')?.value||'',
-    roomStatus:status,
-    ready:document.querySelector('input[name="ready"]:checked')?.value||'',
-    issues, damages, repairs,
-    chargeAmount:chargeAmt,
-    chargeNote:document.getElementById('chargeNote').value,
-    elecBefore:b, elecAfter:a, elecUnit:unit, elecTotal:unit*10,
-    repairNote:document.getElementById('repairNote').value,
-    leftBehind:document.querySelector('input[name="leftBehind"]:checked')?.value||'',
-    extraNote:document.getElementById('extraNote').value,
-    hasIssue:issues.length>0||damages.length>0||['major','block'].includes(status),
-    isCritical, timestamp:Date.now(),
-    driveLinks:[], // filled after upload
-    photoCount:(photoStore.dmgPreview||[]).length+(photoStore.meterPreview||[]).length+(photoStore.roomPreview||[]).length
-  };
-}
-
-// ===== UID =====
-function genUID(){
-  const room=(document.getElementById('roomNum').value||'XXX').split(' ')[0];
-  const d=document.getElementById('checkDate').value?.replace(/-/g,'')||new Date().toISOString().slice(0,10).replace(/-/g,'');
-  const t=document.getElementById('checkTime').value?.replace(':','')||'0000';
-  return `${room}_${d}_${t}`;
-}
-
-// ===== SHOW SUMMARY MODAL =====
-function showSummary(){
-  const room=document.getElementById('roomNum').value;
-  const insp=document.getElementById('inspector').value;
-  const status=document.querySelector('input[name="roomStatus"]:checked');
-  if(!room||!insp||!status){showToast('กรุณากรอก: ห้อง / ผู้ตรวจ / สถานะ','error');return;}
-  const data=collectFormData();
-  document.getElementById('sumUID').textContent='🆔 '+data.uid;
-  const hasIssue=data.hasIssue;
-  document.getElementById('sumIcon').textContent=data.isCritical?'🚨':hasIssue?'⚠️':'✅';
-  document.getElementById('sumTitle').textContent=data.isCritical?'มีรายการ Critical!':hasIssue?'มีรายการผิดปกติ':'ห้องปกติ ✓';
-  document.getElementById('sumSub').textContent=`ตรวจโดย ${insp} · ${data.checkDate}`;
-  const statusLabel={normal:'ปกติ',clean:'ต้อง Clean เพิ่ม',minor:'เสียหายเล็กน้อย',major:'เสียหายหนัก',block:'Block ห้อง'}[data.roomStatus]||data.roomStatus;
-  let html=`
-    <div class="summary-row"><span class="summary-key">ห้อง</span><span class="summary-val">${data.roomNum}</span></div>
-    <div class="summary-row"><span class="summary-key">OTA</span><span class="summary-val">${data.ota||'—'}</span></div>
-    <div class="summary-row"><span class="summary-key">แขก</span><span class="summary-val">${data.guestName||'—'}</span></div>
-    <div class="summary-row"><span class="summary-key">สถานะ</span><span class="summary-val">${statusLabel}</span></div>
-    <div class="summary-row"><span class="summary-key">พร้อมขาย</span><span class="summary-val">${data.ready||'—'}</span></div>`;
-  if(data.elecTotal>0) html+=`<div class="summary-row"><span class="summary-key">⚡ ค่าไฟ</span><span class="summary-val">${data.elecUnit.toFixed(1)} unit = ${data.elecTotal.toLocaleString()} ฿</span></div>`;
-  if(data.chargeAmount) html+=`<div class="summary-row"><span class="summary-key">💸 Charge</span><span class="summary-val" style="color:var(--accent2)">${data.chargeAmount.toLocaleString()} ฿</span></div>`;
-  if(data.issues.length) html+=`<div class="summary-row"><span class="summary-key">ผิดปกติ</span><div class="summary-tags">${data.issues.map(i=>`<span class="s-tag issue">${i}</span>`).join('')}</div></div>`;
-  if(data.damages.length) html+=`<div class="summary-row"><span class="summary-key">Damage</span><div class="summary-tags">${data.damages.map(d=>`<span class="s-tag issue">${d}</span>`).join('')}</div></div>`;
-  if(data.repairs.length) html+=`<div class="summary-row"><span class="summary-key">ซ่อม</span><div class="summary-tags">${data.repairs.map(r=>`<span class="s-tag neutral">${r}</span>`).join('')}</div></div>`;
-  document.getElementById('sumBody').innerHTML=html;
-
-  // Sync indicator
-  const syncing=settings.autoSheets&&settings.sheetsUrl;
-  document.getElementById('syncDot').className='sync-dot'+(syncing?' synced':'');
-  document.getElementById('syncText').textContent=syncing?'จะส่ง Google Sheets อัตโนมัติ':'ไม่ได้เชื่อมต่อ Google Sheets';
-  document.getElementById('summaryModal').classList.add('show');
-}
-
-// ===== FINAL SUBMIT =====
-async function finalSubmit(){
-  const btn=document.getElementById('confirmSubmitBtn');
-  if(btn.disabled) return;
-  btn.disabled=true;
-  btn.textContent='⏳ กำลังบันทึก...';
-
-  const data=collectFormData();
-
-  if(history_data.some(r=>r.uid===data.uid)){
-    btn.disabled=false; btn.textContent='✅ ยืนยันบันทึก';
-    showToast('⚠️ บันทึกซ้ำ — UID นี้มีอยู่แล้ว','error'); return;
-  }
-
-  // Save record immediately (no photos = small size)
-  history_data.push(data);
-  try{ saveHistory(); }catch(lsErr){ showToast('⚠️ localStorage เต็ม — ลบประวัติเก่าออกบ้าง','error'); }
-
-  // Send to Sheets + Drive (single no-cors POST, photos bundled)
-  if(settings.autoSheets&&settings.sheetsUrl){
-    const dot=document.getElementById('syncDot');
-    const txt=document.getElementById('syncText');
-    dot.className='sync-dot syncing';
-
-    const allPhotos=[
-      ...(photoStore.dmgPreview||[]).map(function(p,i){return{data:p,label:'Damage',index:i+1};}),
-      ...(photoStore.meterPreview||[]).map(function(p,i){return{data:p,label:'Meter',index:i+1};}),
-      ...(photoStore.roomPreview||[]).map(function(p,i){return{data:p,label:'Room',index:i+1};}),
-    ];
-
-    txt.textContent=allPhotos.length?'กำลังส่ง + อัปโหลด '+allPhotos.length+' รูป...':'กำลังส่ง Sheets...';
-
-    try{
-      const payload=Object.assign({},data,{
-        action:'saveData',
-        photos:allPhotos  // send all photos in one POST
-      });
-      await fetch(settings.sheetsUrl,{
-        method:'POST',mode:'no-cors',
-        body:JSON.stringify(payload),
-        headers:{'Content-Type':'text/plain'}
-      });
-      dot.className='sync-dot synced';
-      txt.textContent=allPhotos.length?'✓ ส่งแล้ว — Sync เพื่อดูลิงค์รูป':'✓ Sheets สำเร็จ';
-      // Mark photos as pending — links come back after sync
-      if(allPhotos.length){
+      if(driveLinks.length){
         const rec=history_data.find(function(r){return r.uid===data.uid;});
-        if(rec){rec.photosPending=true;try{saveHistory();}catch(e3){}}
+        if(rec){rec.driveLinks=driveLinks;try{saveHistory();}catch(e3){}}
+        dot.className='sync-dot synced';
+        txt.textContent='✓ Sheets + Drive '+driveLinks.length+' รูป';
       }
-    }catch(e){
-      dot.className='sync-dot error';
-      txt.textContent='⚠️ Sheets ไม่ได้ (บันทึก local แล้ว)';
     }
   }
 
@@ -1758,26 +1189,12 @@ async function syncFromSheets(){
 }
 
 function applySync(data,statusEl){
-  var existingUIDs=new Set(history_data.map(function(r){return r.uid;}));
-  var newRecords=data.filter(function(r){return r.uid&&!existingUIDs.has(r.uid);});
-  var updated=0;
-  // Merge driveLinks into existing records that are pending
-  data.forEach(function(remote){
-    if(!remote.uid) return;
-    var local=history_data.find(function(r){return r.uid===remote.uid;});
-    if(local&&remote.driveLinks&&remote.driveLinks.length&&(!local.driveLinks||!local.driveLinks.length)){
-      local.driveLinks=remote.driveLinks;
-      local.photosPending=false;
-      updated++;
-    }
-  });
+  const existingUIDs=new Set(history_data.map(r=>r.uid));
+  const newRecords=data.filter(function(r){return r.uid&&!existingUIDs.has(r.uid);});
   history_data=[...history_data,...newRecords];
-  try{saveHistory();}catch(e){}
-  renderHistory();
+  saveHistory(); renderHistory();
   statusEl.textContent='✓';
-  var msg='✓ Sync '+newRecords.length+' ใหม่';
-  if(updated) msg+=' + อัปเดต '+updated+' ลิงค์รูป';
-  showToast(msg,'success');
+  showToast('✓ Sync '+newRecords.length+' รายการใหม่จาก Sheets','success');
 }
 
 function fetchJSONP(url){
