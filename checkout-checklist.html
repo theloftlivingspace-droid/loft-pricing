@@ -752,6 +752,37 @@ const appsScriptCode = [
   '  var output;',
   '  try {',
   '    var data = JSON.parse(e.postData.contents);',
+  '    // === uploadPhoto: upload single photo to Drive, update DriveLinks column ===',
+  "    if (data.action === 'uploadPhoto') {",
+  '      var root2 = DriveApp.getFolderById(DRIVE_FOLDER_ID);',
+  '      var subs2 = root2.getFoldersByName(data.uid);',
+  '      var folder2 = subs2.hasNext() ? subs2.next() : root2.createFolder(data.uid);',
+  '      var ph = data.photo;',
+  "      var raw = ph.data || '';",
+  "      var b64 = raw.indexOf(',') > -1 ? raw.split(',')[1] : raw;",
+  "      var blob2 = Utilities.newBlob(Utilities.base64Decode(b64), 'image/jpeg', ph.label+'_'+ph.index+'.jpg');",
+  '      var file2 = folder2.createFile(blob2);',
+  '      file2.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);',
+  "      var link = {label: ph.label+' '+ph.index, url: 'https://drive.google.com/file/d/'+file2.getId()+'/view'};",
+  '      // Update DriveLinks column in sheet for this UID',
+  '      var ss0 = SpreadsheetApp.getActiveSpreadsheet();',
+  "      var sh0 = ss0.getSheetByName(SHEET_NAME);",
+  '      if (sh0) {',
+  '        var vals = sh0.getDataRange().getValues();',
+  '        for (var ri = 1; ri < vals.length; ri++) {',
+  '          if (vals[ri][0] === data.uid) {',
+  '            var existingLinks = vals[ri][18] ? vals[ri][18]+\' | \' : \'\';',
+  "            sh0.getRange(ri+1, 19).setValue(existingLinks + link.label+': '+link.url);",
+  '            break;',
+  '          }',
+  '        }',
+  '      }',
+  '      output = ContentService',
+  "        .createTextOutput(JSON.stringify({status:'ok', driveLink:link}))",
+  '        .setMimeType(ContentService.MimeType.JSON);',
+  "      output.setHeader('Access-Control-Allow-Origin', '*');",
+  '      return output;',
+  '    }',
   '    var ss = SpreadsheetApp.getActiveSpreadsheet();',
   "    var sheet = ss.getSheetByName(SHEET_NAME);",
   '    if (!sheet) {',
@@ -778,7 +809,7 @@ const appsScriptCode = [
   '          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);',
   "          driveLinks.push({label: photos[i].label+' '+photos[i].index,",
   "            url: 'https://drive.google.com/file/d/' + file.getId() + '/view'});",
-  '        } catch (photoErr) {}',
+  '        } catch (photoErr) { driveLinks.push({label: photos[i].label+\'_ERR\', url: photoErr.toString()}); }',
   '      }',
   '    }',
   "    var linkStr = driveLinks.map(function(l){return l.label+': '+l.url;}).join(' | ');",
@@ -1132,64 +1163,61 @@ async function finalSubmit(){
       ...(photoStore.roomPreview||[]).map(function(p,i){return{data:p,label:'Room',index:i+1};}),
     ];
 
-    txt.textContent=allPhotos.length?'⏳ กำลังส่ง + อัปโหลด '+allPhotos.length+' รูป...':'⏳ กำลังส่ง Sheets...';
+    txt.textContent='⏳ กำลังส่งข้อมูล...';
 
+    // === POST 1: ส่งข้อมูลก่อน (ไม่มีรูป) ===
     try{
-      // Send data WITHOUT photos embedded in JSON column, photos sent separately
-      const payload=Object.assign({},data,{
-        action:'saveData',
-        photos:allPhotos
-      });
-
+      const payload=Object.assign({},data,{action:'saveData',photos:[]});
       const res=await fetch(settings.sheetsUrl,{
-        method:'POST',
-        // CORS mode so we can read the response (requires Apps Script to return CORS headers)
-        mode:'cors',
+        method:'POST',mode:'cors',
         body:JSON.stringify(payload),
         headers:{'Content-Type':'text/plain'}
       });
-
       if(res.ok){
-        const json=await res.json();
-        const rec=history_data.find(function(r){return r.uid===data.uid;});
-        if(rec){
-          // Attach driveLinks returned by Apps Script immediately
-          if(json.driveLinks&&json.driveLinks.length){
-            rec.driveLinks=json.driveLinks;
-            rec.photosPending=false;
-            dot.className='sync-dot synced';
-            txt.textContent='✓ Sheets + อัปโหลด '+json.driveLinks.length+' รูป Drive สำเร็จ';
-          } else {
-            rec.photosPending=allPhotos.length>0;
-            dot.className='sync-dot synced';
-            txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ — Drive กำลัง process รูป':'✓ Sheets สำเร็จ';
-          }
-          try{saveHistory();}catch(e3){}
-        }
-      } else {
-        throw new Error('HTTP '+res.status);
-      }
-    }catch(fetchErr){
-      // CORS failed → fallback to no-cors (data only, no photos, no response)
-      const dot2=document.getElementById('syncDot');
-      const txt2=document.getElementById('syncText');
-      dot2.className='sync-dot syncing';
-      txt2.textContent='⚠️ CORS ไม่ผ่าน — ลองส่งแบบ no-cors (ไม่มีรูป Drive)...';
+        dot.className='sync-dot synced';
+        txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ — กำลังอัปโหลดรูป '+allPhotos.length+' รูป...':'✓ Sheets สำเร็จ';
+      } else { throw new Error('HTTP '+res.status); }
+    }catch(e1){
       try{
-        const payloadNoCors=Object.assign({},data,{action:'saveData',photos:[]});
-        await fetch(settings.sheetsUrl,{
-          method:'POST',mode:'no-cors',
-          body:JSON.stringify(payloadNoCors),
-          headers:{'Content-Type':'text/plain'}
-        });
-        dot2.className='sync-dot synced';
-        txt2.textContent='✓ Sheets สำเร็จ (ไม่มีรูป — Deploy Apps Script ใหม่เพื่อเปิด CORS)';
-        const rec=history_data.find(function(r){return r.uid===data.uid;});
-        if(rec&&allPhotos.length){rec.photosPending=true;try{saveHistory();}catch(e4){}}
+        const payloadNC=Object.assign({},data,{action:'saveData',photos:[]});
+        await fetch(settings.sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(payloadNC),headers:{'Content-Type':'text/plain'}});
+        dot.className='sync-dot synced';
+        txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ (no-cors) — กำลังอัปโหลดรูป...':'✓ Sheets สำเร็จ';
       }catch(e2){
-        dot2.className='sync-dot error';
-        txt2.textContent='⚠️ Sheets ไม่ได้ — ข้อมูลบันทึก local แล้ว';
+        dot.className='sync-dot error';
+        txt.textContent='⚠️ Sheets ไม่ได้ — บันทึก local แล้ว';
       }
+    }
+
+    // === POST 2: อัปโหลดทีละรูป (payload เล็กลง ไม่ timeout) ===
+    if(allPhotos.length>0){
+      const driveLinks=[];
+      for(let pi=0;pi<allPhotos.length;pi++){
+        const ph=allPhotos[pi];
+        txt.textContent='⏳ อัปโหลดรูป '+(pi+1)+'/'+allPhotos.length+'...';
+        try{
+          const pRes=await fetch(settings.sheetsUrl,{
+            method:'POST',mode:'cors',
+            body:JSON.stringify({action:'uploadPhoto',uid:data.uid,photo:{data:ph.data,label:ph.label,index:ph.index}}),
+            headers:{'Content-Type':'text/plain'}
+          });
+          if(pRes.ok){
+            const pJson=await pRes.json();
+            if(pJson.driveLink) driveLinks.push(pJson.driveLink);
+          }
+        }catch(pe){
+          driveLinks.push({label:ph.label+'_ERR_'+ph.index,url:pe.toString()});
+        }
+      }
+      const rec=history_data.find(function(r){return r.uid===data.uid;});
+      if(rec){
+        rec.driveLinks=driveLinks;
+        rec.photosPending=driveLinks.some(function(l){return l.url&&l.url.includes('ERR');});
+        try{saveHistory();}catch(e3){}
+      }
+      dot.className='sync-dot synced';
+      const okCount=driveLinks.filter(function(l){return l.url&&l.url.includes('drive.google');}).length;
+      txt.textContent='✓ อัปโหลดรูปสำเร็จ '+okCount+'/'+allPhotos.length+' รูป';
     }
   }
 
