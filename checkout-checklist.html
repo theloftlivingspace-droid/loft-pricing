@@ -740,6 +740,102 @@ function saveHistory(){
   }
 }
 
+const appsScriptCode = [
+  '// Google Apps Script - The Loft Checkout Log',
+  '// Deploy: Extensions > Apps Script > Deploy > New Deployment',
+  '// Type: Web app | Execute as: Me | Who has access: Anyone',
+  '',
+  "var SHEET_NAME = 'Raw_Checkout_Log';",
+  "var DRIVE_FOLDER_ID = '1tZzYWZ6MUYnjXGRMVHtg_vYLlHcF_H80';",
+  '',
+  'function doPost(e) {',
+  '  try {',
+  '    var data = JSON.parse(e.postData.contents);',
+  '    var ss = SpreadsheetApp.getActiveSpreadsheet();',
+  "    var sheet = ss.getSheetByName(SHEET_NAME);",
+  '    if (!sheet) {',
+  "      sheet = ss.insertSheet(SHEET_NAME);",
+  "      sheet.appendRow(['UID','Date','Time','Inspector','Room','OTA','Guest',",
+  "        'Status','Ready','Issues','Damages','Charge','ChargeNote',",
+  "        'ElecUnit','ElecTHB','LateCheckout','Repairs','ExtraNote',",
+  "        'DriveLinks','Timestamp','JSON']);",
+  '    }',
+  '    var driveLinks = [];',
+  '    var photos = data.photos || [];',
+  '    if (photos.length > 0) {',
+  '      var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);',
+  '      var subs = root.getFoldersByName(data.uid);',
+  '      var folder = subs.hasNext() ? subs.next() : root.createFolder(data.uid);',
+  '      for (var i = 0; i < photos.length; i++) {',
+  '        try {',
+  "          var base64 = photos[i].data.split(',')[1];",
+  '          var blob = Utilities.newBlob(',
+  "            Utilities.base64Decode(base64), 'image/jpeg',",
+  "            photos[i].label + '_' + photos[i].index + '.jpg'",
+  '          );',
+  '          var file = folder.createFile(blob);',
+  '          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);',
+  "          driveLinks.push({label: photos[i].label+' '+photos[i].index,",
+  "            url: 'https://drive.google.com/file/d/' + file.getId() + '/view'});",
+  '        } catch (photoErr) {}',
+  '      }',
+  '    }',
+  "    var linkStr = driveLinks.map(function(l){return l.label+': '+l.url;}).join(' | ');",
+  '    data.driveLinks = driveLinks;',
+  '    sheet.appendRow([',
+  '      data.uid, data.checkDate, data.checkTime, data.inspector,',
+  '      data.roomNum, data.ota, data.guestName, data.roomStatus, data.ready,',
+  "      (data.issues||[]).join(', '), (data.damages||[]).join(', '),",
+  '      data.chargeAmount||0, data.chargeNote, data.elecUnit||0, data.elecTotal||0,',
+  '      data.lateCheckout, (data.repairs||[]).join(\', \'), data.extraNote,',
+  '      linkStr, new Date().toISOString(), JSON.stringify(data)',
+  '    ]);',
+  '    if (data.damages && data.damages.length > 0) {',
+  "      var dmgSheet = ss.getSheetByName('Damage_History') || ss.insertSheet('Damage_History');",
+  '      dmgSheet.appendRow([data.uid, data.checkDate, data.roomNum, data.ota,',
+  "        (data.damages||[]).join(', '), data.chargeAmount||0, data.chargeNote, linkStr]);",
+  '    }',
+  '    return ContentService',
+  "      .createTextOutput(JSON.stringify({status:'ok',uid:data.uid,driveLinks:driveLinks}))",
+  '      .setMimeType(ContentService.MimeType.JSON);',
+  '  } catch (err) {',
+  '    return ContentService',
+  '      .createTextOutput(JSON.stringify({status:\'error\', msg:err.toString()}))',
+  '      .setMimeType(ContentService.MimeType.JSON);',
+  '  }',
+  '}',
+  '',
+  'function doGet(e) {',
+  '  try {',
+  "    var action = e.parameter.action || '';",
+  "    var callback = e.parameter.callback || '';",
+  "    var result = {status:'ok', msg:'Loft API running'};",
+  "    if (action === 'getHistory') {",
+  '      var ss2 = SpreadsheetApp.getActiveSpreadsheet();',
+  '      var sh2 = ss2.getSheetByName(SHEET_NAME);',
+  '      var records = [];',
+  '      if (sh2) {',
+  '        var rows = sh2.getDataRange().getValues();',
+  '        for (var i = 1; i < rows.length; i++) {',
+  '          try {',
+  '            var parsed = JSON.parse(rows[i][rows[i].length-1] || \'{}\');',
+  "            if (parsed && parsed.uid) { delete parsed.photos; records.push(parsed); }",
+  '          } catch (pe) {}',
+  '        }',
+  '      }',
+  "      result = {status:'ok', data:records, count:records.length};",
+  '    }',
+  '    var out = callback ? callback+\'(\'+JSON.stringify(result)+\')\' : JSON.stringify(result);',
+  '    var mime = callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;',
+  '    return ContentService.createTextOutput(out).setMimeType(mime);',
+  '  } catch (err) {',
+  '    return ContentService',
+  '      .createTextOutput(JSON.stringify({status:\'error\', msg:err.toString()}))',
+  '      .setMimeType(ContentService.MimeType.JSON);',
+  '  }',
+  '}'
+].join("\n");
+
 function renderHistory(filter='all'){
   const list=document.getElementById('historyList');
   let data=[...history_data].reverse();
@@ -1012,55 +1108,40 @@ async function finalSubmit(){
   history_data.push(data);
   try{ saveHistory(); }catch(lsErr){ showToast('⚠️ localStorage เต็ม — ลบประวัติเก่าออกบ้าง','error'); }
 
-  // Send to Sheets + Drive
+  // Send to Sheets + Drive (single no-cors POST, photos bundled)
   if(settings.autoSheets&&settings.sheetsUrl){
     const dot=document.getElementById('syncDot');
     const txt=document.getElementById('syncText');
     dot.className='sync-dot syncing';
 
     const allPhotos=[
-      ...(photoStore.dmgPreview||[]).map(function(p){return{data:p,label:'Damage'};}),
-      ...(photoStore.meterPreview||[]).map(function(p){return{data:p,label:'Meter'};}),
-      ...(photoStore.roomPreview||[]).map(function(p){return{data:p,label:'Room'};}),
+      ...(photoStore.dmgPreview||[]).map(function(p,i){return{data:p,label:'Damage',index:i+1};}),
+      ...(photoStore.meterPreview||[]).map(function(p,i){return{data:p,label:'Meter',index:i+1};}),
+      ...(photoStore.roomPreview||[]).map(function(p,i){return{data:p,label:'Room',index:i+1};}),
     ];
 
-    // STEP 1: Send text data only (no-cors = always works)
-    txt.textContent='กำลังส่ง Sheets...';
+    txt.textContent=allPhotos.length?'กำลังส่ง + อัปโหลด '+allPhotos.length+' รูป...':'กำลังส่ง Sheets...';
+
     try{
+      const payload=Object.assign({},data,{
+        action:'saveData',
+        photos:allPhotos  // send all photos in one POST
+      });
       await fetch(settings.sheetsUrl,{
         method:'POST',mode:'no-cors',
-        body:JSON.stringify(Object.assign({},data,{action:'saveData'})),
+        body:JSON.stringify(payload),
         headers:{'Content-Type':'text/plain'}
       });
       dot.className='sync-dot synced';
-      txt.textContent='✓ Sheets สำเร็จ';
+      txt.textContent=allPhotos.length?'✓ ส่งแล้ว — Sync เพื่อดูลิงค์รูป':'✓ Sheets สำเร็จ';
+      // Mark photos as pending — links come back after sync
+      if(allPhotos.length){
+        const rec=history_data.find(function(r){return r.uid===data.uid;});
+        if(rec){rec.photosPending=true;try{saveHistory();}catch(e3){}}
+      }
     }catch(e){
       dot.className='sync-dot error';
-      txt.textContent='⚠️ Sheets ไม่ได้';
-    }
-
-    // STEP 2: Upload photos one by one (with cors to get links back)
-    if(allPhotos.length){
-      txt.textContent='อัปโหลดรูป 0/'+allPhotos.length+'...';
-      const driveLinks=[];
-      for(var i=0;i<allPhotos.length;i++){
-        try{
-          const r2=await fetch(settings.sheetsUrl,{
-            method:'POST',
-            body:JSON.stringify({action:'uploadPhoto',uid:data.uid,photoData:allPhotos[i].data,label:allPhotos[i].label,index:i+1}),
-            headers:{'Content-Type':'text/plain'}
-          });
-          const j2=await r2.json();
-          if(j2.url) driveLinks.push({label:allPhotos[i].label+' '+(i+1),url:j2.url});
-          txt.textContent='อัปโหลดรูป '+(i+1)+'/'+allPhotos.length+'...';
-        }catch(pe){}
-      }
-      if(driveLinks.length){
-        const rec=history_data.find(function(r){return r.uid===data.uid;});
-        if(rec){rec.driveLinks=driveLinks;try{saveHistory();}catch(e3){}}
-        dot.className='sync-dot synced';
-        txt.textContent='✓ Sheets + Drive '+driveLinks.length+' รูป';
-      }
+      txt.textContent='⚠️ Sheets ไม่ได้ (บันทึก local แล้ว)';
     }
   }
 
@@ -1189,12 +1270,26 @@ async function syncFromSheets(){
 }
 
 function applySync(data,statusEl){
-  const existingUIDs=new Set(history_data.map(r=>r.uid));
-  const newRecords=data.filter(function(r){return r.uid&&!existingUIDs.has(r.uid);});
+  var existingUIDs=new Set(history_data.map(function(r){return r.uid;}));
+  var newRecords=data.filter(function(r){return r.uid&&!existingUIDs.has(r.uid);});
+  var updated=0;
+  // Merge driveLinks into existing records that are pending
+  data.forEach(function(remote){
+    if(!remote.uid) return;
+    var local=history_data.find(function(r){return r.uid===remote.uid;});
+    if(local&&remote.driveLinks&&remote.driveLinks.length&&(!local.driveLinks||!local.driveLinks.length)){
+      local.driveLinks=remote.driveLinks;
+      local.photosPending=false;
+      updated++;
+    }
+  });
   history_data=[...history_data,...newRecords];
-  saveHistory(); renderHistory();
+  try{saveHistory();}catch(e){}
+  renderHistory();
   statusEl.textContent='✓';
-  showToast('✓ Sync '+newRecords.length+' รายการใหม่จาก Sheets','success');
+  var msg='✓ Sync '+newRecords.length+' ใหม่';
+  if(updated) msg+=' + อัปเดต '+updated+' ลิงค์รูป';
+  showToast(msg,'success');
 }
 
 function fetchJSONP(url){
@@ -1226,135 +1321,28 @@ function clearHistory(){
 }
 
 // ===== APPS SCRIPT TEMPLATE =====
-const appsScriptCode=`// Google Apps Script - The Loft Checkout Log
-// Deploy: Extensions > Apps Script > Deploy > New Deployment
-// Type: Web app | Execute as: Me | Who has access: Anyone
-
-var SHEET_NAME = 'Raw_Checkout_Log';
-var DRIVE_FOLDER_ID = '1tZzYWZ6MUYnjXGRMVHtg_vYLlHcF_H80';
-
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var action = data.action || 'saveData';
-
-    // --- Upload single photo ---
-    if (action === 'uploadPhoto') {
-      var base64 = data.photoData.split(',')[1];
-      var blob = Utilities.newBlob(
-        Utilities.base64Decode(base64),
-        'image/jpeg',
-        data.label + '_' + data.index + '.jpg'
-      );
-      var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-      var subs = root.getFoldersByName(data.uid);
-      var folder = subs.hasNext() ? subs.next() : root.createFolder(data.uid);
-      var file = folder.createFile(blob);
-      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-      var url = 'https://drive.google.com/file/d/' + file.getId() + '/view';
-      return jsonResponse({ status: 'ok', url: url });
-    }
-
-    // --- Save form data to Sheet ---
-    var sheet = getOrCreateSheet(SHEET_NAME);
-    sheet.appendRow([
-      data.uid, data.checkDate, data.checkTime,
-      data.inspector, data.roomNum, data.ota,
-      data.guestName, data.roomStatus, data.ready,
-      (data.issues || []).join(', '),
-      (data.damages || []).join(', '),
-      data.chargeAmount || 0, data.chargeNote,
-      data.elecUnit || 0, data.elecTotal || 0,
-      data.lateCheckout,
-      (data.repairs || []).join(', '),
-      data.extraNote,
-      new Date().toISOString(),
-      JSON.stringify(data)
-    ]);
-
-    if (data.damages && data.damages.length > 0) {
-      var dmgSheet = getOrCreateSheet('Damage_History');
-      dmgSheet.appendRow([
-        data.uid, data.checkDate, data.roomNum, data.ota,
-        (data.damages || []).join(', '),
-        data.chargeAmount || 0, data.chargeNote
-      ]);
-    }
-
-    return jsonResponse({ status: 'ok', uid: data.uid });
-  } catch (err) {
-    return jsonResponse({ status: 'error', msg: err.toString() });
-  }
-}
-
-// --- GET: sync history back to app ---
-function doGet(e) {
-  try {
-    var action = e.parameter.action || '';
-    var callback = e.parameter.callback || '';
-    if (action === 'getHistory') {
-      var sheet = getOrCreateSheet(SHEET_NAME);
-      var rows = sheet.getDataRange().getValues();
-      var records = [];
-      for (var i = 1; i < rows.length; i++) {
-        try {
-          var parsed = JSON.parse(rows[i][19] || '{}');
-          if (parsed && parsed.uid) {
-            delete parsed.photos;
-            records.push(parsed);
-          }
-        } catch (pe) {}
-      }
-      var result = { status: 'ok', data: records, count: records.length };
-      if (callback) {
-        return ContentService
-          .createTextOutput(callback + '(' + JSON.stringify(result) + ')')
-          .setMimeType(ContentService.MimeType.JAVASCRIPT);
-      }
-      return jsonResponse(result);
-    }
-    return jsonResponse({ status: 'ok', msg: 'Loft API running' });
-  } catch (err) {
-    return jsonResponse({ status: 'error', msg: err.toString() });
-  }
-}
-
-function getOrCreateSheet(name) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(name);
-  if (!sheet) {
-    sheet = ss.insertSheet(name);
-    if (name === SHEET_NAME) {
-      sheet.appendRow([
-        'UID','Date','Time','Inspector','Room','OTA','Guest',
-        'Status','Ready','Issues','Damages','Charge(THB)',
-        'ChargeNote','ElecUnit','ElecTHB','LateCheckout',
-        'Repairs','ExtraNote','Timestamp','FullJSON'
-      ]);
-    }
-  }
-  return sheet;
-}
-
-function jsonResponse(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}`
-
 function copyAppsScript(){
+  const el=document.getElementById('appsScriptPreview');
+  el.textContent=appsScriptCode;
   copyText(appsScriptCode);
-  document.getElementById('appsScriptPreview').textContent=appsScriptCode;
+  showToast('✓ Copy Apps Script Code แล้ว','success');
 }
 
-// ===== UTILS =====
-function closeModal(id){document.getElementById(id).classList.remove('show');}
-function showToast(msg,type='success'){
+// ===== UTILITIES =====
+function showToast(msg,type){
   const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast '+type;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  t.textContent=msg;
+  t.className='toast'+(type?' '+type:'');
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2800);
 }
-function confirmClear(){if(confirm('ล้างข้อมูลฟอร์ม?')) resetForm();}
+function closeModal(id){
+  document.getElementById(id).classList.remove('show');
+}
+function confirmClear(){
+  if(confirm('ล้างฟอร์มทั้งหมด?')) resetForm();
+}
 
 // ===== INIT =====
 (function init(){
@@ -1370,6 +1358,7 @@ function confirmClear(){if(confirm('ล้างข้อมูลฟอร์�
   if(settings.defaultInspector) document.getElementById('inspector').value=settings.defaultInspector;
   updateProgress();
 })();
+
 </script>
 </body>
 </html>
