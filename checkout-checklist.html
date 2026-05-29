@@ -195,6 +195,7 @@ textarea{resize:none;min-height:68px;}
 .modal-btn-primary{background:var(--accent);color:#0f0f11;border:none;border-radius:10px;padding:13px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;width:100%;}
 .modal-btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:11px;font-family:var(--font);font-size:14px;cursor:pointer;width:100%;}
 .modal-btn-danger{background:transparent;color:var(--accent2);border:1px solid rgba(232,93,74,.3);border-radius:10px;padding:10px;font-family:var(--font);font-size:13px;cursor:pointer;width:100%;}
+.modal-btn-line{background:#06C755;color:#fff;border:none;border-radius:10px;padding:11px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;width:100%;}
 
 /* TOAST */
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:500;z-index:400;transition:transform .3s;white-space:nowrap;}
@@ -615,7 +616,9 @@ textarea{resize:none;min-height:68px;}
     <div class="modal-body" id="sumBody"></div>
     <div class="modal-actions">
       <button class="modal-btn-primary" id="confirmSubmitBtn" onclick="finalSubmit()">✅ ยืนยันบันทึก</button>
-      <button class="modal-btn-secondary" onclick="copyLineReport()">📱 Copy รายงาน LINE</button>
+      <button class="modal-btn-line" id="lineShareBtn" onclick="shareToLine()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;margin-right:5px"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.07 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>ส่งไลน์
+      </button>
       <button class="modal-btn-danger" onclick="closeModal('summaryModal')">✕ กลับแก้ไข</button>
     </div>
     <div class="sync-indicator" id="syncIndicator">
@@ -749,99 +752,61 @@ const appsScriptCode = [
   "var DRIVE_FOLDER_ID = '1tZzYWZ6MUYnjXGRMVHtg_vYLlHcF_H80';",
   '',
   'function doPost(e) {',
-  '  var output;',
   '  try {',
   '    var data = JSON.parse(e.postData.contents);',
-  '    // === uploadPhoto: upload single photo to Drive, update DriveLinks column ===',
-  "    if (data.action === 'uploadPhoto') {",
-  '      var root2 = DriveApp.getFolderById(DRIVE_FOLDER_ID);',
-  '      var subs2 = root2.getFoldersByName(data.uid);',
-  '      var folder2 = subs2.hasNext() ? subs2.next() : root2.createFolder(data.uid);',
-  '      var ph = data.photo;',
-  "      var raw = ph.data || '';",
-  "      var b64 = raw.indexOf(',') > -1 ? raw.split(',')[1] : raw;",
-  "      var blob2 = Utilities.newBlob(Utilities.base64Decode(b64), 'image/jpeg', ph.label+'_'+ph.index+'.jpg');",
-  '      var file2 = folder2.createFile(blob2);',
-  '      file2.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);',
-  "      var link = {label: ph.label+' '+ph.index, url: 'https://drive.google.com/file/d/'+file2.getId()+'/view'};",
-  '      // Update DriveLinks column in sheet for this UID',
-  '      var ss0 = SpreadsheetApp.getActiveSpreadsheet();',
-  "      var sh0 = ss0.getSheetByName(SHEET_NAME);",
-  '      if (sh0) {',
-  '        var vals = sh0.getDataRange().getValues();',
-  '        for (var ri = 1; ri < vals.length; ri++) {',
-  '          if (vals[ri][0] === data.uid) {',
-  '            var existingLinks = vals[ri][18] ? vals[ri][18]+\' | \' : \'\';',
-  "            sh0.getRange(ri+1, 19).setValue(existingLinks + link.label+': '+link.url);",
-  '            break;',
-  '          }',
-  '        }',
-  '      }',
-  '      output = ContentService',
-  "        .createTextOutput(JSON.stringify({status:'ok', driveLink:link}))",
+  '    var action = data.action || "saveData";',
+  '',
+  '    // ── uploadPhoto: รับรูปแยก ทีละรูป ──',
+  '    if (action === "uploadPhoto") {',
+  '      var uid = data.uid;',
+  '      var photo = data.photo;',
+  '      var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);',
+  '      var subs = root.getFoldersByName(uid);',
+  '      var folder = subs.hasNext() ? subs.next() : root.createFolder(uid);',
+  "      var base64 = photo.data.split(',')[1];",
+  '      var blob = Utilities.newBlob(',
+  "        Utilities.base64Decode(base64), 'image/jpeg',",
+  "        photo.label + '_' + photo.index + '.jpg'",
+  '      );',
+  '      var file = folder.createFile(blob);',
+  '      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);',
+  "      var url = 'https://drive.google.com/file/d/' + file.getId() + '/view';",
+  '      return ContentService',
+  "        .createTextOutput(JSON.stringify({status:'ok', url:url}))",
   '        .setMimeType(ContentService.MimeType.JSON);',
-  "      output.setHeader('Access-Control-Allow-Origin', '*');",
-  '      return output;',
   '    }',
+  '',
+  '    // ── saveData: บันทึกข้อมูลลง Sheet ──',
   '    var ss = SpreadsheetApp.getActiveSpreadsheet();',
-  "    var sheet = ss.getSheetByName(SHEET_NAME);",
+  '    var sheet = ss.getSheetByName(SHEET_NAME);',
   '    if (!sheet) {',
-  "      sheet = ss.insertSheet(SHEET_NAME);",
+  '      sheet = ss.insertSheet(SHEET_NAME);',
   "      sheet.appendRow(['UID','Date','Time','Inspector','Room','OTA','Guest',",
   "        'Status','Ready','Issues','Damages','Charge','ChargeNote',",
   "        'ElecUnit','ElecTHB','LateCheckout','Repairs','ExtraNote',",
   "        'DriveLinks','Timestamp','JSON']);",
   '    }',
-  '    var driveLinks = [];',
-  '    var photos = data.photos || [];',
-  '    if (photos.length > 0) {',
-  '      var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);',
-  '      var subs = root.getFoldersByName(data.uid);',
-  '      var folder = subs.hasNext() ? subs.next() : root.createFolder(data.uid);',
-  '      for (var i = 0; i < photos.length; i++) {',
-  '        try {',
-  "          var base64 = photos[i].data.split(',')[1];",
-  '          var blob = Utilities.newBlob(',
-  "            Utilities.base64Decode(base64), 'image/jpeg',",
-  "            photos[i].label + '_' + photos[i].index + '.jpg'",
-  '          );',
-  '          var file = folder.createFile(blob);',
-  '          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);',
-  "          driveLinks.push({label: photos[i].label+' '+photos[i].index,",
-  "            url: 'https://drive.google.com/file/d/' + file.getId() + '/view'});",
-  '        } catch (photoErr) { driveLinks.push({label: photos[i].label+\'_ERR\', url: photoErr.toString()}); }',
-  '      }',
-  '    }',
-  "    var linkStr = driveLinks.map(function(l){return l.label+': '+l.url;}).join(' | ');",
-  '    data.driveLinks = driveLinks;',
-  '    // Strip photos before saving to JSON column (prevents giant cell values)',
-  '    var dataForSheet = JSON.parse(JSON.stringify(data));',
-  '    delete dataForSheet.photos;',
   '    sheet.appendRow([',
   '      data.uid, data.checkDate, data.checkTime, data.inspector,',
   '      data.roomNum, data.ota, data.guestName, data.roomStatus, data.ready,',
   "      (data.issues||[]).join(', '), (data.damages||[]).join(', '),",
   '      data.chargeAmount||0, data.chargeNote, data.elecUnit||0, data.elecTotal||0,',
-  '      data.lateCheckout, (data.repairs||[]).join(\', \'), data.extraNote,',
-  '      linkStr, new Date().toISOString(), JSON.stringify(dataForSheet)',
+  "      data.lateCheckout, (data.repairs||[]).join(', '), data.extraNote,",
+  "      '', new Date().toISOString(), JSON.stringify(data)",
   '    ]);',
   '    if (data.damages && data.damages.length > 0) {',
   "      var dmgSheet = ss.getSheetByName('Damage_History') || ss.insertSheet('Damage_History');",
-  '      dmgSheet.appendRow([data.uid, data.checkDate, data.roomNum, data.ota,',
-  "        (data.damages||[]).join(', '), data.chargeAmount||0, data.chargeNote, linkStr]);",
+  "      dmgSheet.appendRow([data.uid, data.checkDate, data.roomNum, data.ota,",
+  "        (data.damages||[]).join(', '), data.chargeAmount||0, data.chargeNote, '']);",
   '    }',
-  '    output = ContentService',
-  "      .createTextOutput(JSON.stringify({status:'ok',uid:data.uid,driveLinks:driveLinks}))",
+  '    return ContentService',
+  "      .createTextOutput(JSON.stringify({status:'ok', uid:data.uid}))",
   '      .setMimeType(ContentService.MimeType.JSON);',
   '  } catch (err) {',
-  '    output = ContentService',
-  '      .createTextOutput(JSON.stringify({status:\'error\', msg:err.toString()}))',
+  '    return ContentService',
+  "      .createTextOutput(JSON.stringify({status:'error', msg:err.toString()}))",
   '      .setMimeType(ContentService.MimeType.JSON);',
   '  }',
-  "  output.setHeader('Access-Control-Allow-Origin', '*');",
-  "  output.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');",
-  "  output.setHeader('Access-Control-Allow-Headers', 'Content-Type');",
-  '  return output;',
   '}',
   '',
   'function doGet(e) {',
@@ -857,24 +822,20 @@ const appsScriptCode = [
   '        var rows = sh2.getDataRange().getValues();',
   '        for (var i = 1; i < rows.length; i++) {',
   '          try {',
-  '            var parsed = JSON.parse(rows[i][rows[i].length-1] || \'{}\');',
+  "            var parsed = JSON.parse(rows[i][rows[i].length-1] || '{}');",
   "            if (parsed && parsed.uid) { delete parsed.photos; records.push(parsed); }",
   '          } catch (pe) {}',
   '        }',
   '      }',
   "      result = {status:'ok', data:records, count:records.length};",
   '    }',
-  '    var out = callback ? callback+\'(\'+JSON.stringify(result)+\')\' : JSON.stringify(result);',
+  "    var out = callback ? callback+'('+JSON.stringify(result)+')' : JSON.stringify(result);",
   '    var mime = callback ? ContentService.MimeType.JAVASCRIPT : ContentService.MimeType.JSON;',
-  '    var getOut = ContentService.createTextOutput(out).setMimeType(mime);',
-  "    getOut.setHeader('Access-Control-Allow-Origin', '*');",
-  '    return getOut;',
+  '    return ContentService.createTextOutput(out).setMimeType(mime);',
   '  } catch (err) {',
-  '    var errOut = ContentService',
-  '      .createTextOutput(JSON.stringify({status:\'error\', msg:err.toString()}))',
+  '    return ContentService',
+  "      .createTextOutput(JSON.stringify({status:'error', msg:err.toString()}))",
   '      .setMimeType(ContentService.MimeType.JSON);',
-  "    errOut.setHeader('Access-Control-Allow-Origin', '*');",
-  '    return errOut;',
   '  }',
   '}'
 ].join("\n");
@@ -1136,6 +1097,7 @@ function showSummary(){
 // ===== FINAL SUBMIT =====
 async function finalSubmit(){
   const btn=document.getElementById('confirmSubmitBtn');
+  const lineBtn=document.getElementById('lineShareBtn');
   if(btn.disabled) return;
   btn.disabled=true;
   btn.textContent='⏳ กำลังบันทึก...';
@@ -1147,82 +1109,64 @@ async function finalSubmit(){
     showToast('⚠️ บันทึกซ้ำ — UID นี้มีอยู่แล้ว','error'); return;
   }
 
-  // Save record locally first
+  // Save to localStorage first
   history_data.push(data);
   try{ saveHistory(); }catch(lsErr){ showToast('⚠️ localStorage เต็ม — ลบประวัติเก่าออกบ้าง','error'); }
 
-  // Send to Sheets + Drive via CORS fetch (so we can read driveLinks back)
   if(settings.autoSheets&&settings.sheetsUrl){
     const dot=document.getElementById('syncDot');
     const txt=document.getElementById('syncText');
     dot.className='sync-dot syncing';
+    txt.textContent='กำลังส่ง Sheets...';
 
-    const allPhotos=[
-      ...(photoStore.dmgPreview||[]).map(function(p,i){return{data:p,label:'Damage',index:i+1};}),
-      ...(photoStore.meterPreview||[]).map(function(p,i){return{data:p,label:'Meter',index:i+1};}),
-      ...(photoStore.roomPreview||[]).map(function(p,i){return{data:p,label:'Room',index:i+1};}),
-    ];
-
-    txt.textContent='⏳ กำลังส่งข้อมูล...';
-
-    // === POST 1: ส่งข้อมูลก่อน (ไม่มีรูป) ===
+    // ── Step 1: ส่งข้อมูล (ไม่มีรูป) แบบ cors ──
     try{
-      const payload=Object.assign({},data,{action:'saveData',photos:[]});
-      const res=await fetch(settings.sheetsUrl,{
-        method:'POST',mode:'cors',
-        body:JSON.stringify(payload),
+      const resp=await fetch(settings.sheetsUrl,{
+        method:'POST',
+        body:JSON.stringify(Object.assign({},data,{action:'saveData',photos:[]})),
         headers:{'Content-Type':'text/plain'}
       });
-      if(res.ok){
-        dot.className='sync-dot synced';
-        txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ — กำลังอัปโหลดรูป '+allPhotos.length+' รูป...':'✓ Sheets สำเร็จ';
-      } else { throw new Error('HTTP '+res.status); }
-    }catch(e1){
-      try{
-        const payloadNC=Object.assign({},data,{action:'saveData',photos:[]});
-        await fetch(settings.sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(payloadNC),headers:{'Content-Type':'text/plain'}});
-        dot.className='sync-dot synced';
-        txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ (no-cors) — กำลังอัปโหลดรูป...':'✓ Sheets สำเร็จ';
-      }catch(e2){
-        dot.className='sync-dot error';
-        txt.textContent='⚠️ Sheets ไม่ได้ — บันทึก local แล้ว';
-      }
+      dot.className='sync-dot synced';
+      txt.textContent='✓ Sheets สำเร็จ';
+    }catch(e){
+      dot.className='sync-dot error';
+      txt.textContent='⚠️ Sheets ไม่ได้ (บันทึก local แล้ว)';
     }
 
-    // === POST 2: อัปโหลดทีละรูป (payload เล็กลง ไม่ timeout) ===
-    if(allPhotos.length>0){
+    // ── Step 2: ส่งรูปแยก ทีละรูป ──
+    const allPhotos=[
+      ...(photoStore.dmgPreview||[]).map((p,i)=>({data:p,label:'Damage',index:i+1})),
+      ...(photoStore.meterPreview||[]).map((p,i)=>({data:p,label:'Meter',index:i+1})),
+      ...(photoStore.roomPreview||[]).map((p,i)=>({data:p,label:'Room',index:i+1})),
+    ];
+
+    if(allPhotos.length){
+      txt.textContent='อัปโหลดรูป 0/'+allPhotos.length+'...';
       const driveLinks=[];
-      for(let pi=0;pi<allPhotos.length;pi++){
-        const ph=allPhotos[pi];
-        txt.textContent='⏳ อัปโหลดรูป '+(pi+1)+'/'+allPhotos.length+'...';
+      for(let i=0;i<allPhotos.length;i++){
         try{
-          showToast('📤 กำลังส่งรูป '+(pi+1)+'...','success');
-          const pRes=await fetch(settings.sheetsUrl,{
-            method:'POST',mode:'cors',
-            body:JSON.stringify({action:'uploadPhoto',uid:data.uid,photo:{data:ph.data,label:ph.label,index:ph.index}}),
+          const r=await fetch(settings.sheetsUrl,{
+            method:'POST',
+            body:JSON.stringify({action:'uploadPhoto',uid:data.uid,photo:allPhotos[i]}),
             headers:{'Content-Type':'text/plain'}
           });
-          const pText=await pRes.text();
-          showToast('📥 Response '+(pi+1)+': '+pText.substring(0,80),'success');
-          try{
-            const pJson=JSON.parse(pText);
-            if(pJson.driveLink) driveLinks.push(pJson.driveLink);
-            else showToast('⚠️ ไม่มี driveLink: '+JSON.stringify(pJson).substring(0,60),'error');
-          }catch(je){ showToast('⚠️ Parse error: '+pText.substring(0,60),'error'); }
-        }catch(pe){
-          showToast('❌ Fetch error '+(pi+1)+': '+pe.toString(),'error');
-          driveLinks.push({label:ph.label+'_ERR_'+ph.index,url:pe.toString()});
+          const j=await r.json();
+          if(j.url) driveLinks.push({label:allPhotos[i].label+' '+allPhotos[i].index,url:j.url});
+          txt.textContent='อัปโหลดรูป '+(i+1)+'/'+allPhotos.length+'...';
+        }catch(photoErr){ /* ข้ามรูปที่ error */ }
+      }
+      // บันทึก driveLinks กลับเข้า record
+      if(driveLinks.length){
+        const rec=history_data.find(r=>r.uid===data.uid);
+        if(rec){
+          rec.driveLinks=driveLinks;
+          try{saveHistory();}catch(e){}
         }
+        dot.className='sync-dot synced';
+        txt.textContent='✓ อัปโหลดรูปสำเร็จ '+driveLinks.length+' รูป';
+      } else {
+        txt.textContent='⚠️ รูปไม่ขึ้น Drive (ข้อมูลบันทึกแล้ว)';
       }
-      const rec=history_data.find(function(r){return r.uid===data.uid;});
-      if(rec){
-        rec.driveLinks=driveLinks;
-        rec.photosPending=driveLinks.some(function(l){return l.url&&l.url.includes('ERR');});
-        try{saveHistory();}catch(e3){}
-      }
-      dot.className='sync-dot synced';
-      const okCount=driveLinks.filter(function(l){return l.url&&l.url.includes('drive.google');}).length;
-      txt.textContent='✓ อัปโหลดรูปสำเร็จ '+okCount+'/'+allPhotos.length+' รูป';
     }
   }
 
@@ -1231,7 +1175,6 @@ async function finalSubmit(){
   closeModal('summaryModal');
   showToast('✓ บันทึกสำเร็จ: '+data.uid,'success');
 
-  // Reset form after short delay
   setTimeout(()=>{
     if(confirm('ล้างฟอร์มสำหรับตรวจห้องถัดไป?')) resetForm();
   },1200);
@@ -1250,6 +1193,20 @@ function resetForm(){
   calcElec(); updateProgress(); updateDamageBadge();
   // Scroll top
   window.scrollTo(0,0);
+}
+
+// ===== LINE SHARE =====
+function shareToLine(){
+  // ดึง data จาก record ที่บันทึกแล้ว (มี driveLinks) หรือจาก form ปัจจุบัน
+  const room=document.getElementById('roomNum').value;
+  const insp=document.getElementById('inspector').value;
+  const status=document.querySelector('input[name="roomStatus"]:checked');
+  const data=collectFormData();
+  // หา record ล่าสุดที่มี driveLinks (ถ้ามี)
+  const saved=history_data.find(r=>r.uid===data.uid)||data;
+  const text=buildLineReport(saved);
+  const url='https://line.me/R/share?text='+encodeURIComponent(text);
+  window.open(url,'_blank');
 }
 
 // ===== LINE REPORT =====
@@ -1403,10 +1360,10 @@ function clearHistory(){
 
 // ===== APPS SCRIPT TEMPLATE =====
 function copyAppsScript(){
-  const code=appsScriptCode.join('\n');
   const el=document.getElementById('appsScriptPreview');
-  el.textContent=code;
-  navigator.clipboard.writeText(code).then(()=>showToast('✓ Copy Apps Script Code แล้ว — วางใน Editor','success')).catch(()=>{prompt('Copy ด้วยมือ:',code);});
+  el.textContent=appsScriptCode;
+  copyText(appsScriptCode);
+  showToast('✓ Copy Apps Script Code แล้ว','success');
 }
 
 // ===== UTILITIES =====
