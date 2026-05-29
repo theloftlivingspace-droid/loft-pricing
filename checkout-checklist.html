@@ -1196,16 +1196,21 @@ async function finalSubmit(){
         const ph=allPhotos[pi];
         txt.textContent='⏳ อัปโหลดรูป '+(pi+1)+'/'+allPhotos.length+'...';
         try{
+          showToast('📤 กำลังส่งรูป '+(pi+1)+'...','success');
           const pRes=await fetch(settings.sheetsUrl,{
             method:'POST',mode:'cors',
             body:JSON.stringify({action:'uploadPhoto',uid:data.uid,photo:{data:ph.data,label:ph.label,index:ph.index}}),
             headers:{'Content-Type':'text/plain'}
           });
-          if(pRes.ok){
-            const pJson=await pRes.json();
+          const pText=await pRes.text();
+          showToast('📥 Response '+(pi+1)+': '+pText.substring(0,80),'success');
+          try{
+            const pJson=JSON.parse(pText);
             if(pJson.driveLink) driveLinks.push(pJson.driveLink);
-          }
+            else showToast('⚠️ ไม่มี driveLink: '+JSON.stringify(pJson).substring(0,60),'error');
+          }catch(je){ showToast('⚠️ Parse error: '+pText.substring(0,60),'error'); }
         }catch(pe){
+          showToast('❌ Fetch error '+(pi+1)+': '+pe.toString(),'error');
           driveLinks.push({label:ph.label+'_ERR_'+ph.index,url:pe.toString()});
         }
       }
