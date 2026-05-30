@@ -1168,25 +1168,17 @@ async function finalSubmit(){
     // === POST 1: ส่งข้อมูลก่อน (ไม่มีรูป) ===
     try{
       const payload=Object.assign({},data,{action:'saveData',photos:[]});
-      const res=await fetch(settings.sheetsUrl,{
-        method:'POST',mode:'cors',
+      // Use no-cors directly (Safari blocks cors to script.google.com)
+      await fetch(settings.sheetsUrl,{
+        method:'POST',mode:'no-cors',
         body:JSON.stringify(payload),
         headers:{'Content-Type':'text/plain'}
       });
-      if(res.ok){
-        dot.className='sync-dot synced';
-        txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ — กำลังอัปโหลดรูป '+allPhotos.length+' รูป...':'✓ Sheets สำเร็จ';
-      } else { throw new Error('HTTP '+res.status); }
+      dot.className='sync-dot synced';
+      txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ — กำลังอัปโหลดรูป '+allPhotos.length+' รูป...':'✓ Sheets สำเร็จ';
     }catch(e1){
-      try{
-        const payloadNC=Object.assign({},data,{action:'saveData',photos:[]});
-        await fetch(settings.sheetsUrl,{method:'POST',mode:'no-cors',body:JSON.stringify(payloadNC),headers:{'Content-Type':'text/plain'}});
-        dot.className='sync-dot synced';
-        txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ (no-cors) — กำลังอัปโหลดรูป...':'✓ Sheets สำเร็จ';
-      }catch(e2){
-        dot.className='sync-dot error';
-        txt.textContent='⚠️ Sheets ไม่ได้ — บันทึก local แล้ว';
-      }
+      dot.className='sync-dot error';
+      txt.textContent='⚠️ Sheets ไม่ได้ — บันทึก local แล้ว';
     }
 
     // === POST 2: อัปโหลดทีละรูป (payload เล็กลง ไม่ timeout) ===
@@ -1196,21 +1188,18 @@ async function finalSubmit(){
         const ph=allPhotos[pi];
         txt.textContent='⏳ อัปโหลดรูป '+(pi+1)+'/'+allPhotos.length+'...';
         try{
-          showToast('📤 กำลังส่งรูป '+(pi+1)+'...','success');
-          const pRes=await fetch(settings.sheetsUrl,{
-            method:'POST',mode:'cors',
+          txt.textContent='⏳ อัปโหลดรูป '+(pi+1)+'/'+allPhotos.length+'...';
+          // Use no-cors to avoid CORS block on Safari/iPhone
+          // Apps Script will upload and update Sheet directly
+          await fetch(settings.sheetsUrl,{
+            method:'POST',
+            mode:'no-cors',
             body:JSON.stringify({action:'uploadPhoto',uid:data.uid,photo:{data:ph.data,label:ph.label,index:ph.index}}),
             headers:{'Content-Type':'text/plain'}
           });
-          const pText=await pRes.text();
-          showToast('📥 Response '+(pi+1)+': '+pText.substring(0,80),'success');
-          try{
-            const pJson=JSON.parse(pText);
-            if(pJson.driveLink) driveLinks.push(pJson.driveLink);
-            else showToast('⚠️ ไม่มี driveLink: '+JSON.stringify(pJson).substring(0,60),'error');
-          }catch(je){ showToast('⚠️ Parse error: '+pText.substring(0,60),'error'); }
+          // no-cors = no response, assume success
+          driveLinks.push({label:ph.label+' '+ph.index,url:'pending'});
         }catch(pe){
-          showToast('❌ Fetch error '+(pi+1)+': '+pe.toString(),'error');
           driveLinks.push({label:ph.label+'_ERR_'+ph.index,url:pe.toString()});
         }
       }
