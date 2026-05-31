@@ -615,7 +615,7 @@ textarea{resize:none;min-height:68px;}
     <div class="modal-body" id="sumBody"></div>
     <div class="modal-actions">
       <button class="modal-btn-primary" id="confirmSubmitBtn" onclick="finalSubmit()">✅ ยืนยันบันทึก</button>
-      <button class="modal-btn-secondary" id="lineReportBtn" onclick="copyLineReport()" style="display:none">📱 Copy รายงาน LINE</button>
+      <button class="modal-btn-secondary" id="lineReportBtn" onclick="copyLineReport()" disabled style="opacity:0.4">📱 ส่งรายงาน LINE</button>
       <button class="modal-btn-danger" onclick="closeModal('summaryModal')">✕ กลับแก้ไข</button>
     </div>
     <div class="sync-indicator" id="syncIndicator">
@@ -1176,7 +1176,7 @@ async function finalSubmit(){
         headers:{'Content-Type':'text/plain'}
       });
       dot.className='sync-dot synced';
-      if(!allPhotos.length) document.getElementById('lineReportBtn').style.display='';
+      if(!allPhotos.length) const lBtn=document.getElementById('lineReportBtn');if(lBtn){lBtn.disabled=false;lBtn.style.opacity='1';}
       txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ — กำลังอัปโหลดรูป '+allPhotos.length+' รูป...':'✓ Sheets สำเร็จ';
     }catch(e1){
       dot.className='sync-dot error';
@@ -1224,7 +1224,7 @@ async function finalSubmit(){
               try{saveHistory();}catch(e3){}
             }
             dot.className='sync-dot synced';
-            document.getElementById('lineReportBtn').style.display='';
+            const lBtn=document.getElementById('lineReportBtn');if(lBtn){lBtn.disabled=false;lBtn.style.opacity='1';}
             txt.textContent='✓ อัปโหลด '+syncJson.driveLinks.length+' รูป Drive สำเร็จ';
           } else {
             dot.className='sync-dot synced';
@@ -1267,7 +1267,9 @@ function resetForm(){
 // ===== LINE REPORT =====
 function buildLineReport(data){
   let txt=`🏨 LOFT CHECKOUT REPORT\n━━━━━━━━━━━━━━━━━━\n`;
-  txt+=`🆔 ${data.uid}\n🚪 ห้อง: ${data.roomNum}\n👤 ผู้ตรวจ: ${data.inspector}\n📡 OTA: ${data.ota||'—'}\n`;
+  txt+=`🆔 ${data.uid}\n🚪 ห้อง: ${data.roomNum}\n`;
+  if(data.guestName) txt+=`🙍 แขก: ${data.guestName}\n`;
+  txt+=`👤 ผู้ตรวจ: ${data.inspector}\n📡 OTA: ${data.ota||'—'}\n`;
   const sl={normal:'✅ ปกติ',clean:'🧹 Clean เพิ่ม',minor:'⚠️ เสียหายเล็กน้อย',major:'🔴 เสียหายหนัก',block:'🚫 Block ห้อง'};
   txt+=`🏷️ สถานะ: ${sl[data.roomStatus]||data.roomStatus}\n`;
   txt+=`✅ พร้อมขาย: ${data.ready||'—'}\n`;
