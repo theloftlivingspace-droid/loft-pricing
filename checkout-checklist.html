@@ -1176,7 +1176,7 @@ async function finalSubmit(){
         headers:{'Content-Type':'text/plain'}
       });
       dot.className='sync-dot synced';
-
+      if(!allPhotos.length){const lb=document.getElementById('lineReportBtn');if(lb)lb.style.display='';window._lastSubmittedUID=data.uid;}
       txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ — กำลังอัปโหลดรูป '+allPhotos.length+' รูป...':'✓ Sheets สำเร็จ';
     }catch(e1){
       dot.className='sync-dot error';
@@ -1205,6 +1205,10 @@ async function finalSubmit(){
           driveLinks.push({label:ph.label+'_ERR_'+ph.index,url:pe.toString()});
         }
       }
+      // Show LINE button immediately after upload loop
+      const lbAfterUpload=document.getElementById('lineReportBtn');
+      if(lbAfterUpload){lbAfterUpload.style.display='';} 
+      window._lastSubmittedUID=data.uid;
       // Wait a moment for Apps Script to finish, then sync DriveLinks from Sheet
       dot.className='sync-dot syncing';
       txt.textContent='⏳ รอ Drive sync...';
