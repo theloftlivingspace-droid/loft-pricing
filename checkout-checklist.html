@@ -1287,7 +1287,8 @@ function buildLineReport(data){
 }
 function copyLineReport(){
   const data=collectFormData();
-  copyText(buildLineReport(data));
+  const msg=buildLineReport(data);
+  openLineShare(msg);
 }
 async function copyHistoryReport(uid){
   const data=history_data.find(r=>r.uid===uid);
@@ -1310,8 +1311,15 @@ async function copyHistoryReport(uid){
       }
     }catch(se){}
   }
-  copyText(buildLineReport(data));
+  openLineShare(buildLineReport(data));
 }
+function openLineShare(txt){
+  // Try LINE deep link first (opens LINE app with message pre-filled)
+  const encoded=encodeURIComponent(txt);
+  const lineUrl='https://line.me/R/msg/text/?'+encoded;
+  window.open(lineUrl,'_blank');
+}
+
 function copyText(txt){
   navigator.clipboard.writeText(txt).then(()=>showToast('✓ Copy แล้ว! วางใน LINE','success')).catch(()=>{prompt('Copy:',txt);});
 }
