@@ -1176,7 +1176,7 @@ async function finalSubmit(){
         headers:{'Content-Type':'text/plain'}
       });
       dot.className='sync-dot synced';
-      if(!allPhotos.length) const lBtn=document.getElementById('lineReportBtn');if(lBtn){lBtn.disabled=false;lBtn.style.opacity='1';}
+      if(!allPhotos.length){const lBtn=document.getElementById('lineReportBtn');if(lBtn){lBtn.disabled=false;lBtn.style.opacity='1';}}
       txt.textContent=allPhotos.length?'✓ Sheets สำเร็จ — กำลังอัปโหลดรูป '+allPhotos.length+' รูป...':'✓ Sheets สำเร็จ';
     }catch(e1){
       dot.className='sync-dot error';
