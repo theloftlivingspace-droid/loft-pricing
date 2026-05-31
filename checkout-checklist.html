@@ -1286,9 +1286,28 @@ function copyLineReport(){
   const data=collectFormData();
   copyText(buildLineReport(data));
 }
-function copyHistoryReport(uid){
+async function copyHistoryReport(uid){
   const data=history_data.find(r=>r.uid===uid);
-  if(data) copyText(buildLineReport(data));
+  if(!data) return;
+  // If driveLinks missing/pending, try sync from Sheet first
+  const hasPending = !data.driveLinks || data.driveLinks.length===0 ||
+    data.driveLinks.some(function(l){return !l.url||l.url==='pending'||l.url.includes('ERR');});
+  if(hasPending && settings.sheetsUrl){
+    showToast('⏳ ดึงลิงค์รูปจาก Drive...','success');
+    try{
+      const syncUrl=settings.sheetsUrl+'?action=getRecord&uid='+encodeURIComponent(uid);
+      const syncRes=await fetch(syncUrl,{mode:'cors'});
+      if(syncRes.ok){
+        const syncJson=await syncRes.json();
+        if(syncJson.driveLinks&&syncJson.driveLinks.length){
+          data.driveLinks=syncJson.driveLinks;
+          data.photosPending=false;
+          try{saveHistory();}catch(e){}
+        }
+      }
+    }catch(se){}
+  }
+  copyText(buildLineReport(data));
 }
 function copyText(txt){
   navigator.clipboard.writeText(txt).then(()=>showToast('✓ Copy แล้ว! วางใน LINE','success')).catch(()=>{prompt('Copy:',txt);});
