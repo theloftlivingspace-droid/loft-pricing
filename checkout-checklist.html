@@ -1203,15 +1203,35 @@ async function finalSubmit(){
           driveLinks.push({label:ph.label+'_ERR_'+ph.index,url:pe.toString()});
         }
       }
-      const rec=history_data.find(function(r){return r.uid===data.uid;});
-      if(rec){
-        rec.driveLinks=driveLinks;
-        rec.photosPending=driveLinks.some(function(l){return l.url&&l.url.includes('ERR');});
-        try{saveHistory();}catch(e3){}
+      // Wait a moment for Apps Script to finish, then sync DriveLinks from Sheet
+      dot.className='sync-dot syncing';
+      txt.textContent='⏳ รอ Drive sync...';
+      await new Promise(function(r){setTimeout(r,4000);});
+
+      // Fetch back the record from Sheet to get real DriveLinks
+      try{
+        const syncUrl=settings.sheetsUrl+'?action=getRecord&uid='+encodeURIComponent(data.uid);
+        const syncRes=await fetch(syncUrl,{mode:'cors'});
+        if(syncRes.ok){
+          const syncJson=await syncRes.json();
+          if(syncJson.driveLinks&&syncJson.driveLinks.length){
+            const rec=history_data.find(function(r){return r.uid===data.uid;});
+            if(rec){
+              rec.driveLinks=syncJson.driveLinks;
+              rec.photosPending=false;
+              try{saveHistory();}catch(e3){}
+            }
+            dot.className='sync-dot synced';
+            txt.textContent='✓ อัปโหลด '+syncJson.driveLinks.length+' รูป Drive สำเร็จ';
+          } else {
+            dot.className='sync-dot synced';
+            txt.textContent='✓ ส่งรูปแล้ว — ลิงค์จะขึ้นหลัง sync';
+          }
+        }
+      }catch(se){
+        dot.className='sync-dot synced';
+        txt.textContent='✓ ส่งรูปแล้ว (ลิงค์จะขึ้นหลัง sync)';
       }
-      dot.className='sync-dot synced';
-      const okCount=driveLinks.filter(function(l){return l.url&&l.url.includes('drive.google');}).length;
-      txt.textContent='✓ อัปโหลดรูปสำเร็จ '+okCount+'/'+allPhotos.length+' รูป';
     }
   }
 
