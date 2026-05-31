@@ -615,6 +615,7 @@ textarea{resize:none;min-height:68px;}
     <div class="modal-body" id="sumBody"></div>
     <div class="modal-actions">
       <button class="modal-btn-primary" id="confirmSubmitBtn" onclick="finalSubmit()">✅ ยืนยันบันทึก</button>
+      <button class="modal-btn-secondary" id="lineReportBtn" onclick="sendLineFromModal()" style="display:none">📱 ส่งรายงาน LINE</button>
       <button class="modal-btn-danger" onclick="closeModal('summaryModal')">✕ กลับแก้ไข</button>
     </div>
     <div class="sync-indicator" id="syncIndicator">
@@ -1222,15 +1223,20 @@ async function finalSubmit(){
               rec.photosPending=false;
               try{saveHistory();}catch(e3){}
             }
+            const lbSync=document.getElementById('lineReportBtn');if(lbSync)lbSync.style.display='';
+            window._lastSubmittedUID=data.uid;
             dot.className='sync-dot synced';
-
             txt.textContent='✓ อัปโหลด '+syncJson.driveLinks.length+' รูป Drive สำเร็จ';
           } else {
+            const lbFb=document.getElementById('lineReportBtn');if(lbFb)lbFb.style.display='';
+            window._lastSubmittedUID=data.uid;
             dot.className='sync-dot synced';
             txt.textContent='✓ ส่งรูปแล้ว — ลิงค์จะขึ้นหลัง sync';
           }
         }
       }catch(se){
+        const lbCatch=document.getElementById('lineReportBtn');if(lbCatch)lbCatch.style.display='';
+        window._lastSubmittedUID=data.uid;
         dot.className='sync-dot synced';
         txt.textContent='✓ ส่งรูปแล้ว (ลิงค์จะขึ้นหลัง sync)';
       }
@@ -1240,7 +1246,7 @@ async function finalSubmit(){
   btn.disabled=false;
   btn.textContent='✅ ยืนยันบันทึก';
   closeModal('summaryModal');
-  showToast('✓ บันทึกแล้ว — กด 📱 ส่ง LINE ในประวัติ','success');
+  showToast('✓ บันทึกสำเร็จ: '+data.uid,'success');
 
   // Reset form after short delay
   setTimeout(()=>{
@@ -1288,8 +1294,14 @@ function buildLineReport(data){
 }
 function copyLineReport(){
   const data=collectFormData();
-  const msg=buildLineReport(data);
-  openLineShare(msg);
+  openLineShare(buildLineReport(data));
+}
+function sendLineFromModal(){
+  // Use lastSubmittedUID set after upload completes
+  const uid=window._lastSubmittedUID;
+  const data=uid ? history_data.find(r=>r.uid===uid) : null;
+  if(data) openLineShare(buildLineReport(data));
+  else copyLineReport();
 }
 async function copyHistoryReport(uid){
   const data=history_data.find(r=>r.uid===uid);
