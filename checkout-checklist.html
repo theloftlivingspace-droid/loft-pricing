@@ -616,7 +616,7 @@ textarea{resize:none;min-height:68px;}
     <div class="modal-actions">
       <button class="modal-btn-primary" id="confirmSubmitBtn" onclick="finalSubmit()">✅ ยืนยันบันทึก</button>
       <button class="modal-btn-secondary" id="lineReportBtn" onclick="sendLineFromModal()" style="display:none">📱 ส่งรายงาน LINE</button>
-      <button class="modal-btn-danger" onclick="closeModal('summaryModal')">✕ กลับแก้ไข</button>
+      <button class="modal-btn-danger" onclick="closeAndReset()">✕ ปิด / ห้องถัดไป</button>
     </div>
     <div class="sync-indicator" id="syncIndicator">
       <div class="sync-dot" id="syncDot"></div>
@@ -1249,15 +1249,17 @@ async function finalSubmit(){
 
   btn.disabled=false;
   btn.textContent='✅ ยืนยันบันทึก';
-  closeModal('summaryModal');
   showToast('✓ บันทึกสำเร็จ: '+data.uid,'success');
-
-  // Reset form after short delay
-  setTimeout(()=>{
-    if(confirm('ล้างฟอร์มสำหรับตรวจห้องถัดไป?')) resetForm();
-  },1200);
+  // Modal stays open so user can tap LINE button after upload
+  // User closes manually with ✕ or after sending LINE
 }
 
+function closeAndReset(){
+  closeModal('summaryModal');
+  setTimeout(()=>{
+    if(confirm('ล้างฟอร์มสำหรับตรวจห้องถัดไป?')) resetForm();
+  },300);
+}
 function resetForm(){
   document.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(el=>el.checked=false);
   ['roomNum','guestName','actualCO','chargeAmount','chargeNote','meterBefore','meterAfter','repairNote','extraNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
