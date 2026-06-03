@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Loft — Reservations Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0d12;--bg2:#111520;--bg3:#181e2e;--surface:#1c2235;--surface2:#232c42;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);--gold:#c9a84c;--gold2:#e8c97a;--gold-dim:rgba(201,168,76,0.15);--green:#4ade80;--green-dim:rgba(74,222,128,0.12);--red:#f87171;--red-dim:rgba(248,113,113,0.12);--yellow:#fbbf24;--yellow-dim:rgba(251,191,36,0.12);--blue:#60a5fa;--purple:#a78bfa;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.header{background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border2);padding:0 2rem;position:sticky;top:0;z-index:100}
+.header-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(201,168,76,0.3)}
+.logo-text{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--gold2)}
+.logo-sub{font-size:.7rem;color:var(--text3);letter-spacing:.08em;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:12px}
+.sync-btn{background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);color:var(--gold2);padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;display:flex;align-items:center;gap:6px;transition:all .2s}
+.sync-btn:hover{background:rgba(201,168,76,0.25)}
+.sync-btn.loading .sync-icon{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.last-sync{font-size:.75rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.tabs{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 2rem}
+.tabs-inner{max-width:1600px;margin:0 auto;display:flex}
+.tab{padding:14px 20px;cursor:pointer;font-size:.875rem;font-weight:500;color:var(--text3);border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--gold2);border-bottom-color:var(--gold)}
+.tab-badge{background:var(--surface);padding:2px 7px;border-radius:10px;font-size:.7rem;font-family:'JetBrains Mono',monospace}
+.main{max-width:1600px;margin:0 auto;padding:1.5rem 2rem 3rem}
+.section{display:none}
+.section.active{display:block}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:1.5rem}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;position:relative;overflow:hidden;transition:transform .2s}
+.kpi:hover{transform:translateY(-2px)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kpi-color,var(--gold))}
+.kpi-label{font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.kpi-value{font-size:1.8rem;font-weight:600;line-height:1;color:var(--kpi-color,var(--gold2))}
+.kpi-sub{font-size:.75rem;color:var(--text3);margin-top:4px}
+.filter-bar{display:flex;gap:10px;margin-bottom:1.2rem;flex-wrap:wrap;align-items:center}
+.filter-bar input,.filter-bar select{background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:8px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .2s}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--gold)}
+.filter-bar input{min-width:220px}
+.filter-bar select option{background:var(--surface)}
+.filter-count{margin-left:auto;font-size:.8rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{background:var(--surface2);padding:12px 14px;text-align:left;font-size:.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border2);white-space:nowrap;cursor:pointer;user-select:none;transition:color .2s}
+thead th:hover{color:var(--gold2)}
+thead th .si{margin-left:4px;opacity:.4}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,0.03)}
+tbody tr.cancelled{opacity:.45}
+tbody tr.cur{background:rgba(201,168,76,0.05)}
+td{padding:10px 14px;vertical-align:middle}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.ch{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.ch-a{background:rgba(255,90,95,0.15);color:#ff7b7f}
+.ch-b{background:rgba(0,53,128,0.4);color:#6daaff}
+.ch-e{background:rgba(255,199,44,0.15);color:#ffc72c}
+.ch-t{background:rgba(0,175,240,0.15);color:#00aff0}
+.ch-d{background:var(--green-dim);color:var(--green)}
+.ch-o{background:rgba(167,139,250,0.15);color:var(--purple)}
+.rm{display:inline-block;padding:2px 9px;border-radius:4px;font-size:.72rem;font-weight:600}
+.rm-luxury{background:rgba(201,168,76,0.15);color:var(--gold2)}
+.rm-elegance{background:rgba(96,165,250,0.15);color:var(--blue)}
+.rm-legacy{background:rgba(167,139,250,0.15);color:var(--purple)}
+.rm-allure{background:rgba(244,114,182,0.15);color:#f472b6}
+.rm-retro{background:rgba(251,146,60,0.15);color:#fb923c}
+.rm-radiance{background:rgba(74,222,128,0.15);color:var(--green)}
+.rm-unknown{background:var(--surface2);color:var(--text3)}
+.sdot{display:inline-flex;align-items:center;gap:6px;font-size:.78rem}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dg{background:var(--green);box-shadow:0 0 6px rgba(74,222,128,0.6)}
+.dy{background:var(--yellow)}
+.dgr{background:var(--text3)}
+.dr{background:var(--red)}
+.dep{background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(251,191,36,0.2);padding:1px 7px;border-radius:4px;font-size:.68rem;font-weight:600;white-space:nowrap}
+.nc{background:var(--surface2);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text2)}
+.pagination{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:1.2rem;padding:.5rem}
+.pb{background:var(--surface);border:1px solid var(--border2);color:var(--text2);width:34px;height:34px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.pb:hover{border-color:var(--gold);color:var(--gold2)}
+.pb.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold2)}
+.pb:disabled{opacity:.3;cursor:not-allowed}
+.lgrid{display:grid;grid-template-columns:340px 1fr;gap:1.5rem}
+@media(max-width:1000px){.lgrid{grid-template-columns:1fr}}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.scard-hdr{background:var(--surface2);padding:14px 16px;font-size:.78rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border)}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--border);font-size:.85rem}
+.srow:last-child{border-bottom:none}
+.srow.tot{background:var(--gold-dim);border-top:1px solid rgba(201,168,76,0.2)}
+.slabel{color:var(--text2)}
+.sval{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.9rem}
+.vg{color:var(--green)}
+.vy{color:var(--yellow)}
+.vo{color:var(--gold2)}
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;color:var(--text3);gap:12px}
+.spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+.err-box{background:var(--red-dim);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:16px 20px;margin-bottom:1rem;font-size:.85rem;color:var(--red)}
+.cfg{background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:24px;margin-bottom:1.5rem}
+.cfg h3{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--gold2);margin-bottom:12px}
+.cfg p{font-size:.85rem;color:var(--text2);margin-bottom:16px;line-height:1.6}
+.irow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.irow input{flex:1;min-width:300px;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:10px 14px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.85rem;outline:none}
+.irow input:focus{border-color:var(--gold)}
+.pbtn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0a0d12;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:600;transition:opacity .2s,transform .2s}
+.pbtn:hover{opacity:.9;transform:translateY(-1px)}
+.inv-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+.inv-wrap h3{font-family:'DM Serif Display',serif;color:var(--gold2);margin-bottom:12px;font-size:1rem}
+.inv-form{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+.fg label{display:block;font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.fg input,.fg select{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);padding:9px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.875rem;outline:none}
+.fg input:focus,.fg select:focus{border-color:var(--gold)}
+.inv-doc{background:#fff;color:#1a1a1a;border-radius:12px;padding:40px 50px;display:none;box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+.inv-doc.show{display:block}
+.inv-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:30px;padding-bottom:24px;border-bottom:2px solid #f0e0b0}
+.inv-brand{font-family:'DM Serif Display',serif;font-size:1.8rem;color:#8b6914}
+.inv-sub{font-size:.8rem;color:#888;margin-top:2px}
+.inv-num{text-align:right}
+.inv-num .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:#888}
+.inv-num .val{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:600;color:#1a1a1a}
+.inv-parties{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px}
+.inv-party h4{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:#888;margin-bottom:8px}
+.inv-party .pname{font-weight:600;font-size:1rem}
+.inv-party .pdet{font-size:.85rem;color:#555;line-height:1.6}
+.inv-tbl{width:100%;border-collapse:collapse;margin-bottom:20px}
+.inv-tbl th{background:#fdf6e3;padding:10px 12px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#8b6914;border-bottom:1px solid #f0e0b0}
+.inv-tbl td{padding:10px 12px;border-bottom:1px solid #f5f5f5;font-size:.875rem}
+.inv-tots{display:flex;justify-content:flex-end}
+.inv-tblock{min-width:240px}
+.inv-trow{display:flex;justify-content:space-between;padding:6px 0;font-size:.875rem;color:#555}
+.inv-trow.fin{border-top:2px solid #f0e0b0;margin-top:4px;padding-top:10px;font-weight:700;font-size:1.1rem;color:#8b6914}
+.inv-footer{margin-top:40px;padding-top:20px;border-top:1px solid #eee;font-size:.78rem;color:#999;text-align:center;line-height:1.6}
+.prtbtn{background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);color:var(--gold2);padding:10px 20px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.875rem;font-weight:500;display:inline-flex;align-items:center;gap:6px;margin-top:1rem;margin-right:8px;transition:all .2s}
+.prtbtn:hover{background:rgba(201,168,76,0.25)}
+@media print{body{background:#fff}.header,.tabs,.filter-bar,.inv-wrap,.prtbtn,.cfg,.banner{display:none!important}.inv-doc{display:block!important;box-shadow:none}}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-state .icon{font-size:3rem;margin-bottom:12px;opacity:.4}
+.empty-state p{font-size:.9rem}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:3px}
+.sec-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--gold2);margin-bottom:1.2rem;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.gname{font-weight:500}
+.tc{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.2);padding:1px 6px;border-radius:3px;font-size:.65rem;font-weight:700;text-transform:uppercase;margin-left:4px}
+.tns{background:rgba(251,191,36,0.1);color:var(--yellow);border:1px solid rgba(251,191,36,0.2);padding:1px 6px;border-radius:3px;font-size:.65rem;font-weight:700;text-transform:uppercase;margin-left:4px}
+.tin{background:var(--green-dim);color:var(--green);border:1px solid rgba(74,222,128,0.25);padding:1px 6px;border-radius:3px;font-size:.65rem;font-weight:700;letter-spacing:.05em;margin-left:4px}
+.ascode{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:16px;margin-top:16px}
+.ascode pre{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text2);white-space:pre-wrap;line-height:1.6;overflow-x:auto}
+.ascode-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ascode-hdr span{font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
+.cpbtn{background:var(--surface2);border:1px solid var(--border2);color:var(--text2);padding:4px 10px;border-radius:5px;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif;transition:all .2s}
+.cpbtn:hover{color:var(--gold2);border-color:var(--gold)}
+.banner{background:var(--surface);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:12px 16px;margin-bottom:1.2rem;display:flex;align-items:center;gap:12px;font-size:.85rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">&#127968;</div>
+      <div>
+        <div class="logo-text">The Loft Living Space</div>
+        <div class="logo-sub">Reservations Dashboard</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="last-sync" id="lastSync">&#8212;</span>
+      <button class="sync-btn" id="syncBtn" onclick="doSync()">
+        <span class="sync-icon">&#8635;</span> Sync
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tabs-inner">
+    <div class="tab active" id="tab-bookings" onclick="switchTab('bookings')">&#128203; Bookings <span class="tab-badge" id="badge-bookings">&#8212;</span></div>
+    <div class="tab" id="tab-inhouse" onclick="switchTab('inhouse')">&#127968; In-House <span class="tab-badge" id="badge-inhouse">&#8212;</span></div>
+    <div class="tab" id="tab-ledger" onclick="switchTab('ledger')">&#128176; Bank Ledger</div>
+    <div class="tab" id="tab-invoice" onclick="switchTab('invoice')">&#129534; Invoice / Receipt</div>
+    <div class="tab" id="tab-setup" onclick="switchTab('setup')">&#9881;&#65039; Setup</div>
+  </div>
+</div>
+
+<div class="main">
+  <div id="errBox" class="err-box" style="display:none"></div>
+
+  <!-- BOOKINGS -->
+  <div class="section active" id="section-bookings">
+    <div class="banner" id="bannerBox">
+      <span>&#9881;&#65039;</span>
+      <span style="color:var(--text2)">กรุณาโหลดข้อมูลก่อน &#8212;</span>
+      <button class="pbtn" style="padding:6px 14px;font-size:.8rem" onclick="loadDemoData()">&#127919; Demo Data</button>
+      <span style="color:var(--text3)">หรือ</span>
+      <button class="pbtn" style="padding:6px 14px;font-size:.8rem;background:linear-gradient(135deg,#3b4a6b,#4a5a80)" onclick="switchTab('setup')">&#9881;&#65039; เชื่อมต่อ Sheet</button>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi" style="--kpi-color:var(--gold)"><div class="kpi-label">Total Bookings</div><div class="kpi-value" id="kpi-total">&#8212;</div><div class="kpi-sub">ทั้งหมด</div></div>
+      <div class="kpi" style="--kpi-color:var(--green)"><div class="kpi-label">Active / Upcoming</div><div class="kpi-value" id="kpi-active">&#8212;</div><div class="kpi-sub">ไม่รวม cancel/no-show</div></div>
+      <div class="kpi" style="--kpi-color:#ff5a5f"><div class="kpi-label">Airbnb</div><div class="kpi-value" id="kpi-airbnb">&#8212;</div><div class="kpi-sub">bookings</div></div>
+      <div class="kpi" style="--kpi-color:#6daaff"><div class="kpi-label">Booking.com</div><div class="kpi-value" id="kpi-booking">&#8212;</div><div class="kpi-sub">bookings</div></div>
+      <div class="kpi" style="--kpi-color:#ffc72c"><div class="kpi-label">Expedia</div><div class="kpi-value" id="kpi-expedia">&#8212;</div><div class="kpi-sub">bookings</div></div>
+      <div class="kpi" style="--kpi-color:#00aff0"><div class="kpi-label">Trip.com</div><div class="kpi-value" id="kpi-trip">&#8212;</div><div class="kpi-sub">bookings</div></div>
+      <div class="kpi" style="--kpi-color:var(--yellow)"><div class="kpi-label">มัดจำรอรับ</div><div class="kpi-value" id="kpi-dep">&#8212;</div><div class="kpi-sub">bookings มีมัดจำ</div></div>
+    </div>
+    <div class="filter-bar">
+      <input type="text" id="srch" placeholder="&#128269; ค้นหา ชื่อแขก / ห้อง / ResId..." oninput="applyFilters()">
+      <select id="fCh" onchange="applyFilters()">
+        <option value="">All Channels</option>
+        <option value="airbnb">Airbnb</option>
+        <option value="booking">Booking.com</option>
+        <option value="expedia">Expedia</option>
+        <option value="trip">Trip.com</option>
+        <option value="direct">Direct</option>
+      </select>
+      <select id="fRm" onchange="applyFilters()">
+        <option value="">All Rooms</option>
+        <option value="luxury">300 Luxury</option>
+        <option value="elegance">Elegance (103/204)</option>
+        <option value="legacy">Legacy (113/214)</option>
+        <option value="allure">Allure (203/205)</option>
+        <option value="retro">108 Retro</option>
+        <option value="radiance">Radiance (209/210)</option>
+      </select>
+      <select id="fSt" onchange="applyFilters()">
+        <option value="">All Status</option>
+        <option value="active">Active / Upcoming</option>
+        <option value="checkedout">Checked Out</option>
+        <option value="cancelled">Cancelled</option>
+        <option value="noshow">No Show</option>
+      </select>
+      <input type="month" id="fMo" onchange="applyFilters()" style="width:160px">
+      <span class="filter-count" id="fCnt"></span>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <div id="tblLoad" class="loading-state" style="display:none"><div class="spinner"></div><span>กำลังโหลด...</span></div>
+        <div id="tblEmpty" class="empty-state" style="display:none"><div class="icon">&#128237;</div><p>ไม่พบข้อมูล — กรุณาโหลดข้อมูลก่อน</p></div>
+        <table id="bkTbl" style="display:none">
+          <thead><tr>
+            <th onclick="sortBy('room')"># ห้อง <span class="si">&#8645;</span></th>
+            <th onclick="sortBy('guest')">ชื่อแขก <span class="si">&#8645;</span></th>
+            <th onclick="sortBy('checkin')">เช็คอิน <span class="si">&#8645;</span></th>
+            <th onclick="sortBy('checkout')">เช็คเอาท์ <span class="si">&#8645;</span></th>
+            <th>คืน</th>
+            <th onclick="sortBy('channel')">Channel <span class="si">&#8645;</span></th>
+            <th>Res ID</th>
+            <th>สถานะ</th>
+            <th>หมายเหตุ</th>
+          </tr></thead>
+          <tbody id="bkBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="pagination" id="bkPg"></div>
+  </div>
+
+  <!-- IN-HOUSE -->
+  <div class="section" id="section-inhouse">
+    <div class="sec-title">&#127968; แขกที่อยู่วันนี้ &amp; เช็คอิน/เอาท์วันนี้</div>
+    <div id="inhouseContent"><div class="loading-state"><div class="spinner"></div></div></div>
+  </div>
+
+  <!-- LEDGER -->
+  <div class="section" id="section-ledger">
+    <div class="sec-title">&#128176; Bank Ledger &#8212; สรุปรายรับ</div>
+    <div class="lgrid">
+      <div>
+        <div class="scard">
+          <div class="scard-hdr">&#128202; สรุปยอดรายรับ</div>
+          <div id="lSum"><div class="loading-state"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-title" style="margin-bottom:1rem;font-size:1rem">รายการ Bank Ledger</div>
+        <div class="filter-bar">
+          <input type="text" id="lSrch" placeholder="&#128269; ค้นหา ชื่อแขก / Booking ID..." oninput="applyLF()">
+          <select id="lOTA" onchange="applyLF()">
+            <option value="">All OTA</option>
+            <option value="airbnb">Airbnb</option>
+            <option value="booking">Booking.com</option>
+            <option value="expedia">Expedia</option>
+            <option value="trip">Trip.com</option>
+            <option value="scb">SCB</option>
+          </select>
+          <select id="lStat" onchange="applyLF()">
+            <option value="">All Status</option>
+            <option value="matched">&#10003; Matched / โอนแล้ว</option>
+            <option value="pending">&#8987; รอ Match</option>
+          </select>
+          <span class="filter-count" id="lCnt"></span>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table id="lTbl" style="display:none">
+              <thead><tr>
+                <th onclick="sortL('date')">วันที่ <span class="si">&#8645;</span></th>
+                <th>OTA</th>
+                <th>ชื่อแขก</th>
+                <th>ห้อง</th>
+                <th>เช็คอิน</th>
+                <th>เช็คเอาท์</th>
+                <th>คืน</th>
+                <th onclick="sortL('gross')">ยอดรวม <span class="si">&#8645;</span></th>
+                <th>Commission</th>
+                <th onclick="sortL('net')">NET <span class="si">&#8645;</span></th>
+                <th>สถานะ</th>
+              </tr></thead>
+              <tbody id="lBody"></tbody>
+            </table>
+            <div id="lEmpty" class="empty-state" style="display:none"><div class="icon">&#128196;</div><p>กรุณาโหลดข้อมูลก่อน</p></div>
+          </div>
+        </div>
+        <div class="pagination" id="lPg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVOICE -->
+  <div class="section" id="section-invoice">
+    <div class="sec-title">&#129534; ออก Invoice / Receipt</div>
+    <div class="inv-wrap">
+      <h3>ค้นหาการจอง</h3>
+      <div class="inv-form">
+        <div class="fg"><label>ชื่อแขก หรือ ResId</label><input type="text" id="invQ" placeholder="เช่น Amir Hayes / ABB-amirhayes"></div>
+        <div class="fg"><label>ประเภทเอกสาร</label>
+          <select id="invType">
+            <option value="invoice">Invoice (ใบแจ้งหนี้)</option>
+            <option value="receipt">Receipt (ใบเสร็จรับเงิน)</option>
+          </select>
+        </div>
+        <button class="pbtn" onclick="searchInv()">ค้นหา</button>
+      </div>
+      <div id="invRes" style="margin-top:12px"></div>
+    </div>
+    <div id="invDoc" class="inv-doc">
+      <div class="inv-hdr">
+        <div>
+          <div class="inv-brand">The Loft Living Space</div>
+          <div class="inv-sub">Thepharak Road, Samut Prakan &middot; theloftlivingspace@gmail.com</div>
+          <div class="inv-sub">ใกล้สุวรรณภูมิ 15 นาที &middot; MRT Sridan/Sritepha 8 นาที &middot; Free Parking</div>
+        </div>
+        <div class="inv-num">
+          <div class="lbl" id="invTypeLbl">INVOICE</div>
+          <div class="val" id="invNo">INV-2026-0001</div>
+          <div style="font-size:.8rem;color:#888;margin-top:4px">วันที่: <span id="invDt"></span></div>
+        </div>
+      </div>
+      <div class="inv-parties">
+        <div class="inv-party">
+          <h4>ออกให้แก่ (Bill To)</h4>
+          <div class="pname" id="invGN">&#8212;</div>
+          <div class="pdet" id="invGD" style="white-space:pre-line">&#8212;</div>
+        </div>
+        <div class="inv-party">
+          <h4>จากผู้ออก (From)</h4>
+          <div class="pname">The Loft Living Space</div>
+          <div class="pdet">&#3603;&#3633;&#3600;&#3609;&#3634;&#3600; &#3629;&#3614;&#3634;&#3619;&#3660;&#3607;&#3648;&#3617;&#3657;&#3609;&#3660;<br>Thepharak Road, Samut Prakan 10540</div>
+        </div>
+      </div>
+      <table class="inv-tbl">
+        <thead><tr>
+          <th>รายการ</th>
+          <th style="text-align:center">จำนวน</th>
+          <th>หน่วย</th>
+          <th style="text-align:right">ราคา/หน่วย</th>
+          <th style="text-align:right">ยอดรวม</th>
+        </tr></thead>
+        <tbody id="invItems"></tbody>
+      </table>
+      <div class="inv-tots">
+        <div class="inv-tblock">
+          <div class="inv-trow"><span>ค่าห้องพัก</span><span id="invSub">&#8212;</span></div>
+          <div class="inv-trow"><span>มัดจำที่ชำระแล้ว</span><span id="invDep">&#8212;</span></div>
+          <div class="inv-trow fin"><span>ยอดสุทธิ</span><span id="invTot">&#8212;</span></div>
+        </div>
+      </div>
+      <div class="inv-footer">
+        ขอบคุณที่เลือกพักที่ The Loft Living Space &middot; "Sleep Above the Ordinary"<br>
+        โอนเงินผ่าน SCB เลขที่บัญชี xxx-x-xxxxx-x ชื่อบัญชี: The Loft Living Space<br>
+        <span id="invNote" style="color:#aaa"></span>
+      </div>
+    </div>
+    <button class="prtbtn" id="prtBtn" onclick="window.print()" style="display:none">&#128424;&#65039; พิมพ์ / Save PDF</button>
+    <button class="prtbtn" id="editBtn" onclick="editInv()" style="display:none;border-color:rgba(96,165,250,0.3);color:var(--blue)">&#9999;&#65039; แก้ไขยอด</button>
+  </div>
+
+  <!-- SETUP -->
+  <div class="section" id="section-setup">
+    <div class="sec-title">&#9881;&#65039; การเชื่อมต่อข้อมูล</div>
+    <div class="cfg">
+      <h3>วิธีที่ 1 &#8212; Apps Script (แนะนำ)</h3>
+      <p>เชื่อมต่อโดยตรงกับ Sheet แบบ Private ดึงข้อมูลสด ทุกครั้งที่กด Sync</p>
+      <div class="irow">
+        <input type="text" id="asUrl" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
+        <button class="pbtn" onclick="loadFromAS()">เชื่อมต่อ</button>
+      </div>
+      <div class="ascode">
+        <div class="ascode-hdr">
+          <span>&#128196; Apps Script Code — วางใน Extensions &#8594; Apps Script ของ Sheet</span>
+          <button class="cpbtn" id="cpBtn" onclick="copyCode()">&#128203; Copy</button>
+        </div>
+        <pre id="asCode">function doGet(e) {
+  var ss = SpreadsheetApp.openById('1XbTJLhecql_HNqyE80Hc6h30A2_elIxliudF4e6Rlz0');
+  var sheet = ss.getSheetByName('Sheet1');
+  var data = sheet.getDataRange().getValues();
+
+  var bookings = [];
+  var ledger = [];
+  var summary = {};
+  var mode = 'header';
+
+  for (var i = 0; i < data.length; i++) {
+    var row = data[i];
+    var c0 = String(row[0] || '').trim();
+
+    if (c0 === 'เลขห้อง') { mode = 'bookings'; continue; }
+    if (c0.indexOf('สรุปยอด') === 0 || c0 === 'Booking.com') { mode = 'summary'; }
+    if (c0 === 'วันที่ตรวจพบ') { mode = 'ledger'; continue; }
+
+    if (mode === 'bookings' && c0 && c0.indexOf('สรุป') !== 0) {
+      bookings.push({
+        room: c0,
+        guest: String(row[1] || ''),
+        checkin: String(row[2] || ''),
+        checkout: String(row[3] || ''),
+        channel: String(row[4] || ''),
+        resId: String(row[5] || ''),
+        note: String(row[6] || '')
+      });
+    }
+
+    if (mode === 'summary' && c0 && row[1]) {
+      summary[c0] = parseFloat(String(row[1]).replace(/,/g, '')) || 0;
+    }
+
+    if (mode === 'ledger' && c0 && c0 !== 'วันที่ตรวจพบ') {
+      ledger.push({
+        date: String(row[0] || ''),
+        ota: String(row[1] || ''),
+        bookingId: String(row[2] || ''),
+        guest: String(row[4] || ''),
+        room: String(row[5] || ''),
+        checkin: String(row[6] || ''),
+        checkout: String(row[7] || ''),
+        nights: parseInt(row[8]) || 0,
+        gross: parseFloat(String(row[9]).replace(/,/g, '')) || 0,
+        commission: parseFloat(String(row[10]).replace(/,/g, '')) || 0,
+        net: parseFloat(String(row[11]).replace(/,/g, '')) || 0,
+        status: String(row[12] || '')
+      });
+    }
+  }
+
+  var result = { bookings: bookings, ledger: ledger, summary: summary };
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+      </div>
+      <div style="margin-top:12px;font-size:.82rem;color:var(--text3);line-height:1.7">
+        <strong style="color:var(--text2)">วิธี Deploy:</strong><br>
+        1. เปิด Google Sheet &#8594; Extensions &#8594; Apps Script<br>
+        2. วางโค้ดด้านบน &#8594; Save<br>
+        3. Deploy &#8594; New Deployment &#8594; Web App<br>
+        4. Execute as: <strong>Me</strong> &nbsp; Who has access: <strong>Anyone</strong><br>
+        5. Copy URL &#8594; วางในช่องด้านบน &#8594; กด เชื่อมต่อ
+      </div>
+    </div>
+    <div class="cfg" style="margin-top:1rem">
+      <h3>วิธีที่ 2 &#8212; Demo Data (offline)</h3>
+      <p>ใช้ข้อมูลตัวอย่างจาก Sheet ที่ดึงมาล่าสุด เพื่อ preview dashboard</p>
+      <button class="pbtn" onclick="loadDemoData()">&#127919; โหลด Demo Data</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var allBK = [], allLD = [], ldSum = {};
+var filtBK = [], filtLD = [];
+var bkPage = 1, ldPage = 1;
+var BK_PS = 30, LD_PS = 25;
+var bkSortK = 'checkin', bkSortD = -1;
+var ldSortK = 'date', ldSortD = -1;
+var invCnt = 1;
+
+/* ── TAB ── */
+function switchTab(name) {
+  var tabs = document.querySelectorAll('.tab');
+  var secs = document.querySelectorAll('.section');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  for (var i = 0; i < secs.length; i++) secs[i].classList.remove('active');
+  var t = document.getElementById('tab-' + name);
+  var s = document.getElementById('section-' + name);
+  if (t) t.classList.add('active');
+  if (s) s.classList.add('active');
+  if (name === 'inhouse') renderInhouse();
+}
+
+/* ── SYNC ── */
+function doSync() {
+  var btn = document.getElementById('syncBtn');
+  btn.classList.add('loading');
+  var url = document.getElementById('asUrl') ? document.getElementById('asUrl').value.trim() : '';
+  if (url) {
+    loadFromAS();
+  } else {
+    showErr('ยังไม่ได้ตั้ง Apps Script URL &#8212; ไปที่แท็บ Setup');
+    btn.classList.remove('loading');
+  }
+}
+
+async function loadFromAS() {
+  var url = document.getElementById('asUrl').value.trim();
+  if (!url) { showErr('กรุณาใส่ Apps Script URL'); return; }
+  setLoad(true);
+  try {
+    var res = await fetch(url);
+    var json = await res.json();
+    if (json.bookings) allBK = json.bookings;
+    if (json.ledger) allLD = json.ledger;
+    if (json.summary) ldSum = json.summary;
+    afterLoad();
+  } catch(e) {
+    showErr('ไม่สามารถเชื่อมต่อ: ' + e.message);
+    setLoad(false);
+  }
+  document.getElementById('syncBtn').classList.remove('loading');
+}
+
+function loadDemoData() {
+  allBK = [
+    {room:'300 Luxury',guest:'Chanel, Rica',checkin:'2026-03-01',checkout:'2026-03-21',channel:'Airbnb',resId:'ABB-chanelrica-20260301',note:''},
+    {room:'209 Radiance',guest:'Ozgur Oruc',checkin:'2026-05-18',checkout:'2026-06-01',channel:'Airbnb',resId:'ABB-zgroru-20260518',note:''},
+    {room:'210 Radiance',guest:'Julien Faye',checkin:'2026-05-20',checkout:'2026-06-08',channel:'Airbnb',resId:'ABB-julientien-20260520',note:''},
+    {room:'108 Retro',guest:'Guilherme Fernandes',checkin:'2026-05-18',checkout:'2026-06-04',channel:'Airbnb',resId:'ABB-guilhermem-20260518',note:''},
+    {room:'103 Elegance',guest:'SU MYAT AUNG',checkin:'2026-06-03',checkout:'2026-06-12',channel:'Extranet',resId:'OTH-sumyataung-20260603',note:'มัดจำ 3,000 บาท'},
+    {room:'214 Legacy',guest:'Dogukan Kaner',checkin:'2026-05-31',checkout:'2026-06-10',channel:'Airbnb',resId:'ABB-dogukankan-20260531',note:''},
+    {room:'300 Luxury',guest:'Arqum Shahid Hussain',checkin:'2026-05-31',checkout:'2026-06-04',channel:'Booking',resId:'BKC-arqumshahi-20260531',note:'มัดจำ 3,000 บาท'},
+    {room:'205 Allure',guest:'Cedric Nixon',checkin:'2026-05-06',checkout:'2026-06-07',channel:'Airbnb',resId:'ABB-cedricnixo-20260506',note:''},
+    {room:'203 Allure',guest:'Kgotlello Masemola',checkin:'2026-05-27',checkout:'2026-06-07',channel:'Airbnb',resId:'ABB-kgotlellom-20260528',note:''},
+    {room:'113 Legacy',guest:'Eiji Uenaka',checkin:'2026-05-30',checkout:'2026-06-06',channel:'Airbnb',resId:'ABB-eijiuenaka-20260530',note:''},
+    {room:'204 Elegance',guest:'Nick Laschet',checkin:'2026-05-10',checkout:'2026-05-31',channel:'Airbnb',resId:'ABB-nicklasche-20260510',note:''},
+    {room:'113 Legacy',guest:'Alexander Fong',checkin:'2027-02-19',checkout:'2027-03-12',channel:'Booking',resId:'BKC-alexanderf-20260219',note:'มัดจำ 3,000 บาท'},
+    {room:'108 Retro',guest:'Christopher Nguyen',checkin:'2027-02-19',checkout:'2027-03-12',channel:'Booking',resId:'BKC-christophe-20260219',note:'มัดจำ 3,000 บาท'},
+    {room:'103 ยกเลิก',guest:'Araya Rattanabamrung',checkin:'',checkout:'',channel:'Trip',resId:'TRP-arayaratta-20260518',note:'มัดจำ 3,000 บาท'},
+    {room:'203 ยกเลิก',guest:'SM Muhaimen Mahmood',checkin:'2026-04-07',checkout:'2026-04-10',channel:'Airbnb',resId:'ABB-smmuhaimen-20260407',note:''},
+    {room:'108 no show',guest:'GLEB IURKOV',checkin:'2026-05-12',checkout:'',channel:'Expedia',resId:'EXP-glebiurkov-20260512',note:'มัดจำ 3,000 บาท'},
+    {room:'113 Legacy',guest:'Huynh Duong Luong',checkin:'2026-06-24',checkout:'2026-06-30',channel:'Airbnb',resId:'ABB-huynhduong-20260624',note:''},
+    {room:'103 Elegance',guest:'HAO TING YAN',checkin:'2026-05-23',checkout:'2026-06-01',channel:'Direct',resId:'DBK-haotingyan-20260523',note:'มัดจำ 3,000 บาท'},
+    {room:'113 Legacy',guest:'Teck Foo',checkin:'2026-05-18',checkout:'2026-05-22',channel:'Direct',resId:'DBK-teckfoo-20260518',note:'มัดจำ 3,000 บาท'},
+    {room:'204 Elegance',guest:'Amjad Ohid',checkin:'2026-04-02',checkout:'2026-04-20',channel:'Airbnb',resId:'ABB-amjadohid-20260402',note:''},
+    {room:'300 Luxury',guest:'Shahid Hussain Arqum',checkin:'2026-05-14',checkout:'2026-05-31',channel:'Trip',resId:'TRP-shahidhuss-20260514',note:'มัดจำ 3,000 บาท'},
+    {room:'205 Allure',guest:'Amir Hayes',checkin:'2026-03-29',checkout:'2026-04-14',channel:'Airbnb',resId:'ABB-amirhayes-20260329',note:''}
+  ];
+  allLD = [
+    {date:'2026-06-02',ota:'Airbnb',bookingId:'ABB-HMRKPSAX9F',guest:'Harley Bowman',room:'private apt',checkin:'2026-06-01',checkout:'2026-06-16',nights:15,gross:6507.53,commission:0,net:6507.53,status:'โอนแล้ว'},
+    {date:'2026-06-01',ota:'Airbnb',bookingId:'ABB-HMTZCKN2XM',guest:'Dogukan Kaner',room:'113/214 Legacy',checkin:'2026-05-31',checkout:'2026-06-10',nights:10,gross:5218.86,commission:0,net:5218.86,status:'โอนแล้ว'},
+    {date:'2026-05-30',ota:'Booking.com',bookingId:'6506062257',guest:'Shahid Hussain Arqum',room:'300 Luxury',checkin:'2026-05-31',checkout:'2026-06-04',nights:4,gross:2380.50,commission:468.82,net:1911.68,status:'PrePaid - รอ Booking.com โอน'},
+    {date:'2026-05-28',ota:'Airbnb',bookingId:'ABB-HM8TCJMPKR',guest:'Kgotlello Masemola',room:'203/205 Allure',checkin:'2026-05-27',checkout:'2026-06-07',nights:11,gross:4428.06,commission:0,net:4428.06,status:'โอนแล้ว'},
+    {date:'2026-05-25',ota:'Trip.com',bookingId:'1128147902481442',guest:'Shahid Hussain/Arqum',room:'300 Luxury',checkin:'2026-05-14',checkout:'2026-05-31',nights:17,gross:0,commission:0,net:7529.75,status:'Net Rate - รอ monthly settlement'},
+    {date:'2026-05-21',ota:'Airbnb',bookingId:'ABB-HMQ9DXRDKP',guest:'Julien Faye',room:'209/210 Radiance',checkin:'2026-05-20',checkout:'2026-06-08',nights:19,gross:7994.40,commission:0,net:7994.40,status:'โอนแล้ว'},
+    {date:'2026-05-07',ota:'Airbnb',bookingId:'ABB-HMF3M5DXDD',guest:'Cedric Nixon',room:'203/205 Allure',checkin:'2026-05-06',checkout:'2026-06-07',nights:32,gross:15845.68,commission:0,net:14167.21,status:'โอนแล้ว'},
+    {date:'2026-04-24',ota:'Booking.com',bookingId:'6953423073',guest:'Nguyen Christopher',room:'108 Retro',checkin:'2027-02-19',checkout:'2027-03-12',nights:21,gross:12273.49,commission:2230.14,net:10043.35,status:'PrePaid - รอ Booking.com โอน'},
+    {date:'2026-04-24',ota:'Booking.com',bookingId:'6681573604',guest:'Fong Alexander',room:'113/214 Legacy',checkin:'2027-02-19',checkout:'2027-03-12',nights:21,gross:9416.33,commission:1721.46,net:7694.87,status:'PrePaid - รอ Booking.com โอน'},
+    {date:'2026-05-05',ota:'Trip.com',bookingId:'batch-may',guest:'NAM/SANG WON + 2',room:'misc',checkin:'',checkout:'',nights:0,gross:0,commission:0,net:5555.03,status:'Matched - Trip.com settlement'}
+  ];
+  ldSum = {
+    'Booking.com (รอ)': 40224.48,
+    'Expedia (รอ)': 35994.69,
+    'Trip.com (รอ)': 61494.14,
+    'รอ match (SCB)': 195548.23,
+    'Airbnb Payout': 437663.92,
+    'Booking.com Payout': 2404.72,
+    'Expedia Payout': 3930.72,
+    'Expedia remittance': 19591.58,
+    'Trip.com Payout': 3355.29,
+    'Trip.com settlement': 24046.40,
+    'Trip.com settlement (batch)': 5555.03,
+    'รวม NET ทั้งหมด': 829809.20,
+    'Match แล้ว': 496547.66,
+    'รอ match': 195548.23
+  };
+  afterLoad();
+  switchTab('bookings');
+}
+
+function afterLoad() {
+  setLoad(false);
+  var b = document.getElementById('bannerBox');
+  if (b) b.style.display = 'none';
+  document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('th-TH');
+  updateKPIs();
+  applyFilters();
+  applyLF();
+  renderLSum();
+  document.getElementById('tblEmpty').style.display = 'none';
+  document.getElementById('bkTbl').style.display = '';
+}
+
+/* ── HELPERS ── */
+function bkStatus(b) {
+  var r = b.room.toLowerCase();
+  if (r.indexOf('ยกเลิก') >= 0 || r.indexOf('cancel') >= 0) return 'cancelled';
+  if (r.indexOf('no show') >= 0) return 'noshow';
+  var today = new Date(); today.setHours(0,0,0,0);
+  var ci = b.checkin ? new Date(b.checkin) : null;
+  var co = b.checkout ? new Date(b.checkout) : null;
+  if (ci && co && ci <= today && today < co) return 'inhouse';
+  if (co && co <= today) return 'checkedout';
+  return 'upcoming';
+}
+function rmType(room) {
+  var r = room.toLowerCase();
+  if (r.indexOf('luxury') >= 0) return 'luxury';
+  if (r.indexOf('elegance') >= 0) return 'elegance';
+  if (r.indexOf('legacy') >= 0) return 'legacy';
+  if (r.indexOf('allure') >= 0) return 'allure';
+  if (r.indexOf('retro') >= 0) return 'retro';
+  if (r.indexOf('radiance') >= 0) return 'radiance';
+  return 'unknown';
+}
+function chClass(ch) {
+  var c = (ch||'').toLowerCase();
+  if (c.indexOf('airbnb') >= 0) return 'ch-a';
+  if (c.indexOf('booking') >= 0) return 'ch-b';
+  if (c.indexOf('expedia') >= 0) return 'ch-e';
+  if (c.indexOf('trip') >= 0) return 'ch-t';
+  if (c === 'direct' || c.indexOf('direct') >= 0 || c === 'dbk') return 'ch-d';
+  return 'ch-o';
+}
+function chLabel(ch) {
+  var c = (ch||'').toLowerCase();
+  if (c.indexOf('airbnb') >= 0) return 'Airbnb';
+  if (c.indexOf('booking') >= 0) return 'Booking.com';
+  if (c.indexOf('expedia') >= 0) return 'Expedia';
+  if (c.indexOf('trip') >= 0) return 'Trip.com';
+  if (c === 'direct' || c.indexOf('direct') >= 0) return 'Direct';
+  return ch || 'Other';
+}
+function nights(a, b) {
+  if (!a || !b) return null;
+  var n = Math.round((new Date(b) - new Date(a)) / 86400000);
+  return n > 0 ? n : null;
+}
+function fd(d) {
+  if (!d) return '&#8212;';
+  try { var dt = new Date(d); if (isNaN(dt)) return d; return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'}); } catch(e) { return d; }
+}
+function fm(n) {
+  if (n === null || n === undefined) return '&#8212;';
+  return '&#3647;' + Number(n).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+/* ── KPIs ── */
+function updateKPIs() {
+  var active = 0;
+  for (var i = 0; i < allBK.length; i++) {
+    var s = bkStatus(allBK[i]);
+    if (s !== 'cancelled' && s !== 'noshow') active++;
+  }
+  function cnt(k) {
+    var c = 0;
+    for (var i = 0; i < allBK.length; i++) if ((allBK[i].channel||'').toLowerCase().indexOf(k) >= 0) c++;
+    return c;
+  }
+  var dep = 0;
+  for (var i = 0; i < allBK.length; i++) {
+    if ((allBK[i].note||'').indexOf('มัดจำ') >= 0 && bkStatus(allBK[i]) !== 'cancelled') dep++;
+  }
+  var ih = 0;
+  for (var i = 0; i < allBK.length; i++) if (bkStatus(allBK[i]) === 'inhouse') ih++;
+  document.getElementById('kpi-total').textContent = allBK.length;
+  document.getElementById('kpi-active').textContent = active;
+  document.getElementById('kpi-airbnb').textContent = cnt('airbnb');
+  document.getElementById('kpi-booking').textContent = cnt('booking');
+  document.getElementById('kpi-expedia').textContent = cnt('expedia');
+  document.getElementById('kpi-trip').textContent = cnt('trip');
+  document.getElementById('kpi-dep').textContent = dep;
+  document.getElementById('badge-bookings').textContent = allBK.length;
+  document.getElementById('badge-inhouse').textContent = ih;
+}
+
+/* ── BOOKING FILTER + TABLE ── */
+function applyFilters() {
+  var srch = (document.getElementById('srch').value||'').toLowerCase();
+  var fch = document.getElementById('fCh').value;
+  var frm = document.getElementById('fRm').value;
+  var fst = document.getElementById('fSt').value;
+  var fmo = document.getElementById('fMo').value;
+  filtBK = [];
+  for (var i = 0; i < allBK.length; i++) {
+    var b = allBK[i];
+    if (srch && (b.guest||'').toLowerCase().indexOf(srch) < 0 && (b.room||'').toLowerCase().indexOf(srch) < 0 && (b.resId||'').toLowerCase().indexOf(srch) < 0) continue;
+    if (fch && (b.channel||'').toLowerCase().indexOf(fch) < 0) continue;
+    if (frm && (b.room||'').toLowerCase().indexOf(frm) < 0) continue;
+    if (fst) {
+      var s = bkStatus(b);
+      if (fst === 'active' && s !== 'inhouse' && s !== 'upcoming') continue;
+      if (fst !== 'active' && s !== fst) continue;
+    }
+    if (fmo && b.checkin && b.checkin.indexOf(fmo) !== 0) continue;
+    filtBK.push(b);
+  }
+  filtBK.sort(function(a,b) {
+    var va = a[bkSortK]||'', vb = b[bkSortK]||'';
+    return va < vb ? -bkSortD : va > vb ? bkSortD : 0;
+  });
+  document.getElementById('fCnt').textContent = filtBK.length + ' รายการ';
+  bkPage = 1;
+  renderBKTable();
+}
+function sortBy(k) {
+  if (bkSortK === k) bkSortD *= -1; else { bkSortK = k; bkSortD = -1; }
+  applyFilters();
+}
+function renderBKTable() {
+  var tbody = document.getElementById('bkBody');
+  var start = (bkPage - 1) * BK_PS;
+  var page = filtBK.slice(start, start + BK_PS);
+  var rows = '';
+  for (var i = 0; i < page.length; i++) {
+    var b = page[i];
+    var st = bkStatus(b);
+    var rt = rmType(b.room);
+    var nn = nights(b.checkin, b.checkout);
+    var cl = chClass(b.channel);
+    var lb = chLabel(b.channel);
+    var sdot = '';
+    if (st === 'inhouse') sdot = '<span class="sdot"><span class="dot dg"></span>In-house</span>';
+    else if (st === 'upcoming') sdot = '<span class="sdot"><span class="dot dy"></span>Upcoming</span>';
+    else if (st === 'checkedout') sdot = '<span class="sdot"><span class="dot dgr"></span>Checked out</span>';
+    else if (st === 'cancelled') sdot = '<span class="sdot"><span class="dot dr"></span>Cancelled</span>';
+    else sdot = '<span class="sdot"><span class="dot dr"></span>No Show</span>';
+    var canc = (st === 'cancelled' || st === 'noshow') ? 'cancelled' : '';
+    var cur = st === 'inhouse' ? 'cur' : '';
+    var noteH = (b.note||'').indexOf('มัดจำ') >= 0 ? '<span class="dep">&#3647; มัดจำ</span>' : (b.note ? '<span style="color:var(--text3);font-size:.78rem">' + (b.note).substring(0,28) + '</span>' : '');
+    var tags = (st === 'inhouse' ? '<span class="tin">IN</span>' : '') + (st === 'cancelled' ? '<span class="tc">ยกเลิก</span>' : '') + (st === 'noshow' ? '<span class="tns">No Show</span>' : '');
+    var roomShort = b.room.replace(/ (Luxury|Elegance|Legacy|Allure|Retro|Radiance)/g,'').trim();
+    var rid = (b.resId||'').substring(0,22) + ((b.resId||'').length > 22 ? '...' : '');
+    rows += '<tr class="' + canc + ' ' + cur + '">';
+    rows += '<td><span class="rm rm-' + rt + '">' + roomShort + '</span><br><small style="color:var(--text3);font-size:.68rem">' + rt.charAt(0).toUpperCase() + rt.slice(1) + '</small></td>';
+    rows += '<td><div class="gname">' + b.guest + tags + '</div></td>';
+    rows += '<td>' + fd(b.checkin) + '</td>';
+    rows += '<td>' + fd(b.checkout) + '</td>';
+    rows += '<td><span class="nc">' + (nn ? nn + 'n' : '&#8212;') + '</span></td>';
+    rows += '<td><span class="ch ' + cl + '">' + lb + '</span></td>';
+    rows += '<td class="mono" title="' + (b.resId||'') + '">' + rid + '</td>';
+    rows += '<td>' + sdot + '</td>';
+    rows += '<td>' + noteH + '</td>';
+    rows += '</tr>';
+  }
+  tbody.innerHTML = rows;
+  renderPg('bkPg', filtBK.length, bkPage, BK_PS, function(p){ bkPage = p; renderBKTable(); });
+}
+
+/* ── IN-HOUSE ── */
+function renderInhouse() {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var ih = [], ci = [], co = [];
+  for (var i = 0; i < allBK.length; i++) {
+    var b = allBK[i];
+    var st = bkStatus(b);
+    if (st === 'inhouse') ih.push(b);
+    if (b.checkin) {
+      var d = new Date(b.checkin); d.setHours(0,0,0,0);
+      if (d.getTime() === today.getTime() && st !== 'cancelled') ci.push(b);
+    }
+    if (b.checkout) {
+      var d = new Date(b.checkout); d.setHours(0,0,0,0);
+      if (d.getTime() === today.getTime() && st !== 'cancelled') co.push(b);
+    }
+  }
+  var todayStr = today.toLocaleDateString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  function cards(arr, lbl, color) {
+    if (!arr.length) return '<div style="color:var(--text3);font-size:.85rem;padding:12px 0">ไม่มี' + lbl + 'วันนี้</div>';
+    var h = '';
+    for (var i = 0; i < arr.length; i++) {
+      var b = arr[i];
+      var rt = rmType(b.room);
+      var cl = chClass(b.channel);
+      var nn = nights(b.checkin, b.checkout);
+      var dep = (b.note||'').indexOf('มัดจำ') >= 0 ? '<span class="dep">&#3647; มัดจำ</span>' : '';
+      h += '<div style="background:var(--surface2);border:1px solid var(--border2);border-left:3px solid ' + color + ';border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;gap:16px;align-items:center">';
+      h += '<span class="rm rm-' + rt + '" style="font-size:.9rem;padding:4px 12px">' + b.room + '</span>';
+      h += '<div style="flex:1"><div style="font-weight:600;margin-bottom:2px">' + b.guest + '</div>';
+      h += '<div style="font-size:.78rem;color:var(--text3)">' + fd(b.checkin) + ' &#8594; ' + fd(b.checkout) + ' &middot; ' + (nn||'?') + ' คืน</div></div>';
+      h += '<span class="ch ' + cl + '">' + chLabel(b.channel) + '</span>' + dep + '</div>';
+    }
+    return h;
+  }
+  document.getElementById('inhouseContent').innerHTML =
+    '<div style="font-size:.85rem;color:var(--text3);margin-bottom:1.5rem">&#128197; ' + todayStr + '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem">' +
+    '<div><div class="sec-title" style="font-size:1rem;margin-bottom:1rem">&#127968; In-House (' + ih.length + ')</div>' + cards(ih,'แขก In-House','#4ade80') + '</div>' +
+    '<div><div class="sec-title" style="font-size:1rem;margin-bottom:1rem">&#9992;&#65039; เช็คอินวันนี้ (' + ci.length + ')</div>' + cards(ci,'เช็คอิน','#fbbf24') + '</div>' +
+    '<div><div class="sec-title" style="font-size:1rem;margin-bottom:1rem">&#128682; เช็คเอาท์วันนี้ (' + co.length + ')</div>' + cards(co,'เช็คเอาท์','#60a5fa') + '</div>' +
+    '</div>';
+}
+
+/* ── LEDGER SUMMARY ── */
+function renderLSum() {
+  var keys = Object.keys(ldSum);
+  if (!keys.length) { document.getElementById('lSum').innerHTML = '<div style="padding:16px;color:var(--text3);font-size:.85rem">ไม่มีข้อมูล</div>'; return; }
+  var h = '';
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i], v = ldSum[k];
+    var isT = k.indexOf('รวม NET') >= 0;
+    var isMt = k.indexOf('Match') >= 0 || k.indexOf('Payout') >= 0 || k.indexOf('settlement') >= 0 || k.indexOf('remittance') >= 0;
+    var isPe = k.indexOf('รอ') >= 0;
+    var vc = isMt ? 'vg' : isPe ? 'vy' : isT ? 'vo' : '';
+    h += '<div class="srow ' + (isT ? 'tot' : '') + '"><span class="slabel">' + k + '</span><span class="sval ' + vc + '">' + fm(v) + '</span></div>';
+  }
+  document.getElementById('lSum').innerHTML = h;
+}
+
+/* ── LEDGER FILTER + TABLE ── */
+function applyLF() {
+  var srch = (document.getElementById('lSrch').value||'').toLowerCase();
+  var ota = document.getElementById('lOTA').value;
+  var stat = document.getElementById('lStat').value;
+  filtLD = [];
+  for (var i = 0; i < allLD.length; i++) {
+    var l = allLD[i];
+    if (srch && (l.guest||'').toLowerCase().indexOf(srch) < 0 && (l.bookingId||'').toLowerCase().indexOf(srch) < 0) continue;
+    if (ota && (l.ota||'').toLowerCase().indexOf(ota) < 0) continue;
+    var matched = (l.status||'').indexOf('โอนแล้ว') >= 0 || (l.status||'').indexOf('Match') >= 0;
+    if (stat === 'matched' && !matched) continue;
+    if (stat === 'pending' && matched) continue;
+    filtLD.push(l);
+  }
+  filtLD.sort(function(a,b) {
+    var va = a[ldSortK]||0, vb = b[ldSortK]||0;
+    return va < vb ? ldSortD : va > vb ? -ldSortD : 0;
+  });
+  document.getElementById('lCnt').textContent = filtLD.length + ' รายการ';
+  ldPage = 1;
+  renderLTable();
+}
+function sortL(k) {
+  if (ldSortK === k) ldSortD *= -1; else { ldSortK = k; ldSortD = -1; }
+  applyLF();
+}
+function renderLTable() {
+  var tbl = document.getElementById('lTbl'), emp = document.getElementById('lEmpty');
+  if (!allLD.length) { tbl.style.display = 'none'; emp.style.display = ''; return; }
+  tbl.style.display = ''; emp.style.display = 'none';
+  var start = (ldPage - 1) * LD_PS;
+  var page = filtLD.slice(start, start + LD_PS);
+  var rows = '';
+  for (var i = 0; i < page.length; i++) {
+    var l = page[i];
+    var matched = (l.status||'').indexOf('โอนแล้ว') >= 0 || (l.status||'').indexOf('Match') >= 0;
+    var sc = matched ? 'var(--green)' : ((l.status||'').indexOf('รอ') >= 0 ? 'var(--yellow)' : 'var(--text3)');
+    var nc = matched ? 'var(--green)' : 'var(--gold2)';
+    var cl = chClass(l.ota);
+    var stShort = (l.status||'&#8212;').substring(0,28);
+    rows += '<tr>';
+    rows += '<td class="mono" style="white-space:nowrap">' + fd(l.date) + '</td>';
+    rows += '<td><span class="ch ' + cl + '">' + l.ota + '</span></td>';
+    rows += '<td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + l.guest + '">' + l.guest + '</td>';
+    rows += '<td style="font-size:.78rem;color:var(--text3)">' + (l.room||'&#8212;') + '</td>';
+    rows += '<td class="mono">' + fd(l.checkin) + '</td>';
+    rows += '<td class="mono">' + fd(l.checkout) + '</td>';
+    rows += '<td><span class="nc">' + (l.nights||'&#8212;') + '</span></td>';
+    rows += '<td class="mono" style="color:var(--text2)">' + (l.gross ? fm(l.gross) : '&#8212;') + '</td>';
+    rows += '<td class="mono" style="color:var(--red)">' + (l.commission ? fm(l.commission) : '&#8212;') + '</td>';
+    rows += '<td class="mono" style="color:' + nc + ';font-weight:600">' + fm(l.net) + '</td>';
+    rows += '<td style="font-size:.75rem;color:' + sc + '" title="' + (l.status||'') + '">' + stShort + '</td>';
+    rows += '</tr>';
+  }
+  document.getElementById('lBody').innerHTML = rows;
+  renderPg('lPg', filtLD.length, ldPage, LD_PS, function(p){ ldPage = p; renderLTable(); });
+}
+
+/* ── PAGINATION ── */
+function renderPg(id, total, current, ps, cb) {
+  var c = document.getElementById(id);
+  var tp = Math.ceil(total / ps);
+  if (tp <= 1) { c.innerHTML = ''; return; }
+  var h = '';
+  h += '<button class="pb" onclick="(' + cb.toString() + ')(' + (current-1) + ')" ' + (current<=1?'disabled':'') + '>&#8249;</button>';
+  for (var i = 1; i <= tp; i++) {
+    if (i === 1 || i === tp || Math.abs(i-current) <= 2) {
+      h += '<button class="pb ' + (i===current?'active':'') + '" onclick="(' + cb.toString() + ')(' + i + ')">' + i + '</button>';
+    } else if (Math.abs(i-current) === 3) {
+      h += '<span style="color:var(--text3);padding:0 4px">&#8230;</span>';
+    }
+  }
+  h += '<button class="pb" onclick="(' + cb.toString() + ')(' + (current+1) + ')" ' + (current>=tp?'disabled':'') + '>&#8250;</button>';
+  c.innerHTML = h;
+}
+
+/* ── INVOICE ── */
+function searchInv() {
+  var q = (document.getElementById('invQ').value||'').toLowerCase();
+  if (!q) return;
+  var res = [];
+  for (var i = 0; i < allBK.length; i++) {
+    var b = allBK[i];
+    if (((b.guest||'').toLowerCase().indexOf(q) >= 0 || (b.resId||'').toLowerCase().indexOf(q) >= 0) && bkStatus(b) !== 'cancelled') res.push(b);
+    if (res.length >= 8) break;
+  }
+  var con = document.getElementById('invRes');
+  if (!res.length) { con.innerHTML = '<div style="color:var(--text3);font-size:.85rem">ไม่พบการจอง</div>'; return; }
+  var h = '<div style="font-size:.78rem;color:var(--text3);margin-bottom:8px">เลือกการจอง:</div>';
+  for (var i = 0; i < res.length; i++) {
+    var b = res[i];
+    var rt = rmType(b.room);
+    var cl = chClass(b.channel);
+    var nn = nights(b.checkin, b.checkout);
+    var rid = b.resId || '';
+    h += '<div onclick="genInv(\'' + rid + '\')" style="cursor:pointer;padding:10px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;margin-bottom:6px;display:flex;gap:12px;align-items:center" onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--border2)\'">';
+    h += '<span class="rm rm-' + rt + '">' + b.room + '</span>';
+    h += '<div style="flex:1"><div style="font-weight:500">' + b.guest + '</div>';
+    h += '<div style="font-size:.75rem;color:var(--text3)">' + fd(b.checkin) + ' &#8594; ' + fd(b.checkout) + ' &middot; ' + (nn||'?') + ' คืน</div></div>';
+    h += '<span class="ch ' + cl + '">' + chLabel(b.channel) + '</span></div>';
+  }
+  con.innerHTML = h;
+}
+
+function genInv(resId) {
+  var b = null;
+  for (var i = 0; i < allBK.length; i++) if (allBK[i].resId === resId) { b = allBK[i]; break; }
+  if (!b) return;
+  var type = document.getElementById('invType').value;
+  var nn = nights(b.checkin, b.checkout);
+  var invNo = (type === 'invoice' ? 'INV' : 'RCP') + '-' + new Date().getFullYear() + '-' + String(invCnt++).padStart(4,'0');
+  var hasDep = (b.note||'').indexOf('มัดจำ') >= 0;
+  var depAmt = hasDep ? 3000 : 0;
+  var pm = {luxury:1800,elegance:1400,allure:1200,legacy:1300,retro:1100,radiance:1500};
+  var ppn = pm[rmType(b.room)] || 1200;
+  var sub = nn ? nn * ppn : 0;
+  var tot = sub - depAmt;
+  document.getElementById('invTypeLbl').textContent = type === 'invoice' ? 'INVOICE' : 'RECEIPT';
+  document.getElementById('invNo').textContent = invNo;
+  document.getElementById('invDt').textContent = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('invGN').textContent = b.guest;
+  document.getElementById('invGD').textContent = 'Channel: ' + chLabel(b.channel) + '\nRes ID: ' + b.resId;
+  document.getElementById('invItems').innerHTML =
+    '<tr><td>ค่าที่พัก ' + b.room + '</td><td style="text-align:center">' + (nn||'?') + '</td><td>คืน</td><td style="text-align:right">' + fm(ppn) + '</td><td style="text-align:right">' + fm(sub) + '</td></tr>' +
+    '<tr><td style="color:#888;font-size:.82rem">เช็คอิน: ' + fd(b.checkin) + '</td><td></td><td></td><td></td><td style="text-align:right;color:#888;font-size:.82rem">เช็คเอาท์: ' + fd(b.checkout) + '</td></tr>';
+  document.getElementById('invSub').textContent = sub ? fm(sub) : '&#8212;';
+  document.getElementById('invDep').textContent = hasDep ? '(' + fm(depAmt) + ')' : '&#8212;';
+  document.getElementById('invTot').textContent = sub > 0 ? fm(tot > 0 ? tot : sub) : 'กรุณาระบุยอด';
+  document.getElementById('invNote').textContent = hasDep ? '* มัดจำ 3,000 บาท รับแล้ว' : '';
+  document.getElementById('invDoc').classList.add('show');
+  document.getElementById('prtBtn').style.display = '';
+  document.getElementById('editBtn').style.display = '';
+  document.getElementById('invDoc').scrollIntoView({behavior:'smooth'});
+}
+
+function editInv() {
+  var v = prompt('ระบุยอดสุทธิ (ตัวเลข บาท):','');
+  if (v && !isNaN(v)) document.getElementById('invTot').textContent = fm(parseFloat(v));
+}
+
+/* ── COPY CODE ── */
+function copyCode() {
+  var code = document.getElementById('asCode').textContent;
+  navigator.clipboard.writeText(code).then(function() {
+    var b = document.getElementById('cpBtn');
+    b.textContent = 'Copied!';
+    setTimeout(function(){ b.textContent = 'Copy'; }, 2000);
+  });
+}
+
+/* ── UI UTILS ── */
+function setLoad(v) { document.getElementById('tblLoad').style.display = v ? 'flex' : 'none'; }
+function showErr(msg) {
+  var el = document.getElementById('errBox');
+  el.innerHTML = msg;
+  el.style.display = '';
+  setTimeout(function(){ el.style.display = 'none'; }, 8000);
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('fMo').value = new Date().toISOString().substring(0,7);
+});
+</script>
+</body>
+</html>
