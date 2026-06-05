@@ -7,7 +7,7 @@
 <link rel="apple-touch-icon" href="icons/icon-checklist.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Checklist">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Myanmar:wght@400;500;600&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#0f0f11; --surface:#1a1a1f; --surface2:#22222a; --border:#2e2e38;
@@ -15,6 +15,17 @@
   --purple:#a855f7; --text:#e8e8ec; --muted:#7a7a8a;
   --radius:12px; --font:'IBM Plex Sans Thai',sans-serif; --mono:'IBM Plex Mono',monospace;
 }
+/* LANG-SPECIFIC FONTS */
+:lang(my) { font-family:'Noto Sans Myanmar','IBM Plex Sans Thai',sans-serif; }
+:lang(zh) { font-family:'Noto Sans SC','IBM Plex Sans Thai',sans-serif; }
+:lang(en) { font-family:'IBM Plex Sans Thai',sans-serif; }
+
+/* LANG SWITCHER */
+.lang-switcher{display:flex;gap:6px;align-items:center;padding:8px 14px;background:var(--surface2);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.lang-switcher::-webkit-scrollbar{display:none;}
+.lang-btn{padding:5px 11px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;color:var(--muted);cursor:pointer;background:transparent;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:all .15s;}
+.lang-btn.active{border-color:var(--accent);color:var(--accent);background:rgba(245,166,35,.1);}
+
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:120px;}
 
@@ -229,6 +240,14 @@ textarea{resize:none;min-height:68px;}
   <div class="nav-tab" onclick="switchTab('settings')" id="tab-settings">
     <span class="tab-icon">⚙️</span>ตั้งค่า
   </div>
+</div>
+
+<!-- LANG SWITCHER -->
+<div class="lang-switcher" id="langSwitcher">
+  <button class="lang-btn active" onclick="setLang('th')">🇹🇭 ไทย</button>
+  <button class="lang-btn" onclick="setLang('my')">🇲🇲 မြန်မာ</button>
+  <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+  <button class="lang-btn" onclick="setLang('zh')">🇨🇳 中文</button>
 </div>
 
 <!-- ============================================================ -->
@@ -1486,6 +1505,440 @@ function confirmClear(){
   if(confirm('ล้างฟอร์มทั้งหมด?')) resetForm();
 }
 
+// ===== LANGUAGE / i18n =====
+const LANGS = {
+  th: {
+    tab_form:'ตรวจห้อง', tab_history:'ประวัติ', tab_settings:'ตั้งค่า',
+    header_title:'🏨 เช็คลิสต์ตรวจห้อง Check-out',
+    sec1_title:'ข้อมูลพื้นฐาน', sec2_title:'สถานะห้องรวม',
+    sec3_title:'ห้องพัก', sec4_title:'ห้องน้ำ',
+    sec5_title:'Damage / Charge', sec6_title:'มิเตอร์ไฟฟ้า',
+    sec7_title:'งานซ่อม / แจ้งช่าง', sec8_title:'ของลืม / ปิดงาน',
+    lbl_room:'เลขห้อง', lbl_inspector:'ผู้ตรวจ', lbl_datetime:'วันที่ / เวลา',
+    lbl_ota:'OTA / ช่องทาง', lbl_guest:'ชื่อแขก',
+    lbl_late:'เวลา Check-out จริง / Late?',
+    late_ok:'ปกติ', late1:'Late ≤1ชม', late2:'Late 2ชม+',
+    rs_normal:'ปกติ', rs_clean:'ต้อง Clean เพิ่ม', rs_minor:'เสียหายเล็กน้อย', rs_major:'เสียหายหนัก', rs_block:'Block ห้อง',
+    lbl_ready:'ห้องพร้อมขายต่อ?', ready_yes:'✓ พร้อม', ready_no:'✕ ยังไม่พร้อม',
+    lbl_charge_amt:'จำนวน Charge (บาท)', lbl_charge_note:'รายละเอียด',
+    lbl_dmg_photo:'📎 รูปหลักฐาน Damage', upload_tap:'แตะเพื่ออัปโหลดรูป',
+    lbl_meter_before:'เลขก่อน (unit)', lbl_meter_after:'เลขหลัง (unit)',
+    lbl_unit_used:'หน่วยที่ใช้', lbl_elec_total:'ค่าไฟรวม',
+    lbl_meter_photo:'📷 รูปมิเตอร์', meter_tap:'ถ่ายรูปมิเตอร์',
+    lbl_repair_note:'รายละเอียดงานซ่อม',
+    lbl_leftbehind:'พบของลืม?', lb_none:'ไม่มี', lb_told:'มี — แจ้งแล้ว', lb_pending:'มี — ยังไม่แจ้ง',
+    lbl_room_photo:'📷 รูปห้องปิดงาน', room_tap:'ถ่ายรูปสภาพห้องหลังตรวจ',
+    lbl_extra_note:'หมายเหตุเพิ่มเติม',
+    btn_submit:'ตรวจสอบ & บันทึก →',
+    hist_title:'📊 ประวัติการตรวจห้อง',
+    stat_total:'ทั้งหมด', stat_issues:'มีปัญหา', stat_charge:'Charge (฿)',
+    filter_all:'ทั้งหมด', filter_issue:'มีปัญหา', filter_normal:'ปกติ',
+    settings_title:'⚙️ ตั้งค่าระบบ',
+    ph_room:'-- เลือกห้อง --', ph_inspector:'ชื่อพนักงาน', ph_guest:'ชื่อตามที่จอง',
+    ph_charge:'0', ph_damage:'อธิบายรายละเอียดความเสียหาย...',
+    ph_repair:'ระบุรายละเอียด เช่น แอร์ห้อง 203 น้ำไม่เย็น...',
+    ph_extra:'ข้อมูลอื่นๆ...',
+    main_items:[
+      {label:'ผ้าปู / หมอน / ผ้าห่ม',sub:'ครบ ไม่มีคราบหนัก'},
+      {label:'ผ้าเช็ดตัว',sub:'ครบ ไม่สูญหาย / เปื้อนหนัก'},
+      {label:'Keycard ครบ'},
+      {label:'Remote แอร์ / ทีวี',sub:'ครบและใช้งานได้'},
+      {label:'แอร์ทำงานปกติ'},
+      {label:'ทีวีใช้งานได้'},
+      {label:'ตู้เย็นปกติ',sub:'ไม่มีของเหลือ / กลิ่น'},
+      {label:'ไมโครเวฟ / กาต้มน้ำ',sub:'ใช้ได้ ไม่มีเศษอาหาร'},
+      {label:'ปลั๊ก / สวิตช์ / หลอดไฟ',sub:'ปกติครบ'},
+      {label:'ไม่มีกลิ่น / ร่องรอยบุหรี่',sub:'ตรวจ burn mark / เถ้า'},
+      {label:'ไม่มีกลิ่นทุเรียน'},
+      {label:'ไม่มีร่องรอยสัตว์เลี้ยง'},
+      {label:'ผนัง / พื้น / ฝ้า',sub:'ไม่มีรอย / ความเสียหาย'},
+      {label:'เฟอร์นิเจอร์ / บันได Loft',sub:'ไม่มีรอยแตก / หัก'},
+      {label:'ไม่มีขยะตกค้าง'},
+      {label:'ครัว / ซิงก์สะอาด',sub:'ไม่มีเศษอาหาร กลิ่น'},
+      {label:'หลังม่าน / ใต้เตียง',sub:'จุดที่มักพลาด'},
+      {label:'ขั้นบันได Loft',sub:'ตรวจรอยแตกเล็กๆ'},
+    ],
+    bath_items:[
+      {label:'ชักโครกไม่อุดตัน',sub:'ไม่มีสิ่งแปลกปลอมในโถ'},
+      {label:'อ่างล้างหน้า / ฝักบัว',sub:'น้ำไหลปกติ'},
+      {label:'ไม่มีน้ำรั่ว / ซึม'},
+      {label:'ไม่มีกลิ่นท่อ'},
+      {label:'ไม่มีเชื้อรา / คราบหินปูนหนัก'},
+      {label:'อุปกรณ์ห้องน้ำครบ',sub:'แชมพู สบู่ ทิชชู่'},
+    ],
+    damage_items:[
+      {label:'สูบบุหรี่',icon:'🚬'},{label:'ทุเรียน',icon:'🍈'},{label:'ผ้าเสียหาย',icon:'🛏️'},
+      {label:'ของหาย',icon:'🔍'},{label:'แขกเกิน',icon:'👥'},{label:'Late Checkout',icon:'⏰'},
+      {label:'Deep Clean',icon:'🧹'},{label:'ค่าไฟผิดปกติ',icon:'⚡'},{label:'ของเสียหาย',icon:'💥'},{label:'อื่นๆ',icon:'📝'},
+    ],
+    repair_items:[
+      {label:'ช่างไฟ',icon:'⚡'},{label:'ช่างแอร์',icon:'❄️'},{label:'ช่างประปา',icon:'🚿'},
+      {label:'งานสี',icon:'🎨'},{label:'เฟอร์นิเจอร์',icon:'🛠️'},{label:'อื่นๆ',icon:'🔧'},
+    ],
+  },
+  my: {
+    tab_form:'ခန်းစစ်', tab_history:'မှတ်တမ်း', tab_settings:'သတ်မှတ်မှု',
+    header_title:'🏨 ခန်းမှန်းစစ်ဆေးစာရင်း',
+    sec1_title:'အခြေခံအချက်အလက်', sec2_title:'ခန်းအခြေနေ',
+    sec3_title:'အိပ်ခန်း', sec4_title:'ရေချိုးခန်း',
+    sec5_title:'ပျက်စီးမှု / ကောက်ခံမည်', sec6_title:'လျှပ်စစ်မီတာ',
+    sec7_title:'ပြုပြင်မည် / ဆရာ', sec8_title:'ကျန်ခဲ့သောပစ္စည်း',
+    lbl_room:'ခန်းနံပါတ်', lbl_inspector:'စစ်ဆောင်သူ', lbl_datetime:'ရက်စွဲ / အချိန်',
+    lbl_ota:'OTA / လမ်းကြောင်း', lbl_guest:'ဧည့်သည်အမည်',
+    lbl_late:'Check-out အချိန် / နောက်ကျ?',
+    late_ok:'ပုံမှန်', late1:'နောက်ကျ ≤1 နာရီ', late2:'နောက်ကျ 2 နာရီ+',
+    rs_normal:'ပုံမှန်', rs_clean:'သန့်ရှင်းရန်လိုသည်', rs_minor:'ပျက်စီးမှုနည်းသည်', rs_major:'ပျက်စီးမှုများသည်', rs_block:'ခန်းပိတ်ထားသည်',
+    lbl_ready:'ခန်းရောင်းရန်အဆင်သင့်?', ready_yes:'✓ အဆင်သင့်', ready_no:'✕ မအဆင်သင့်',
+    lbl_charge_amt:'ကောက်ခံမည့်ပမာဏ (ဘတ်)', lbl_charge_note:'အသေးစိတ်',
+    lbl_dmg_photo:'📎 ပျက်စီးမှုပုံ', upload_tap:'ပုံတင်ရန်တို့ပါ',
+    lbl_meter_before:'မိတာမတိုင်မီ (unit)', lbl_meter_after:'မိတာပြီးနောက် (unit)',
+    lbl_unit_used:'သုံးဆောင်မှု', lbl_elec_total:'လျှပ်စစ်ဖိုး',
+    lbl_meter_photo:'📷 မိတာပုံ', meter_tap:'မိတာပုံရိုက်ရန်',
+    lbl_repair_note:'ပြုပြင်မှုအသေးစိတ်',
+    lbl_leftbehind:'ကျန်ပစ္စည်းတွေ့သလား?', lb_none:'မတွေ့ပါ', lb_told:'တွေ့သည် — အကြောင်းကြားပြီ', lb_pending:'တွေ့သည် — မကြားသေး',
+    lbl_room_photo:'📷 စစ်ဆင်းပြီးနောက်ခန်းပုံ', room_tap:'ခန်းပုံရိုက်ရန်',
+    lbl_extra_note:'အခြားမှတ်ချက်',
+    btn_submit:'စစ်ဆေးပြီး မှတ်သားမည် →',
+    hist_title:'📊 စစ်ဆောင်မှုမှတ်တမ်း',
+    stat_total:'စုစုပေါင်း', stat_issues:'ပြဿနာ', stat_charge:'ကောက်ခံမှု (฿)',
+    filter_all:'အားလုံး', filter_issue:'ပြဿနာ', filter_normal:'ပုံမှန်',
+    settings_title:'⚙️ စနစ်သတ်မှတ်မှု',
+    ph_room:'-- ခန်းရွေးပါ --', ph_inspector:'ဝန်ထမ်းအမည်', ph_guest:'မှာယူချိန်အမည်',
+    ph_charge:'0', ph_damage:'ပျက်စီးမှုအသေးစိတ်ဖော်ပြပါ...',
+    ph_repair:'ပြုပြင်မှုအသေးစိတ်ဖော်ပြပါ...',
+    ph_extra:'အခြားအချက်အလက်...',
+    main_items:[
+      {label:'အိပ်ရာခင်းများ / ခေါင်းအုံး / စောင်',sub:'ပြည့်စုံပြီး ကြီးမားသောဒဏ်ရာမရှိ'},
+      {label:'သုတ်သပ်ပုဝါ',sub:'မပျောက်ဆုံး / ညစ်ပတ်မနေ'},
+      {label:'Keycard ပြည့်စုံသည်'},
+      {label:'လေအအေးပေး / တီဗွီ Remote',sub:'ပြည့်စုံ အသုံးပြုနိုင်သည်'},
+      {label:'လေအအေးပေး ပုံမှန်လည်ပတ်သည်'},
+      {label:'တီဗွီ အသုံးပြုနိုင်သည်'},
+      {label:'ရေခဲသေတ္တာ ပုံမှန်',sub:'ကျန်ပစ္စည်း / နံ့သာမရှိ'},
+      {label:'မိုက်ကရိုဝေ့ / ရေနွေးကြမ်းဆူပေး',sub:'အသုံးပြုနိုင်ပြီး အစားအသောက်ကျန်မနေ'},
+      {label:'ပလပ်ခေါင်း / ခလုတ် / မီးသီး',sub:'ပုံမှန်ပြည့်စုံ'},
+      {label:'စီးကရက်နံ့ / အမှတ်အသားမရှိ',sub:'မီးလောင်ရာ / မြို့မြေ စစ်ဆေးပါ'},
+      {label:'သစ်ပွတ်နံ့မရှိ'},
+      {label:'တိရစ္ဆာန်ကျင်လည်ဟန်မရှိ'},
+      {label:'နံရံ / ကြမ်းခင်း / မျက်နှာကျက်',sub:'ဒဏ်ရာမရှိ'},
+      {label:'ပရိဘောဂ / Loft ကြမ်းတမ်',sub:'ကွဲ / ကျိုးမနေ'},
+      {label:'အမှိုက်မကျန်'},
+      {label:'မီးဖိုချောင် / ဆေးကန် သန့်ရှင်း',sub:'အစားအသောက်မကျန် နံ့မနံ့'},
+      {label:'ကတ်နဆောင် / အိပ်ရာအောက်',sub:'မကြာခဏ ကြည့်ရှုသင့်သောနေရာ'},
+      {label:'Loft ကြမ်းတမ်ထစ်',sub:'ကွဲအက်မှုစစ်ဆေးပါ'},
+    ],
+    bath_items:[
+      {label:'ရေတိုလက်တန်းမပိတ်ဆို့',sub:'အပိုပစ္စည်းမပါ'},
+      {label:'ရေသန့် / ရေပူပိုက် ပုံမှန်',sub:'ရေစီးဆင်းပုံမှန်'},
+      {label:'ရေမယိုစိမ့်'},
+      {label:'ပိုက်နံ့မနံ့'},
+      {label:'မှိုမပေါက် / ကျောက်ငန်ကြောင်းမကြီး'},
+      {label:'ရေချိုးခန်းသုံးပစ္စည်းပြည့်',sub:'ရေဆပ်ပြာ ဆပ်ပြာ တိဆ်ရှူ'},
+    ],
+    damage_items:[
+      {label:'စီးကရက်သောက်',icon:'🚬'},{label:'သစ်ပွတ်',icon:'🍈'},{label:'ပုဝါပျက်စီး',icon:'🛏️'},
+      {label:'ပစ္စည်းပျောက်',icon:'🔍'},{label:'ဧည့်သည်များသည်',icon:'👥'},{label:'Check-out နောက်ကျ',icon:'⏰'},
+      {label:'Deep Clean',icon:'🧹'},{label:'လျှပ်စစ်ပုံမမှန်',icon:'⚡'},{label:'ပစ္စည်းပျက်စီး',icon:'💥'},{label:'အခြား',icon:'📝'},
+    ],
+    repair_items:[
+      {label:'လျှပ်စစ်ဆရာ',icon:'⚡'},{label:'လေအအေးဆရာ',icon:'❄️'},{label:'ရေပိုက်ဆရာ',icon:'🚿'},
+      {label:'ဆေးသုတ်',icon:'🎨'},{label:'ပရိဘောဂ',icon:'🛠️'},{label:'အခြား',icon:'🔧'},
+    ],
+  },
+  en: {
+    tab_form:'Inspect', tab_history:'History', tab_settings:'Settings',
+    header_title:'🏨 Checkout Inspection Checklist',
+    sec1_title:'Basic Info', sec2_title:'Room Status',
+    sec3_title:'Bedroom', sec4_title:'Bathroom',
+    sec5_title:'Damage / Charge', sec6_title:'Electric Meter',
+    sec7_title:'Repairs / Maintenance', sec8_title:'Left Items / Close',
+    lbl_room:'Room No.', lbl_inspector:'Inspector', lbl_datetime:'Date / Time',
+    lbl_ota:'OTA / Channel', lbl_guest:'Guest Name',
+    lbl_late:'Actual Check-out / Late?',
+    late_ok:'On time', late1:'Late ≤1hr', late2:'Late 2hr+',
+    rs_normal:'Normal', rs_clean:'Needs Cleaning', rs_minor:'Minor Damage', rs_major:'Major Damage', rs_block:'Block Room',
+    lbl_ready:'Room ready to sell?', ready_yes:'✓ Ready', ready_no:'✕ Not ready',
+    lbl_charge_amt:'Charge Amount (THB)', lbl_charge_note:'Details',
+    lbl_dmg_photo:'📎 Damage Photos', upload_tap:'Tap to upload photo',
+    lbl_meter_before:'Before (unit)', lbl_meter_after:'After (unit)',
+    lbl_unit_used:'Units used', lbl_elec_total:'Electric charge',
+    lbl_meter_photo:'📷 Meter Photo', meter_tap:'Take meter photo',
+    lbl_repair_note:'Repair details',
+    lbl_leftbehind:'Items left behind?', lb_none:'None', lb_told:'Yes — Guest notified', lb_pending:'Yes — Not notified',
+    lbl_room_photo:'📷 Closing Room Photo', room_tap:'Take room photo after inspection',
+    lbl_extra_note:'Additional notes',
+    btn_submit:'Review & Submit →',
+    hist_title:'📊 Inspection History',
+    stat_total:'Total', stat_issues:'Issues', stat_charge:'Charge (฿)',
+    filter_all:'All', filter_issue:'Issues', filter_normal:'Normal',
+    settings_title:'⚙️ System Settings',
+    ph_room:'-- Select room --', ph_inspector:'Staff name', ph_guest:'Name on booking',
+    ph_charge:'0', ph_damage:'Describe the damage...',
+    ph_repair:'E.g. AC in room 203 not cold...',
+    ph_extra:'Other information...',
+    main_items:[
+      {label:'Bed sheet / Pillow / Blanket',sub:'Complete, no heavy stains'},
+      {label:'Towels',sub:'Not missing / heavily stained'},
+      {label:'Keycard complete'},
+      {label:'AC / TV Remote',sub:'Present and functional'},
+      {label:'AC working normally'},
+      {label:'TV working'},
+      {label:'Refrigerator normal',sub:'No leftover food / smell'},
+      {label:'Microwave / Kettle',sub:'Working, no food residue'},
+      {label:'Plugs / Switches / Light bulbs',sub:'All normal'},
+      {label:'No smoke smell / traces',sub:'Check burn marks / ash'},
+      {label:'No durian smell'},
+      {label:'No signs of pets'},
+      {label:'Walls / Floor / Ceiling',sub:'No damage'},
+      {label:'Furniture / Loft stairs',sub:'No cracks / breaks'},
+      {label:'No leftover trash'},
+      {label:'Kitchen / Sink clean',sub:'No food residue or smell'},
+      {label:'Behind curtains / Under bed',sub:'Often missed areas'},
+      {label:'Loft stair steps',sub:'Check for small cracks'},
+    ],
+    bath_items:[
+      {label:'Toilet not blocked',sub:'No foreign objects in bowl'},
+      {label:'Sink / Shower',sub:'Normal water flow'},
+      {label:'No water leaks'},
+      {label:'No drain smell'},
+      {label:'No mold / heavy limescale'},
+      {label:'Bathroom amenities complete',sub:'Shampoo, soap, tissue'},
+    ],
+    damage_items:[
+      {label:'Smoking',icon:'🚬'},{label:'Durian',icon:'🍈'},{label:'Linen damage',icon:'🛏️'},
+      {label:'Missing items',icon:'🔍'},{label:'Extra guests',icon:'👥'},{label:'Late Checkout',icon:'⏰'},
+      {label:'Deep Clean',icon:'🧹'},{label:'High electricity',icon:'⚡'},{label:'Property damage',icon:'💥'},{label:'Other',icon:'📝'},
+    ],
+    repair_items:[
+      {label:'Electrician',icon:'⚡'},{label:'AC tech',icon:'❄️'},{label:'Plumber',icon:'🚿'},
+      {label:'Painting',icon:'🎨'},{label:'Furniture',icon:'🛠️'},{label:'Other',icon:'🔧'},
+    ],
+  },
+  zh: {
+    tab_form:'检查', tab_history:'记录', tab_settings:'设置',
+    header_title:'🏨 退房检查清单',
+    sec1_title:'基本信息', sec2_title:'房间状态',
+    sec3_title:'卧室', sec4_title:'卫生间',
+    sec5_title:'损坏 / 收费', sec6_title:'电表',
+    sec7_title:'维修 / 通知', sec8_title:'遗留物品',
+    lbl_room:'房间号', lbl_inspector:'检查员', lbl_datetime:'日期 / 时间',
+    lbl_ota:'OTA / 渠道', lbl_guest:'客人姓名',
+    lbl_late:'实际退房时间 / 晚退?',
+    late_ok:'正常', late1:'晚退 ≤1小时', late2:'晚退 2小时+',
+    rs_normal:'正常', rs_clean:'需要清洁', rs_minor:'轻微损坏', rs_major:'严重损坏', rs_block:'封闭房间',
+    lbl_ready:'房间是否准备好销售?', ready_yes:'✓ 准备好了', ready_no:'✕ 尚未准备好',
+    lbl_charge_amt:'收费金额 (泰铢)', lbl_charge_note:'详情',
+    lbl_dmg_photo:'📎 损坏照片', upload_tap:'点击上传照片',
+    lbl_meter_before:'之前读数 (单位)', lbl_meter_after:'之后读数 (单位)',
+    lbl_unit_used:'使用单位', lbl_elec_total:'电费合计',
+    lbl_meter_photo:'📷 电表照片', meter_tap:'拍电表照片',
+    lbl_repair_note:'维修详情',
+    lbl_leftbehind:'发现遗留物品?', lb_none:'没有', lb_told:'有 — 已通知客人', lb_pending:'有 — 未通知',
+    lbl_room_photo:'📷 关房照片', room_tap:'拍检查后房间照片',
+    lbl_extra_note:'附加说明',
+    btn_submit:'检查并提交 →',
+    hist_title:'📊 检查记录',
+    stat_total:'总计', stat_issues:'问题', stat_charge:'收费 (฿)',
+    filter_all:'全部', filter_issue:'有问题', filter_normal:'正常',
+    settings_title:'⚙️ 系统设置',
+    ph_room:'-- 选择房间 --', ph_inspector:'员工姓名', ph_guest:'预订时的名字',
+    ph_charge:'0', ph_damage:'描述损坏情况...',
+    ph_repair:'例如：203房空调不冷...',
+    ph_extra:'其他信息...',
+    main_items:[
+      {label:'床单 / 枕头 / 被子',sub:'齐全，无重大污渍'},
+      {label:'毛巾',sub:'不缺少 / 无重污渍'},
+      {label:'房卡齐全'},
+      {label:'空调 / 电视遥控器',sub:'齐全且可用'},
+      {label:'空调运行正常'},
+      {label:'电视可用'},
+      {label:'冰箱正常',sub:'无剩余食物 / 异味'},
+      {label:'微波炉 / 烧水壶',sub:'可用，无食物残留'},
+      {label:'插座 / 开关 / 灯泡',sub:'全部正常'},
+      {label:'无烟味 / 吸烟痕迹',sub:'检查烧痕 / 烟灰'},
+      {label:'无榴莲气味'},
+      {label:'无宠物痕迹'},
+      {label:'墙壁 / 地板 / 天花板',sub:'无损坏'},
+      {label:'家具 / Loft楼梯',sub:'无裂缝 / 破损'},
+      {label:'无垃圾残留'},
+      {label:'厨房 / 水槽干净',sub:'无食物残留或异味'},
+      {label:'窗帘后 / 床下',sub:'容易遗漏的区域'},
+      {label:'Loft楼梯台阶',sub:'检查细小裂缝'},
+    ],
+    bath_items:[
+      {label:'马桶无堵塞',sub:'碗内无异物'},
+      {label:'洗手盆 / 淋浴',sub:'水流正常'},
+      {label:'无漏水'},
+      {label:'无下水道异味'},
+      {label:'无霉菌 / 严重水垢'},
+      {label:'浴室用品齐全',sub:'洗发水、肥皂、纸巾'},
+    ],
+    damage_items:[
+      {label:'吸烟',icon:'🚬'},{label:'榴莲',icon:'🍈'},{label:'床单损坏',icon:'🛏️'},
+      {label:'物品丢失',icon:'🔍'},{label:'额外住客',icon:'👥'},{label:'晚退房',icon:'⏰'},
+      {label:'深度清洁',icon:'🧹'},{label:'高电费',icon:'⚡'},{label:'财产损坏',icon:'💥'},{label:'其他',icon:'📝'},
+    ],
+    repair_items:[
+      {label:'电工',icon:'⚡'},{label:'空调技工',icon:'❄️'},{label:'水管工',icon:'🚿'},
+      {label:'油漆',icon:'🎨'},{label:'家具',icon:'🛠️'},{label:'其他',icon:'🔧'},
+    ],
+  }
+};
+
+let currentLang = 'th';
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('loft_lang', lang);
+  const t = LANGS[lang];
+  document.documentElement.lang = lang;
+
+  // Lang buttons
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  const map = {th:0,my:1,en:2,zh:3};
+  document.querySelectorAll('.lang-btn')[map[lang]]?.classList.add('active');
+
+  // Nav tabs
+  document.getElementById('tab-form').lastChild.textContent = t.tab_form;
+  document.getElementById('tab-history').lastChild.textContent = t.tab_history;
+  document.getElementById('tab-settings').lastChild.textContent = t.tab_settings;
+
+  // Header
+  document.querySelector('.header-title').textContent = t.header_title;
+
+  // Section titles
+  const secTitles = document.querySelectorAll('.section-title');
+  const keys = ['sec1_title','sec2_title','sec3_title','sec4_title','sec5_title','sec6_title','sec7_title','sec8_title'];
+  secTitles.forEach((el,i)=>{ if(keys[i]) el.textContent = t[keys[i]]; });
+
+  // Field labels
+  _setFieldLabel('roomNum', t.lbl_room, true);
+  _setFieldLabel('inspector', t.lbl_inspector, true);
+  _setFieldLabelById('checkDate', t.lbl_datetime);
+  _setFieldLabelById('ota1', t.lbl_ota);
+  _setFieldLabelById('guestName', t.lbl_guest);
+  _setFieldLabelById('actualCO', t.lbl_late);
+
+  // Late checkout pills
+  document.querySelector('label[for=late0]').textContent = t.late_ok;
+  document.querySelector('label[for=late1]').textContent = t.late1;
+  document.querySelector('label[for=late2]').textContent = t.late2;
+
+  // Room status
+  document.querySelector('label[for=rs1]').innerHTML = `<span class="s-icon">✅</span>${t.rs_normal}`;
+  document.querySelector('label[for=rs2]').innerHTML = `<span class="s-icon">🧹</span>${t.rs_clean}`;
+  document.querySelector('label[for=rs3]').innerHTML = `<span class="s-icon">⚠️</span>${t.rs_minor}`;
+  document.querySelector('label[for=rs4]').innerHTML = `<span class="s-icon">🔴</span>${t.rs_major}`;
+  document.querySelector('label[for=rs5]').innerHTML = `<span class="s-icon">🚫</span>${t.rs_block}`;
+
+  // Ready
+  _setFieldLabelById('r1', t.lbl_ready);
+  document.querySelector('label[for=r1]').textContent = t.ready_yes;
+  document.querySelector('label[for=r2]').textContent = t.ready_no;
+
+  // Damage section
+  _setTextByQuery('#sec5 .field-label:nth-of-type(1)', t.lbl_charge_amt);
+  document.getElementById('chargeAmount').placeholder = t.ph_charge;
+  document.getElementById('chargeNote').placeholder = t.ph_damage;
+  document.getElementById('repairNote').placeholder = t.ph_repair;
+  document.getElementById('extraNote').placeholder = t.ph_extra;
+
+  // Photo labels
+  const photoLabels = document.querySelectorAll('.field-label');
+  photoLabels.forEach(el => {
+    if(el.textContent.includes('📎')) el.textContent = t.lbl_dmg_photo;
+    if(el.textContent.includes('รูปมิเตอร์')||el.textContent.includes('Meter Photo')||el.textContent.includes('电表照片')||el.textContent.includes('မိတာပုံ')) el.textContent = t.lbl_meter_photo;
+    if(el.textContent.includes('รูปห้องปิด')||el.textContent.includes('Closing')||el.textContent.includes('关房')||el.textContent.includes('စစ်ဆင်းပြီ')) el.textContent = t.lbl_room_photo;
+    if(el.textContent.includes('หมายเหตุ')||el.textContent.includes('Additional')||el.textContent.includes('附加')||el.textContent.includes('အခြားမှတ်')) el.textContent = t.lbl_extra_note;
+  });
+
+  // Photo upload texts
+  const photoTexts = document.querySelectorAll('.photo-text');
+  photoTexts.forEach((el,i) => {
+    if(i===0) el.textContent = t.upload_tap;
+    if(i===1) el.textContent = t.meter_tap;
+    if(i===2) el.textContent = t.room_tap;
+  });
+
+  // Meter labels
+  const elecRows = document.querySelectorAll('.elec-row .field-label');
+  if(elecRows[0]) elecRows[0].textContent = t.lbl_meter_before;
+  if(elecRows[1]) elecRows[1].textContent = t.lbl_meter_after;
+  document.querySelector('.elec-lbl').textContent = t.lbl_unit_used;
+  document.querySelectorAll('.elec-lbl')[1] && (document.querySelectorAll('.elec-lbl')[1].textContent = t.lbl_elec_total);
+
+  // Left behind
+  _setFieldLabelById('lb0', t.lbl_leftbehind);
+  document.querySelector('label[for=lb0]').textContent = t.lb_none;
+  document.querySelector('label[for=lb1]').textContent = t.lb_told;
+  document.querySelector('label[for=lb2]').textContent = t.lb_pending;
+
+  // Submit btn
+  document.querySelector('.submit-btn').textContent = t.btn_submit;
+
+  // Room select placeholder
+  document.querySelector('#roomNum option[value=""]').textContent = t.ph_room;
+
+  // Inspector placeholder
+  document.getElementById('inspector').placeholder = t.ph_inspector;
+  document.getElementById('guestName').placeholder = t.ph_guest;
+
+  // History tab
+  document.querySelector('#page-history .header-title').textContent = t.hist_title;
+  document.querySelectorAll('.stat-lbl')[0] && (document.querySelectorAll('.stat-lbl')[0].textContent = t.stat_total);
+  document.querySelectorAll('.stat-lbl')[1] && (document.querySelectorAll('.stat-lbl')[1].textContent = t.stat_issues);
+  document.querySelectorAll('.stat-lbl')[2] && (document.querySelectorAll('.stat-lbl')[2].textContent = t.stat_charge);
+
+  // Filter pills
+  const pills = document.querySelectorAll('.filter-pill');
+  if(pills[0]) pills[0].textContent = t.filter_all;
+  if(pills[1]) pills[1].textContent = t.filter_issue;
+  if(pills[2]) pills[2].textContent = t.filter_normal;
+
+  // Settings
+  document.querySelector('#page-settings .header-title').textContent = t.settings_title;
+
+  // Repair note label
+  const repairNoteLabel = document.querySelector('#sec7 .field-label');
+  if(repairNoteLabel) repairNoteLabel.textContent = t.lbl_repair_note;
+
+  // Re-render checklists and grids with translated labels
+  // Merge with original IDs
+  const mergedMain = mainItems.map((item,i) => ({...item, label: t.main_items[i]?.label||item.label, sub: t.main_items[i]?.sub||item.sub}));
+  const mergedBath = bathItems.map((item,i) => ({...item, label: t.bath_items[i]?.label||item.label, sub: t.bath_items[i]?.sub||item.sub}));
+  const mergedDmg = damageItems.map((item,i) => ({...item, label: t.damage_items[i]?.label||item.label}));
+  const mergedRep = repairItems.map((item,i) => ({...item, label: t.repair_items[i]?.label||item.label}));
+  renderChecklist(mergedMain, 'mainChecklist');
+  renderChecklist(mergedBath, 'bathChecklist');
+  renderGrid(mergedDmg, 'damageGrid');
+  renderGrid(mergedRep, 'repairGrid');
+  updateProgress();
+  updateDamageBadge();
+}
+
+function _setFieldLabel(inputId, labelText, req) {
+  const el = document.getElementById(inputId);
+  if(!el) return;
+  const field = el.closest('.field');
+  if(!field) return;
+  const lbl = field.querySelector('.field-label');
+  if(!lbl) return;
+  lbl.innerHTML = labelText + (req ? ' <span class="req">*</span>' : '');
+}
+function _setFieldLabelById(inputId, labelText) {
+  const el = document.getElementById(inputId) || document.querySelector('[name="'+inputId+'"]');
+  if(!el) return;
+  const field = el.closest('.field');
+  if(!field) return;
+  const lbl = field.querySelector('.field-label');
+  if(!lbl) return;
+  lbl.textContent = labelText;
+}
+function _setTextByQuery(sel, text) {
+  const el = document.querySelector(sel);
+  if(el) el.textContent = text;
+}
+
 // ===== INIT =====
 (function init(){
   renderChecklist(mainItems,'mainChecklist');
@@ -1498,6 +1951,9 @@ function confirmClear(){
   document.getElementById('checkDate').value=now.toISOString().slice(0,10);
   document.getElementById('checkTime').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   if(settings.defaultInspector) document.getElementById('inspector').value=settings.defaultInspector;
+  // Restore language
+  const savedLang = localStorage.getItem('loft_lang') || 'th';
+  setLang(savedLang);
   updateProgress();
 })();
 
