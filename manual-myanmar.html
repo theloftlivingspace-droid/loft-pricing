@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Loft — လက်စွဲစာအုပ် (မြန်မာဘာသာ)</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;500;600;700&family=Noto+Serif+Myanmar:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9922A;
+  --gold-light: #F5E6C8;
+  --gold-dark: #8B6318;
+  --dark: #1A1208;
+  --surface: #FDFAF4;
+  --surface2: #F5EDD8;
+  --border: #E8D9B0;
+  --text: #2C1F06;
+  --muted: #7A6440;
+  --green: #2D7A4A;
+  --green-light: #E8F5EE;
+  --red: #C0392B;
+  --red-light: #FDECEA;
+  --blue: #1A5F9E;
+  --blue-light: #E8F0FA;
+  --radius: 12px;
+  --font: 'Noto Sans Myanmar', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: #F9F5EC;
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+/* COVER */
+.cover {
+  background: var(--dark);
+  padding: 48px 24px 56px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  border: 1px solid rgba(201,146,42,0.2);
+}
+.cover::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -40px;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  border: 1px solid rgba(201,146,42,0.15);
+}
+.cover-logo {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+.cover-icon {
+  font-size: 52px;
+  margin-bottom: 16px;
+  display: block;
+}
+.cover-title {
+  font-family: 'Noto Serif Myanmar', serif;
+  font-size: 26px;
+  color: #fff;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+.cover-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 32px;
+}
+.cover-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(201,146,42,0.15);
+  border: 1px solid rgba(201,146,42,0.35);
+  border-radius: 30px;
+  padding: 8px 18px;
+  font-size: 13px;
+  color: var(--gold);
+}
+
+/* CONTAINER */
+.container { max-width: 720px; margin: 0 auto; padding: 0 16px 60px; }
+
+/* TOC */
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 24px 0 0;
+  overflow: hidden;
+}
+.toc-header {
+  background: var(--gold);
+  color: #fff;
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toc-list { padding: 4px 0; }
+.toc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+  color: var(--text);
+}
+.toc-item:last-child { border-bottom: none; }
+.toc-item:hover { background: var(--surface2); }
+.toc-num {
+  width: 24px; height: 24px;
+  background: var(--gold-light);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: var(--gold-dark);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* SECTION */
+.section {
+  margin-top: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.section-header {
+  background: var(--gold);
+  color: #fff;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-num {
+  width: 28px; height: 28px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.section-title { font-size: 16px; font-weight: 600; line-height: 1.4; }
+.section-body { padding: 20px; }
+
+/* STEP CARD */
+.step {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.step:last-child { border-bottom: none; padding-bottom: 0; }
+.step-num {
+  width: 32px; height: 32px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.step-content { flex: 1; }
+.step-label {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 5px;
+  color: var(--text);
+}
+.step-desc {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* PHONE MOCKUP */
+.phone-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+.phone {
+  width: 220px;
+  background: #1A1A1F;
+  border-radius: 28px;
+  border: 3px solid #333;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+.phone-bar {
+  height: 8px;
+  background: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.phone-notch {
+  width: 60px; height: 5px;
+  background: #222;
+  border-radius: 3px;
+}
+.phone-screen {
+  background: #0f0f11;
+  padding: 0;
+  min-height: 320px;
+}
+.mock-nav {
+  display: flex;
+  background: #1a1a1f;
+  border-bottom: 1px solid #2e2e38;
+}
+.mock-tab {
+  flex: 1;
+  padding: 9px 4px 7px;
+  text-align: center;
+  font-size: 8px;
+  color: #7a7a8a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.mock-tab.active { color: #f5a623; border-bottom: 2px solid #f5a623; }
+.mock-tab-icon { font-size: 13px; }
+.mock-lang-bar {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  background: #22222a;
+  border-bottom: 1px solid #2e2e38;
+}
+.mock-lang-btn {
+  padding: 3px 7px;
+  border: 1px solid #2e2e38;
+  border-radius: 20px;
+  font-size: 7px;
+  color: #7a7a8a;
+}
+.mock-lang-btn.active {
+  border-color: #f5a623;
+  color: #f5a623;
+  background: rgba(245,166,35,0.1);
+}
+.mock-header {
+  padding: 10px 10px 8px;
+  background: #1a1a1f;
+  border-bottom: 1px solid #2e2e38;
+}
+.mock-brand { font-size: 7px; color: #f5a623; letter-spacing: 0.1em; margin-bottom: 2px; font-family: monospace; }
+.mock-title { font-size: 10px; color: #e8e8ec; font-weight: 600; }
+.mock-prog-bar {
+  height: 2px; background: #2e2e38; border-radius: 1px; margin-top: 6px;
+}
+.mock-prog-fill { height: 100%; background: #f5a623; border-radius: 1px; }
+.mock-section {
+  margin: 6px 8px 0;
+  background: #1a1a1f;
+  border: 1px solid #2e2e38;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.mock-sec-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px;
+  background: #22222a;
+  font-size: 8px;
+  color: #e8e8ec;
+}
+.mock-field {
+  padding: 5px 8px;
+  border-bottom: 1px solid #2e2e38;
+  font-size: 7px;
+  color: #7a7a8a;
+}
+.mock-field:last-child { border-bottom: none; }
+.mock-check-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-bottom: 1px solid #2e2e38;
+  gap: 5px;
+  font-size: 7px;
+  color: #e8e8ec;
+}
+.mock-check-row:last-child { border-bottom: none; }
+.mock-btns {
+  display: flex;
+  gap: 3px;
+  margin-left: auto;
+}
+.mock-btn {
+  padding: 2px 5px;
+  border: 1px solid #2e2e38;
+  border-radius: 3px;
+  font-size: 6px;
+  color: #7a7a8a;
+  font-family: monospace;
+}
+.mock-btn.ok { border-color: #3ecf8e; color: #3ecf8e; }
+
+/* INFO BOXES */
+.info-box {
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 14px 0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.info-box.tip { background: var(--blue-light); border-left: 3px solid var(--blue); }
+.info-box.warn { background: #FFF8E1; border-left: 3px solid #F9A825; }
+.info-box.danger { background: var(--red-light); border-left: 3px solid var(--red); }
+.info-box.success { background: var(--green-light); border-left: 3px solid var(--green); }
+.info-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.info-text { flex: 1; font-size: 14px; line-height: 1.7; }
+.info-text strong { font-weight: 600; display: block; margin-bottom: 3px; font-size: 14px; }
+
+/* CHECKLIST TABLE */
+.check-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+.check-table th {
+  background: var(--gold);
+  color: #fff;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+}
+.check-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.check-table tr:nth-child(even) td { background: var(--surface2); }
+.check-table tr:last-child td { border-bottom: none; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-ok { background: var(--green-light); color: var(--green); }
+.badge-warn { background: #FFF8E1; color: #8B6914; }
+.badge-danger { background: var(--red-light); color: var(--red); }
+
+/* STATUS GRID */
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.status-card {
+  border-radius: 10px;
+  padding: 12px;
+  border: 1.5px solid;
+  text-align: center;
+}
+.status-card .s-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+.status-card .s-label { font-size: 12px; font-weight: 600; line-height: 1.4; }
+.status-card.normal { border-color: #3ecf8e; background: rgba(62,207,142,.06); color: #1a6b44; }
+.status-card.clean { border-color: #60a5fa; background: rgba(96,165,250,.06); color: #1a4e8a; }
+.status-card.minor { border-color: #f5a623; background: rgba(245,166,35,.06); color: #7a5010; }
+.status-card.major { border-color: #e85d4a; background: rgba(232,93,74,.06); color: #7a2010; }
+
+/* DIVIDER */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+
+/* QUICK REF */
+.qref {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.qref-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+.qref-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+.qref-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.qref-value { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--muted);
+  font-size: 13px;
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+.footer strong { color: var(--gold); }
+
+/* PRINT */
+@media print {
+  .cover { background: #1A1208 !important; -webkit-print-color-adjust: exact; }
+  .section-header { background: #C9922A !important; -webkit-print-color-adjust: exact; }
+  body { font-size: 13px; }
+}
+
+/* TAG */
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--gold-light);
+  color: var(--gold-dark);
+  margin: 1px;
+}
+
+.highlight {
+  background: var(--gold-light);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 600;
+  color: var(--gold-dark);
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-logo">THE LOFT LIVING SPACE</div>
+  <span class="cover-icon">🏨</span>
+  <div class="cover-title">ခန်းထွက် စစ်ဆေးမှု<br>လက်စွဲစာအုပ်</div>
+  <div class="cover-sub">Checkout Inspection Manual</div>
+  <div class="cover-badge">📱 iPhone Safari အတွက် · ဝန်ထမ်းများသုံးစွဲရန်</div>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-header">📋 မာတိကာ (Table of Contents)</div>
+    <div class="toc-list">
+      <a class="toc-item" href="#sec1"><div class="toc-num">1</div>App ဖွင့်ပုံ — ဘာသာစကားရွေးချယ်ပုံ</a>
+      <a class="toc-item" href="#sec2"><div class="toc-num">2</div>ခန်းစစ်ဆေးခြင်း — အဆင့်ဆင့်</a>
+      <a class="toc-item" href="#sec3"><div class="toc-num">3</div>စစ်ဆေးမှုစာရင်း (Checklist)</a>
+      <a class="toc-item" href="#sec4"><div class="toc-num">4</div>ခန်းအခြေနေ ရွေးချယ်ပုံ</a>
+      <a class="toc-item" href="#sec5"><div class="toc-num">5</div>ပျက်စီးမှု / ကောက်ခံမှု</a>
+      <a class="toc-item" href="#sec6"><div class="toc-num">6</div>လျှပ်စစ်မီတာ မှတ်တမ်းတင်ပုံ</a>
+      <a class="toc-item" href="#sec7"><div class="toc-num">7</div>ပုံများ ရိုက်ကူးတင်ပုံ</a>
+      <a class="toc-item" href="#sec8"><div class="toc-num">8</div>Submit လုပ်ပြီး LINE ပို့ပုံ</a>
+      <a class="toc-item" href="#sec9"><div class="toc-num">9</div>မှတ်သားရမည့်အချက်များ</div></a>
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section" id="sec1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title">App ဖွင့်ပုံ — ဘာသာစကားရွေးချယ်ပုံ</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box tip">
+        <div class="info-icon">💡</div>
+        <div class="info-text">
+          <strong>iPhone Safari တွင်ဖွင့်ရန်</strong>
+          Link: <span class="highlight">theloftlivingspace-droid.github.io/loft-pricing/checkout-checklist.html</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-label">Safari ဖွင့်ပြီး Link ရိုက်ထည့်ပါ</div>
+          <div class="step-desc">iPhone ၏ Safari Browser ဖွင့်ပါ။ အပေါ်ရှိ address bar တွင် link ရိုက်ထည့်ပြီး "Go" နှိပ်ပါ။</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-label">ဘာသာစကားရွေးချယ်ပါ — မြန်မာ 🇲🇲</div>
+          <div class="step-desc">Page ဖွင့်သောအခါ အပေါ်ဆုံးတွင် ဘာသာစကား buttons တွေ့မည်ဖြစ်သည်။ <span class="highlight">🇲🇲 မြန်မာ</span> ကိုနှိပ်ပါ — App တစ်ခုလုံး မြန်မာဘာသာသို့ ပြောင်းသွားမည်ဖြစ်သည်။</div>
+        </div>
+      </div>
+
+      <!-- PHONE MOCKUP -->
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-bar"><div class="phone-notch"></div></div>
+          <div class="phone-screen">
+            <div class="mock-nav">
+              <div class="mock-tab active"><div class="mock-tab-icon">📋</div>ခန်းစစ်</div>
+              <div class="mock-tab"><div class="mock-tab-icon">📊</div>မှတ်တမ်း</div>
+              <div class="mock-tab"><div class="mock-tab-icon">⚙️</div>သတ်မှတ်မှု</div>
+            </div>
+            <div class="mock-lang-bar">
+              <div class="mock-lang-btn">🇹🇭 ไทย</div>
+              <div class="mock-lang-btn active">🇲🇲 မြန်မာ</div>
+              <div class="mock-lang-btn">🇬🇧 EN</div>
+              <div class="mock-lang-btn">🇨🇳 中文</div>
+            </div>
+            <div class="mock-header">
+              <div class="mock-brand">THE LOFT LIVING SPACE</div>
+              <div class="mock-title">🏨 ခန်းမှန်းစစ်ဆေးစာရင်း</div>
+              <div class="mock-prog-bar"><div class="mock-prog-fill" style="width:40%"></div></div>
+            </div>
+            <div class="mock-section">
+              <div class="mock-sec-head">📋 အခြေခံအချက်အလက်</div>
+              <div class="mock-field">ခန်းနံပါတ် — ရွေးချယ်ပါ</div>
+              <div class="mock-field">စစ်ဆောင်သူ — အမည်ထည့်ပါ</div>
+              <div class="mock-field">ရက်စွဲ / အချိန်</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-box success">
+        <div class="info-icon">✅</div>
+        <div class="info-text">
+          <strong>မှတ်ချက်</strong>
+          ရွေးချယ်ထားသောဘာသာစကားကို App မှ မှတ်မိသည်။ နောက်ကြိမ် ဖွင့်သောအခါ မြန်မာဘာသာကို တည်ရှိနေမည်ဖြစ်သည်။ ထပ်မံရွေးချယ်ရန် မလိုပါ။
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section" id="sec2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title">ခန်းစစ်ဆေးခြင်း — အဆင့်ဆင့်</div>
+    </div>
+    <div class="section-body">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-label">📋 ခန်းနံပါတ် ရွေးချယ်ပါ</div>
+          <div class="step-desc">ပထမ section — "အခြေခံအချက်အလက်" တွင် စစ်ဆေးမည့် ခန်းနံပါတ်ကို dropdown မှ ရွေးပါ။<br>
+          ဥပမာ — <span class="tag">300 Luxury</span> <span class="tag">203 Allure</span> <span class="tag">113 Legacy</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-label">👤 ကိုယ့်အမည်ထည့်ပါ</div>
+          <div class="step-desc">"စစ်ဆောင်သူ" field တွင် မိမိအမည်ကို ရိုက်ထည့်ပါ။ ဤ field ကို မဖြည့်ပါက Submit မရပါ။</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-label">📡 OTA / ဘယ်မှ Booking လဲ ရွေးပါ</div>
+          <div class="step-desc">ဧည့်သည်သည် ဘယ်ကနေ Booking လုပ်ထားသည်ကို ရွေးပါ။<br>
+          <span class="tag">Airbnb</span> <span class="tag">Booking</span> <span class="tag">Trip.com</span> <span class="tag">Expedia</span> <span class="tag">Walk-in</span> <span class="tag">Monthly</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-label">⏰ Check-out နောက်ကျမနောက်ကျ ရွေးပါ</div>
+          <div class="step-desc">ဧည့်သည် ထွက်ချိန်ကို စစ်ဆေးပြီး သင့်လျော်သော option ရွေးပါ —<br>
+          <span class="badge badge-ok">✓ ပုံမှန်</span> ၁ နာရီအတွင်း ထွက်ပါက &nbsp;
+          <span class="badge badge-warn">⏰ နောက်ကျ ≤1 နာရီ</span><br>
+          <span class="badge badge-danger">⏰ နောက်ကျ 2 နာရီ+</span> နောက်ကျမှုရှိပါက Charge ထည့်ရမည်</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-label">🔍 Checklist တစ်ခုစီ စစ်ဆေးပါ</div>
+          <div class="step-desc">အိပ်ခန်းနှင့် ရေချိုးခန်း checklist ရှိ item တစ်ခုစီကို စစ်ဆေးပြီး OK / ! / N/A ကိုနှိပ်ပါ။ Section ကိုဖွင့်ရန် header ကို တို့ပါ (tap)။</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-content">
+          <div class="step-label">🏷️ ခန်းအခြေနေ ရွေးချယ်ပါ</div>
+          <div class="step-desc">စစ်ဆေးပြီးနောက် ခန်းတစ်ခုလုံး၏ အခြေနေကို ရွေးချယ်ပါ (အောက်တွင် ရှင်းပြထားသည်)။</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-content">
+          <div class="step-label">✅ Submit နှိပ်ပြီး စစ်ဆေးပါ</div>
+          <div class="step-desc">အောက်ရှိ <span class="highlight">စစ်ဆေးပြီး မှတ်သားမည် →</span> ကို နှိပ်ပါ။ Summary ပြသမည်ဖြစ်ပြီး မှန်/မမှန် စစ်ဆေးပြီး "ယืနယ်ဆောင် Submit" နှိပ်ပါ။</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section" id="sec3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title">စစ်ဆေးမှုစာရင်း (Checklist) — OK / ! / N/A</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box tip">
+        <div class="info-icon">ℹ️</div>
+        <div class="info-text">Item တစ်ခုစီကို စစ်ဆေးပြီး ဘယ် button နှိပ်ရမည်ဆိုသည်ကို နားလည်ရန် လေ့လာပါ။</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:14px 0;">
+        <div style="background:rgba(62,207,142,.08);border:1.5px solid #3ecf8e;border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px">✅</div>
+          <div style="font-size:13px;font-weight:700;color:#1a6b44;font-family:monospace">OK</div>
+          <div style="font-size:11px;color:#2d7a4a;margin-top:4px">ပုံမှန်ကောင်းမွန်သည်</div>
+        </div>
+        <div style="background:rgba(232,93,74,.08);border:1.5px solid #e85d4a;border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px">⚠️</div>
+          <div style="font-size:13px;font-weight:700;color:#c0392b;font-family:monospace">!</div>
+          <div style="font-size:11px;color:#c0392b;margin-top:4px">ပြဿနာ တွေ့ရှိသည်</div>
+        </div>
+        <div style="background:rgba(122,122,138,.1);border:1.5px solid #7a7a8a;border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:4px">➖</div>
+          <div style="font-size:13px;font-weight:700;color:#5a5a6a;font-family:monospace">N/A</div>
+          <div style="font-size:11px;color:#5a5a6a;margin-top:4px">မသက်ဆိုင်ပါ</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <p style="font-weight:600;margin-bottom:10px;font-size:14px;">🛏️ အိပ်ခန်း — စစ်ဆေးမည့် item များ</p>
+
+      <table class="check-table">
+        <tr><th>item</th><th>စစ်ဆေးရမည့်အချက်</th></tr>
+        <tr><td>🛏️ အိပ်ရာခင်း / ခေါင်းအုံး / စောင်</td><td>ပြည့်စုံပြီး ကြီးမားသောဒဏ်ရာမရှိ</td></tr>
+        <tr><td>🛁 ပုဝါ</td><td>မပျောက်ဆုံး / ညစ်ပတ်မနေ</td></tr>
+        <tr><td>🔑 Keycard</td><td>ပြည့်စုံသည်</td></tr>
+        <tr><td>📺 Remote (TV / AC)</td><td>ရှိပြီး အသုံးပြုနိုင်သည်</td></tr>
+        <tr><td>❄️ လေအအေးပေး (AC)</td><td>ပုံမှန်အလုပ်လုပ်သည်</td></tr>
+        <tr><td>📺 တီဗွီ</td><td>ဖွင့်ရ အသုံးပြုနိုင်သည်</td></tr>
+        <tr><td>🧊 ရေခဲသေတ္တာ</td><td>ပုံမှန် / ကျန်ပစ္စည်းမရှိ / နံ့မနံ့</td></tr>
+        <tr><td>🍳 မီးဖို / ရေနွေးကြမ်းဆူပေး</td><td>ထည့်မပါ / ကျန်မနေ</td></tr>
+        <tr><td>💡 ပလပ် / ခလုတ် / မီးသီး</td><td>ပုံမှန်ပြည့်စုံ</td></tr>
+        <tr><td>🚬 စီးကရက်</td><td>နံ့မနံ့ / ကျောက်မီးသွေးအမှတ်မရှိ</td></tr>
+        <tr><td>🍈 သစ်ပွတ်</td><td>နံ့မနံ့</td></tr>
+        <tr><td>🐾 တိရစ္ဆာန်</td><td>ကျင်လည်ဟန်မရှိ / မွေးမြူမနေ</td></tr>
+        <tr><td>🧱 နံရံ / ကြမ်းခင်း / မျက်နှာကျက်</td><td>ဒဏ်ရာ / ကွဲချောင်းမရှိ</td></tr>
+        <tr><td>🪑 ပရိဘောဂ</td><td>ကွဲ / ကျိုးမနေ</td></tr>
+        <tr><td>🗑️ အမှိုက်</td><td>မကျန်</td></tr>
+        <tr><td>🍽️ မီးဖိုချောင် / ဆေးကန်</td><td>သန့်ရှင်း / နံ့မနံ့</td></tr>
+        <tr><td>🪟 ကတ်နဆောင်နောက် / အိပ်ရာအောက်</td><td>စစ်ဆေးသင့်သောနေရာ</td></tr>
+        <tr><td>🪜 Loft ကြမ်းတမ်ထစ်</td><td>ကွဲအက်မှု မရှိ</td></tr>
+      </table>
+
+      <div class="divider"></div>
+      <p style="font-weight:600;margin-bottom:10px;font-size:14px;">🚿 ရေချိုးခန်း — စစ်ဆေးမည့် item များ</p>
+
+      <table class="check-table">
+        <tr><th>item</th><th>စစ်ဆေးရမည့်အချက်</th></tr>
+        <tr><td>🚽 ရေတိုလက်တန်း</td><td>မပိတ်ဆို့ / အပိုပစ္စည်းမပါ</td></tr>
+        <tr><td>🚿 ရေသန့် / ဖြန်းပိုက်</td><td>ရေစီးဆင်းပုံမှန်</td></tr>
+        <tr><td>💧 ရေယိုစိမ့်မှု</td><td>မရှိ</td></tr>
+        <tr><td>👃 ပိုက်နံ့</td><td>မနံ့</td></tr>
+        <tr><td>🦠 မှိုပေါက် / ကျောက်ငန်</td><td>မရှိ / မကြီး</td></tr>
+        <tr><td>🧴 ရေချိုးသုံးပစ္စည်း</td><td>ရေဆပ်ပြာ / ဆပ်ပြာ / တိဆ်ရှူ ပြည့်စုံ</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section" id="sec4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title">ခန်းအခြေနေ ရွေးချယ်ပုံ</div>
+    </div>
+    <div class="section-body">
+      <p style="margin-bottom:14px;font-size:14px;color:var(--muted)">စစ်ဆေးပြီးနောက် ခန်းတစ်ခုလုံးကို ဘယ်အခြေနေမှာ ရှိသည်ဆိုသော overall status ကိုရွေးပါ —</p>
+
+      <div class="status-grid">
+        <div class="status-card normal">
+          <span class="s-icon">✅</span>
+          <div class="s-label">ပုံမှန်<br><small>Normal</small></div>
+        </div>
+        <div class="status-card clean">
+          <span class="s-icon">🧹</span>
+          <div class="s-label">သန့်ရှင်းရန်လိုသည်<br><small>Needs Cleaning</small></div>
+        </div>
+        <div class="status-card minor">
+          <span class="s-icon">⚠️</span>
+          <div class="s-label">ပျက်စီးမှုနည်းသည်<br><small>Minor Damage</small></div>
+        </div>
+        <div class="status-card major">
+          <span class="s-icon">🔴</span>
+          <div class="s-label">ပျက်စီးမှုများသည်<br><small>Major Damage</small></div>
+        </div>
+      </div>
+      <div style="background:rgba(168,85,247,.06);border:1.5px solid #a855f7;border-radius:10px;padding:12px;text-align:center;margin-top:8px;">
+        <span style="font-size:22px;display:block;margin-bottom:4px">🚫</span>
+        <div style="font-size:12px;font-weight:600;color:#7c3aed;line-height:1.4">ခန်းပိတ်ထားသည်<br><small>Block Room</small></div>
+      </div>
+
+      <div class="info-box warn" style="margin-top:16px">
+        <div class="info-icon">⚠️</div>
+        <div class="info-text">
+          <strong>ခန်းရောင်းရန်အဆင်သင့်?</strong>
+          Status ရွေးပြီးနောက် "ခန်းရောင်းရန်အဆင်သင့်?" ဆိုသော မေးခွန်းကို ဖြေပါ — ✓ အဆင်သင့် (ဧည့်သည်သစ် ချက်ချင်းဝင်နိုင်သည်) သို့မဟုတ် ✕ မအဆင်သင့် (ဦးစွာ clean / ပြုပြင်ရဦးမည်)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section" id="sec5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div class="section-title">ပျက်စီးမှု / ကောက်ခံမှု (Damage / Charge)</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box danger">
+        <div class="info-icon">🔴</div>
+        <div class="info-text">
+          <strong>ဧည့်သည် ဘာမှ မပျက်စီး / မချိုးဖောက်ပါက ဤ section ကို ကျော်နိုင်သည်</strong>
+          ပျက်စီးမှု / ချိုးဖောက်မှု တွေ့ပါကသာ အောက်ပါတို့ ဖြည့်ပါ
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-label">ပြဿနာအမျိုးအစား ရွေးပါ (Checkbox)</div>
+          <div class="step-desc">
+            <span class="tag">🚬 စီးကရက်သောက်</span>
+            <span class="tag">🍈 သစ်ပွတ်</span>
+            <span class="tag">🛏️ ပုဝါပျက်</span>
+            <span class="tag">🔍 ပစ္စည်းပျောက်</span>
+            <span class="tag">👥 ဧည့်သည်များ</span>
+            <span class="tag">⏰ နောက်ကျ</span>
+            <span class="tag">🧹 Deep Clean</span>
+            <span class="tag">⚡ လျှပ်စစ်ပုံမမှန်</span>
+            <span class="tag">💥 ပစ္စည်းပျက်</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-label">ကောက်ခံမည့်ပမာဏ ထည့်ပါ (ဘတ်ဖြင့်)</div>
+          <div class="step-desc">ဧည့်သည်ထံမှ ကောက်ခံမည့် ငွေပမာဏကို ရိုက်ထည့်ပါ။ ဥပမာ: <span class="highlight">500</span> ဘတ်</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-label">အသေးစိတ်ရေးထည့်ပါ</div>
+          <div class="step-desc">မည်သည့်ပစ္စည်း ပျက်စီးသည်ကို ရှင်းရှင်းလင်းလင်း ရေးပါ။ ဥပမာ: "ကြမ်းပေါ်ရှိ chair တစ်ချောင်း ကွဲ"</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-label">📸 ပျက်စီးမှုပုံ ရိုက်တင်ပါ</div>
+          <div class="step-desc">"📎 ပျက်စီးမှုပုံ" section ကိုနှိပ်ပြီး camera ဖွင့်ကာ ပုံရိုက်ပါ (အများဆုံး ၅ ပုံ)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section" id="sec6">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div class="section-title">လျှပ်စစ်မီတာ မှတ်တမ်းတင်ပုံ</div>
+    </div>
+    <div class="section-body">
+      <div class="info-box tip">
+        <div class="info-icon">⚡</div>
+        <div class="info-text">
+          <strong>မီတာဖတ်ပြီး ရိုက်ထည့်ပါ</strong>
+          ဧည့်သည်ထွက်ပြီးနောက် မီတာကို ဖတ်ကာ app တွင် မှတ်ရမည်ဖြစ်သည်
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-label">မိတာမတိုင်မီ (Before) ထည့်ပါ</div>
+          <div class="step-desc">ဧည့်သည်ဝင်ခဲ့သောအချိန်က မီတာဖတ်ဂဏန်းကို ထည့်ပါ (မှတ်တမ်းမှ ယူပါ)</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-label">မိတာပြီးနောက် (After) ထည့်ပါ</div>
+          <div class="step-desc">ယခုစစ်ဆေးနေသောအချိန် မီတာပေါ်တွင်ပြနေသော ဂဏန်းကို ထည့်ပါ</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-label">အလိုအလျောက် တွက်ချက်မည်</div>
+          <div class="step-desc">App မှ အသုံးပြုမှု (unit) နှင့် လျှပ်စစ်ဖိုး (ဘတ်) ကို အလိုအလျောက် တွက်ပေးမည်ဖြစ်သည်</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-label">📷 မီတာပုံ ရိုက်တင်ပါ</div>
+          <div class="step-desc">"📷 မိတာပုံ" section တွင် မီတာပြနေသော ဂဏန်းကို ပုံရိုက်ကာ တင်ပါ</div>
+        </div>
+      </div>
+
+      <div class="info-box warn">
+        <div class="info-icon">💡</div>
+        <div class="info-text">တစ်ယူနစ် = <strong>10 ဘတ်</strong> ဖြင့် တွက်ချက်သည်</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section" id="sec7">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <div class="section-title">ပုံများ ရိုက်ကူးတင်ပုံ</div>
+    </div>
+    <div class="section-body">
+      <table class="check-table">
+        <tr><th>ပုံအမျိုးအစား</th><th>တင်ရမည့် အခြေအနေ</th><th>အများဆုံး</th></tr>
+        <tr>
+          <td>📎 ပျက်စီးမှုပုံ</td>
+          <td>ပျက်စီးမှု / Damage တွေ့ပါက</td>
+          <td style="text-align:center"><span class="badge badge-warn">5 ပုံ</span></td>
+        </tr>
+        <tr>
+          <td>📷 မီတာပုံ</td>
+          <td>မီတာ ဖတ်ပြီးနောက် အမြဲ</td>
+          <td style="text-align:center"><span class="badge badge-ok">1 ပုံ</span></td>
+        </tr>
+        <tr>
+          <td>🏨 ခန်းပိတ်ပုံ</td>
+          <td>စစ်ဆေးပြီး ခန်းပိတ်ချိန်</td>
+          <td style="text-align:center"><span class="badge badge-warn">3 ပုံ</span></td>
+        </tr>
+      </table>
+
+      <div class="info-box tip">
+        <div class="info-icon">📸</div>
+        <div class="info-text">
+          <strong>ပုံတင်ရန်</strong>
+          Camera icon ကိုနှိပ်ပါ → iPhone camera ဖွင့်မည် → ပုံရိုက်ပြီး "Use Photo" နှိပ်ပါ → App မှ အလိုအလျောက် Google Drive တွင် သိမ်းမည်ဖြစ်သည်
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section" id="sec8">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <div class="section-title">Submit လုပ်ပြီး LINE ပို့ပုံ</div>
+    </div>
+    <div class="section-body">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-label">အောက်ရှိ Submit button နှိပ်ပါ</div>
+          <div class="step-desc"><span class="highlight">စစ်ဆေးပြီး မှတ်သားမည် →</span> button (ဝါရောင်) ကို screen အောက်တွင် တွေ့မည်ဖြစ်သည်</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-label">Summary စစ်ဆေးပါ</div>
+          <div class="step-desc">ထွက်လာသော Summary modal တွင် ဖြည့်ထားသောအချက်အလက်များကို ပြန်စစ်ဆေးပြီး မှန်ကန်ကြောင်း သေချာပါ</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-label">✅ ယေနဆောင် Submit နှိပ်ပါ</div>
+          <div class="step-desc">မှတ်တမ်းကို Google Sheets တွင် အလိုအလျောက် သိမ်းဆည်းမည်ဖြစ်ပြီး ပုံများကိုလည်း Google Drive တွင် Upload တင်မည်ဖြစ်သည်</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-label">📱 LINE Report ပို့ပါ (ရွေးချယ်ပါ)</div>
+          <div class="step-desc">Submit ပြီးနောက် <span class="highlight">📱 LINE Report ပို့</span> button ကို တွေ့မည်ဖြစ်သည်။ နှိပ်ပါက LINE App ဖွင့်ပြီး မန်နေဂျာထံ အလိုအလျောက် report ပို့ပေးမည်ဖြစ်သည်</div>
+        </div>
+      </div>
+
+      <div class="info-box success">
+        <div class="info-icon">✅</div>
+        <div class="info-text">
+          <strong>LINE Report ဘာသာစကား</strong>
+          LINE တွင် ပို့သော report သည် <strong>ထိုင်းဘာသာ / အင်္ဂလိပ်</strong> ဖြင့် ပို့မည်ဖြစ်ပြီး App ရှိ ဘာသာစကားသည် ထိုသို့ မသက်ရောက်ပါ — မန်နေဂျာသည် ထိုင်းဘာသာဖြင့် ဖတ်မည်ဖြစ်သည်
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="section" id="sec9">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <div class="section-title">မှတ်သားရမည့်အချက်များ</div>
+    </div>
+    <div class="section-body">
+
+      <div class="info-box danger">
+        <div class="info-icon">🚨</div>
+        <div class="info-text">
+          <strong>Critical — ချက်ချင်း မန်နေဂျာကို ဖုန်းဆက်ရမည့် အခြေအနေများ</strong>
+          🚬 စီးကရက်နံ့ / ကျောက်မီးသွေးအမှတ် တွေ့ပါက<br>
+          🔴 ပျက်စီးမှုကြီးမားပါက (ပရိဘောဂ ကျိုး / နံရံ ကွဲ)<br>
+          🚫 ခန်း Block လုပ်ရမည့် အခြေအနေ
+        </div>
+      </div>
+
+      <div class="qref">
+        <div class="qref-card">
+          <span class="qref-icon">📱</span>
+          <div class="qref-label">မှတ်တမ်းကြည့်ရန်</div>
+          <div class="qref-value">"မှတ်တမ်း" tab ကို နှိပ်ပါ</div>
+        </div>
+        <div class="qref-card">
+          <span class="qref-icon">🗑️</span>
+          <div class="qref-label">ဖောင်ပယ်ဖျက်ရန်</div>
+          <div class="qref-value">🗑️ icon (ဘယ်ဘက်အောက်) နှိပ်ပါ</div>
+        </div>
+        <div class="qref-card">
+          <span class="qref-icon">🔄</span>
+          <div class="qref-label">အချက်အလက် ပျောက်သွားပါက</div>
+          <div class="qref-value">"သတ်မှတ်မှု" → Sync from Sheets</div>
+        </div>
+        <div class="qref-card">
+          <span class="qref-icon">⚙️</span>
+          <div class="qref-label">မိမိအမည် Default သတ်မှတ်ရန်</div>
+          <div class="qref-value">"သတ်မှတ်မှု" tab → ဝန်ထမ်းအမည်</div>
+        </div>
+      </div>
+
+      <div class="info-box tip" style="margin-top:16px">
+        <div class="info-icon">💡</div>
+        <div class="info-text">
+          <strong>ကိုယ့်အမည် Default သတ်မှတ်ပုံ</strong>
+          "သတ်မှတ်မှု" tab ဖွင့်ပြီး မိမိအမည်ကို "ဝန်ထမ်းအမည် (Default)" field တွင် ထည့်ကာ "💾 Save" နှိပ်ပါ — နောက်တစ်ကြိမ်မှ စစ်ဆေးသောအခါ အမည်ကို အလိုအလျောက် ဖြည့်ပေးမည်ဖြစ်သည်
+        </div>
+      </div>
+
+      <div class="info-box warn">
+        <div class="info-icon">📵</div>
+        <div class="info-text">
+          <strong>Internet မရှိပါက</strong>
+          App ကို ဆက်လက်အသုံးပြုနိုင်သည် — ဒေသတွင်း (offline) သိမ်းဆည်းမည်ဖြစ်ပြီး Internet ပြန်ရသောအချိန် Sync လုပ်နိုင်မည်ဖြစ်သည်
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div style="font-size:28px;margin-bottom:8px">🏨</div>
+    <div><strong>The Loft Living Space</strong></div>
+    <div style="margin-top:6px;line-height:1.8">စစ်ဆေးမှုဆိုင်ရာ မေးခွန်းများရှိပါက<br>မန်နေဂျာကို LINE မှ ဆက်သွယ်ပါ</div>
+    <div style="margin-top:14px;font-size:11px;color:#aaa">Checkout Inspection Manual — Myanmar Edition</div>
+  </div>
+
+</div>
+
+</body>
+</html>
