@@ -1201,15 +1201,29 @@ function getPLPrice(type, dateStr){
 
 function calcPrice(base, occ, dow, season){
   // dow: 'weekday'=avg(Mon-Thu), 'fri'=Fri, 'weekend'=avg(Sat-Sun), 'peak'=special
-  // Use today's date for direct PL lookup
   const today = new Date();
   const type = ROOMS_DATA.find(r => r.base === base)?.id;
 
-  // Try direct PL lookup for today
-  if(type && dow === 'weekday'){
-    const todayStr = today.toISOString().split('T')[0];
-    const plPrice = getPLPrice(type, todayStr);
-    if(plPrice) return applyDOWAndOcc(plPrice, type, 2, occ); // Wed baseline
+  // Direct PL lookup for weekday/fri/weekend — pick representative date for each tab
+  if(type && dow !== 'peak'){
+    let lookupDate = new Date(today);
+    if(dow === 'weekend'){
+      // หาวันเสาร์ถัดไป
+      const daysToSat = (6 - today.getDay() + 7) % 7 || 7;
+      lookupDate.setDate(today.getDate() + daysToSat);
+    } else if(dow === 'fri'){
+      // หาวันศุกร์ถัดไป
+      const daysToFri = (5 - today.getDay() + 7) % 7 || 7;
+      lookupDate.setDate(today.getDate() + daysToFri);
+    }
+    // weekday → ใช้วันนี้ (หรือวันพุธถัดไปถ้าวันนี้เป็น weekend)
+    const dateStr = lookupDate.toISOString().split('T')[0];
+    const plPrice = getPLPrice(type, dateStr);
+    if(plPrice){
+      const d = lookupDate.getDay();
+      const realDowIdx = d === 0 ? 6 : d - 1; // 0=Mon
+      return applyDOWAndOcc(plPrice, type, realDowIdx, occ);
+    }
   }
 
   // Fallback: formula-based (PriceLabs pattern)
