@@ -1324,12 +1324,31 @@ function copyLineReport(){
   const data=collectFormData();
   openLineShare(buildLineReport(data));
 }
-function sendLineFromModal(){
+async function sendLineFromModal(){
   // Use lastSubmittedUID set after upload completes
   const uid=window._lastSubmittedUID;
   const data=uid ? history_data.find(r=>r.uid===uid) : null;
-  if(data) openLineShare(buildLineReport(data));
-  else copyLineReport();
+  if(!data){ copyLineReport(); return; }
+
+  // If driveLinks missing/pending, sync from Sheet first
+  const hasPending = !data.driveLinks || data.driveLinks.length===0 ||
+    data.driveLinks.some(function(l){return !l.url||l.url==='pending'||l.url.includes('ERR');});
+  if(hasPending && settings.sheetsUrl){
+    showToast('⏳ ดึงลิงค์รูปจาก Drive...','success');
+    try{
+      const syncUrl=settings.sheetsUrl+'?action=getRecord&uid='+encodeURIComponent(uid);
+      const syncRes=await fetch(syncUrl,{mode:'cors'});
+      if(syncRes.ok){
+        const syncJson=await syncRes.json();
+        if(syncJson.driveLinks&&syncJson.driveLinks.length){
+          data.driveLinks=syncJson.driveLinks;
+          data.photosPending=false;
+          try{saveHistory();}catch(e){}
+        }
+      }
+    }catch(se){}
+  }
+  openLineShare(buildLineReport(data));
 }
 async function copyHistoryReport(uid){
   const data=history_data.find(r=>r.uid===uid);
@@ -1960,3 +1979,4 @@ function _setTextByQuery(sel, text) {
 </script>
 </body>
 </html>
+
