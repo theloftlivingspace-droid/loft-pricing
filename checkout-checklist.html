@@ -407,12 +407,20 @@ textarea{resize:none;min-height:68px;}
       <div style="text-align:right"><div class="elec-lbl">ค่าไฟรวม</div><div class="elec-val" id="totalElec">— ฿</div></div>
     </div>
     <div class="field">
-      <div class="field-label">📷 รูปมิเตอร์</div>
-      <div class="photo-upload" onclick="document.getElementById('meterPhoto').click()">
-        <input type="file" id="meterPhoto" accept="image/*" onchange="previewPhotos(this,'meterPreview')">
-        <div class="photo-icon">🔢</div><div class="photo-text">ถ่ายรูปมิเตอร์</div>
+      <div class="field-label">📷 รูปมิเตอร์ก่อน</div>
+      <div class="photo-upload" onclick="document.getElementById('meterPhotoBefore').click()">
+        <input type="file" id="meterPhotoBefore" accept="image/*" capture="environment" onchange="previewPhotos(this,'meterPreviewBefore')">
+        <div class="photo-icon">🔢</div><div class="photo-text">ถ่ายรูปมิเตอร์ก่อน</div>
       </div>
-      <div class="photo-preview" id="meterPreview"></div>
+      <div class="photo-preview" id="meterPreviewBefore"></div>
+    </div>
+    <div class="field">
+      <div class="field-label">📷 รูปมิเตอร์หลัง</div>
+      <div class="photo-upload" onclick="document.getElementById('meterPhotoAfter').click()">
+        <input type="file" id="meterPhotoAfter" accept="image/*" capture="environment" onchange="previewPhotos(this,'meterPreviewAfter')">
+        <div class="photo-icon">🔢</div><div class="photo-text">ถ่ายรูปมิเตอร์หลัง</div>
+      </div>
+      <div class="photo-preview" id="meterPreviewAfter"></div>
     </div>
   </div>
 </div>
@@ -1028,12 +1036,12 @@ function calcElec(){
 }
 
 // ===== PHOTO =====
-// photo store: { dmgPreview:[], meterPreview:[], roomPreview:[] }
-var photoStore={dmgPreview:[],meterPreview:[],roomPreview:[]};
+// photo store: { dmgPreview:[], meterPreviewBefore:[], meterPreviewAfter:[], roomPreview:[] }
+var photoStore={dmgPreview:[],meterPreviewBefore:[],meterPreviewAfter:[],roomPreview:[]};
 
 function previewPhotos(input,previewId){
   const container=document.getElementById(previewId);
-  const MAX_MAP={'dmgPreview':5,'meterPreview':1,'roomPreview':3};
+  const MAX_MAP={'dmgPreview':5,'meterPreviewBefore':1,'meterPreviewAfter':1,'roomPreview':3};
   const MAX=MAX_MAP[previewId]||3;
   const current=photoStore[previewId]||[];
   Array.from(input.files).forEach(file=>{
@@ -1111,7 +1119,7 @@ function collectFormData(){
     hasIssue:issues.length>0||damages.length>0||['major','block'].includes(status),
     isCritical, timestamp:Date.now(),
     driveLinks:[], // filled after upload
-    photoCount:(photoStore.dmgPreview||[]).length+(photoStore.meterPreview||[]).length+(photoStore.roomPreview||[]).length
+    photoCount:(photoStore.dmgPreview||[]).length+(photoStore.meterPreviewBefore||[]).length+(photoStore.meterPreviewAfter||[]).length+(photoStore.roomPreview||[]).length
   };
 }
 
@@ -1182,7 +1190,8 @@ async function finalSubmit(){
 
     const allPhotos=[
       ...(photoStore.dmgPreview||[]).map(function(p,i){return{data:p,label:'Damage',index:i+1};}),
-      ...(photoStore.meterPreview||[]).map(function(p,i){return{data:p,label:'Meter',index:i+1};}),
+      ...(photoStore.meterPreviewBefore||[]).map(function(p,i){return{data:p,label:'MeterBefore',index:i+1};}),
+      ...(photoStore.meterPreviewAfter||[]).map(function(p,i){return{data:p,label:'MeterAfter',index:i+1};}),
       ...(photoStore.roomPreview||[]).map(function(p,i){return{data:p,label:'Room',index:i+1};}),
     ];
 
@@ -1285,8 +1294,8 @@ function closeAndReset(){
 function resetForm(){
   document.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(el=>el.checked=false);
   ['roomNum','guestName','actualCO','chargeAmount','chargeNote','meterBefore','meterAfter','repairNote','extraNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['dmgPreview','meterPreview','roomPreview'].forEach(id=>document.getElementById(id).innerHTML='');
-  photoStore={dmgPreview:[],meterPreview:[],roomPreview:[]};
+  ['dmgPreview','meterPreviewBefore','meterPreviewAfter','roomPreview'].forEach(id=>document.getElementById(id).innerHTML='');
+  photoStore={dmgPreview:[],meterPreviewBefore:[],meterPreviewAfter:[],roomPreview:[]};
   // Re-apply default inspector
   if(settings.defaultInspector) document.getElementById('inspector').value=settings.defaultInspector;
   const now=new Date();
