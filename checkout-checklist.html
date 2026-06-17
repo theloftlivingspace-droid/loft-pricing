@@ -1898,9 +1898,9 @@ function setLang(lang) {
   // Photo upload texts
   const photoTexts = document.querySelectorAll('.photo-text');
   photoTexts.forEach((el,i) => {
+    if(el.id) return; // skip elements with explicit id (handled separately above)
     if(i===0) el.textContent = t.upload_tap;
-    if(i===1) el.textContent = t.meter_tap;
-    if(i===2) el.textContent = t.room_tap;
+    if(i===1) el.textContent = t.room_tap;
   });
 
   // Meter labels
