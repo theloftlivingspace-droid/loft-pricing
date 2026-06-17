@@ -407,18 +407,18 @@ textarea{resize:none;min-height:68px;}
       <div style="text-align:right"><div class="elec-lbl">ค่าไฟรวม</div><div class="elec-val" id="totalElec">— ฿</div></div>
     </div>
     <div class="field">
-      <div class="field-label">📷 รูปมิเตอร์ก่อน</div>
+      <div class="field-label" id="lbl_meter_photo_before">📷 รูปมิเตอร์ Check-in</div>
       <div class="photo-upload" onclick="document.getElementById('meterPhotoBefore').click()">
         <input type="file" id="meterPhotoBefore" accept="image/*" capture="environment" onchange="previewPhotos(this,'meterPreviewBefore')">
-        <div class="photo-icon">🔢</div><div class="photo-text">ถ่ายรูปมิเตอร์ก่อน</div>
+        <div class="photo-icon">🔢</div><div class="photo-text" id="meter_tap_before">ถ่ายรูปมิเตอร์ Check-in</div>
       </div>
       <div class="photo-preview" id="meterPreviewBefore"></div>
     </div>
     <div class="field">
-      <div class="field-label">📷 รูปมิเตอร์หลัง</div>
+      <div class="field-label" id="lbl_meter_photo_after">📷 รูปมิเตอร์ Check-out</div>
       <div class="photo-upload" onclick="document.getElementById('meterPhotoAfter').click()">
         <input type="file" id="meterPhotoAfter" accept="image/*" capture="environment" onchange="previewPhotos(this,'meterPreviewAfter')">
-        <div class="photo-icon">🔢</div><div class="photo-text">ถ่ายรูปมิเตอร์หลัง</div>
+        <div class="photo-icon">🔢</div><div class="photo-text" id="meter_tap_after">ถ่ายรูปมิเตอร์ Check-out</div>
       </div>
       <div class="photo-preview" id="meterPreviewAfter"></div>
     </div>
@@ -1553,6 +1553,8 @@ const LANGS = {
     lbl_meter_before:'เลขก่อน (unit)', lbl_meter_after:'เลขหลัง (unit)',
     lbl_unit_used:'หน่วยที่ใช้', lbl_elec_total:'ค่าไฟรวม',
     lbl_meter_photo:'📷 รูปมิเตอร์', meter_tap:'ถ่ายรูปมิเตอร์',
+    lbl_meter_photo_before:'📷 รูปมิเตอร์ Check-in', meter_tap_before:'ถ่ายรูปมิเตอร์ Check-in',
+    lbl_meter_photo_after:'📷 รูปมิเตอร์ Check-out', meter_tap_after:'ถ่ายรูปมิเตอร์ Check-out',
     lbl_repair_note:'รายละเอียดงานซ่อม',
     lbl_leftbehind:'พบของลืม?', lb_none:'ไม่มี', lb_told:'มี — แจ้งแล้ว', lb_pending:'มี — ยังไม่แจ้ง',
     lbl_room_photo:'📷 รูปห้องปิดงาน', room_tap:'ถ่ายรูปสภาพห้องหลังตรวจ',
@@ -1622,6 +1624,8 @@ const LANGS = {
     lbl_meter_before:'မိတာမတိုင်မီ (unit)', lbl_meter_after:'မိတာပြီးနောက် (unit)',
     lbl_unit_used:'သုံးဆောင်မှု', lbl_elec_total:'လျှပ်စစ်ဖိုး',
     lbl_meter_photo:'📷 မိတာပုံ', meter_tap:'မိတာပုံရိုက်ရန်',
+    lbl_meter_photo_before:'📷 မိတာပုံ (Check-in)', meter_tap_before:'Check-in မိတာပုံရိုက်ရန်',
+    lbl_meter_photo_after:'📷 မိတာပုံ (Check-out)', meter_tap_after:'Check-out မိတာပုံရိုက်ရန်',
     lbl_repair_note:'ပြုပြင်မှုအသေးစိတ်',
     lbl_leftbehind:'ကျန်ပစ္စည်းတွေ့သလား?', lb_none:'မတွေ့ပါ', lb_told:'တွေ့သည် — အကြောင်းကြားပြီ', lb_pending:'တွေ့သည် — မကြားသေး',
     lbl_room_photo:'📷 စစ်ဆင်းပြီးနောက်ခန်းပုံ', room_tap:'ခန်းပုံရိုက်ရန်',
@@ -1691,6 +1695,8 @@ const LANGS = {
     lbl_meter_before:'Before (unit)', lbl_meter_after:'After (unit)',
     lbl_unit_used:'Units used', lbl_elec_total:'Electric charge',
     lbl_meter_photo:'📷 Meter Photo', meter_tap:'Take meter photo',
+    lbl_meter_photo_before:'📷 Check-in Meter Photo', meter_tap_before:'Take check-in meter photo',
+    lbl_meter_photo_after:'📷 Check-out Meter Photo', meter_tap_after:'Take check-out meter photo',
     lbl_repair_note:'Repair details',
     lbl_leftbehind:'Items left behind?', lb_none:'None', lb_told:'Yes — Guest notified', lb_pending:'Yes — Not notified',
     lbl_room_photo:'📷 Closing Room Photo', room_tap:'Take room photo after inspection',
@@ -1760,6 +1766,8 @@ const LANGS = {
     lbl_meter_before:'之前读数 (单位)', lbl_meter_after:'之后读数 (单位)',
     lbl_unit_used:'使用单位', lbl_elec_total:'电费合计',
     lbl_meter_photo:'📷 电表照片', meter_tap:'拍电表照片',
+    lbl_meter_photo_before:'📷 入住电表照片', meter_tap_before:'拍入住电表照片',
+    lbl_meter_photo_after:'📷 退房电表照片', meter_tap_after:'拍退房电表照片',
     lbl_repair_note:'维修详情',
     lbl_leftbehind:'发现遗留物品?', lb_none:'没有', lb_told:'有 — 已通知客人', lb_pending:'有 — 未通知',
     lbl_room_photo:'📷 关房照片', room_tap:'拍检查后房间照片',
@@ -1876,6 +1884,10 @@ function setLang(lang) {
   photoLabels.forEach(el => {
     if(el.textContent.includes('📎')) el.textContent = t.lbl_dmg_photo;
     if(el.textContent.includes('รูปมิเตอร์')||el.textContent.includes('Meter Photo')||el.textContent.includes('电表照片')||el.textContent.includes('မိတာပုံ')) el.textContent = t.lbl_meter_photo;
+    var elMPB=document.getElementById('lbl_meter_photo_before'); if(elMPB) elMPB.textContent=t.lbl_meter_photo_before;
+    var elMPA=document.getElementById('lbl_meter_photo_after'); if(elMPA) elMPA.textContent=t.lbl_meter_photo_after;
+    var elMTB=document.getElementById('meter_tap_before'); if(elMTB) elMTB.textContent=t.meter_tap_before;
+    var elMTA=document.getElementById('meter_tap_after'); if(elMTA) elMTA.textContent=t.meter_tap_after;
     if(el.textContent.includes('รูปห้องปิด')||el.textContent.includes('Closing')||el.textContent.includes('关房')||el.textContent.includes('စစ်ဆင်းပြီ')) el.textContent = t.lbl_room_photo;
     if(el.textContent.includes('หมายเหตุ')||el.textContent.includes('Additional')||el.textContent.includes('附加')||el.textContent.includes('အခြားမှတ်')) el.textContent = t.lbl_extra_note;
   });
