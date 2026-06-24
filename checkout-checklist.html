@@ -933,7 +933,6 @@ const appsScriptCode = [
   '    var errOut = ContentService',
   '      .createTextOutput(JSON.stringify({status:\'error\', msg:err.toString()}))',
   '      .setMimeType(ContentService.MimeType.JSON);',
-  "    errOut.setHeader('Access-Control-Allow-Origin', '*');",
   '    return errOut;',
   '  }',
   '}'
