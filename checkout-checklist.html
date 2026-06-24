@@ -1541,7 +1541,7 @@ function clearHistory(){
 
 // ===== APPS SCRIPT TEMPLATE =====
 function copyAppsScript(){
-  const code=appsScriptCode.join('\n');
+  const code=appsScriptCode;
   const el=document.getElementById('appsScriptPreview');
   el.textContent=code;
   navigator.clipboard.writeText(code).then(()=>showToast('✓ Copy Apps Script Code แล้ว — วางใน Editor','success')).catch(()=>{prompt('Copy ด้วยมือ:',code);});
