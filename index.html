@@ -1226,23 +1226,19 @@ function calcPrice(base, occ, dow, season){
     }
   }
 
-  // Fallback: formula-based (PriceLabs pattern)
+  // Fallback: formula-based
+  // Use DOW_MULT (weekday=1.0, fri=1.15, weekend=1.30, peak=1.60) — correct premium per pricing strategy
   const occRule = PL_OCC_RULES.find(r => occ <= r.max) || PL_OCC_RULES[PL_OCC_RULES.length-1];
-  const dowIdx = {weekday:2, fri:4, weekend:5, peak:5}[dow] || 2;
-  const dowMult = type && PL_DOW_MULT[type] ? PL_DOW_MULT[type][dowIdx] : 0.9;
+  const dowMult = DOW_MULT[dow] || DOW_MULT.weekday;
   const seasonMult = (SEASON_RULES[season]||{mult:1}).mult;
-  const peakMult = dow === 'peak' ? 1.5 : 1.0;
-  return Math.round(base * dowMult * occRule.mult * seasonMult * peakMult / 50) * 50;
+  return Math.round(base * dowMult * occRule.mult * seasonMult / 50) * 50;
 }
 
 function applyDOWAndOcc(plBasePrice, type, currentDowIdx, occ){
-  // Adjust PL price by current DOW and occ delta
+  // plBasePrice is already the PL price for the target DOW (Sat for weekend tab, Fri for fri tab, etc.)
+  // Just apply occ multiplier — do NOT re-ratio by today's DOW (that cancels the weekend premium)
   const occRule = PL_OCC_RULES.find(r => occ <= r.max) || PL_OCC_RULES[PL_OCC_RULES.length-1];
-  const today = new Date();
-  const realDowIdx = today.getDay() === 0 ? 6 : today.getDay() - 1; // 0=Mon
-  const targDowMult  = PL_DOW_MULT[type] ? PL_DOW_MULT[type][realDowIdx] : 0.9;
-  const baseDowMult  = PL_DOW_MULT[type] ? PL_DOW_MULT[type][currentDowIdx] : 0.9;
-  return Math.round(plBasePrice * (targDowMult/baseDowMult) * occRule.mult / 50) * 50;
+  return Math.round(plBasePrice * occRule.mult / 50) * 50;
 }
 
 function getOccRule(occ){ return PL_OCC_RULES.find(r=>occ<=r.max)||PL_OCC_RULES[PL_OCC_RULES.length-1]; }
