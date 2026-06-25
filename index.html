@@ -1204,19 +1204,27 @@ function calcPrice(base, occ, dow, season){
   const today = new Date();
   const type = ROOMS_DATA.find(r => r.base === base)?.id;
 
-  // Direct PL lookup for weekday/fri/weekend — pick representative date for each tab
+  // Direct PL lookup for weekday/fri/weekend
+  // Always use NEXT week's dates so all tabs are comparable (same booking horizon)
   if(type && dow !== 'peak'){
     let lookupDate = new Date(today);
-    if(dow === 'weekend'){
-      // หาวันเสาร์ถัดไป
-      const daysToSat = (6 - today.getDay() + 7) % 7 || 7;
-      lookupDate.setDate(today.getDate() + daysToSat);
+    // Find next Monday as anchor, then pick the right day of that week
+    const daysToNextMon = (8 - today.getDay()) % 7 || 7;
+    const nextMon = new Date(today);
+    nextMon.setDate(today.getDate() + daysToNextMon);
+    if(dow === 'weekday'){
+      // พุธสัปดาห์หน้า (midweek baseline)
+      lookupDate = new Date(nextMon);
+      lookupDate.setDate(nextMon.getDate() + 2);
     } else if(dow === 'fri'){
-      // หาวันศุกร์ถัดไป
-      const daysToFri = (5 - today.getDay() + 7) % 7 || 7;
-      lookupDate.setDate(today.getDate() + daysToFri);
+      // ศุกร์สัปดาห์หน้า
+      lookupDate = new Date(nextMon);
+      lookupDate.setDate(nextMon.getDate() + 4);
+    } else if(dow === 'weekend'){
+      // เสาร์สัปดาห์หน้า
+      lookupDate = new Date(nextMon);
+      lookupDate.setDate(nextMon.getDate() + 5);
     }
-    // weekday → ใช้วันนี้ (หรือวันพุธถัดไปถ้าวันนี้เป็น weekend)
     const dateStr = lookupDate.toISOString().split('T')[0];
     const plPrice = getPLPrice(type, dateStr);
     if(plPrice){
