@@ -350,8 +350,8 @@ tr:hover td{background:#FAFAF7}
 
 <!-- ── NAV TABS ── -->
 <div class="nav-tabs">
-  <div class="nav-tab active" onclick="switchTab('exec',this)"><span class="tab-icon">📊</span>ภาพรวมผู้บริหาร</div>
-  <div class="nav-tab" onclick="switchTab('pricing',this)"><span class="tab-icon">💰</span>ตั้งราคา</div>
+  <div class="nav-tab active" onclick="switchTab('pricing',this)"><span class="tab-icon">💰</span>ตั้งราคา</div>
+  <div class="nav-tab" onclick="switchTab('exec',this)"><span class="tab-icon">📊</span>ภาพรวมผู้บริหาร</div>
   <div class="nav-tab" onclick="switchTab('strategy',this)"><span class="tab-icon">🎯</span>กลยุทธ์ & Projection</div>
   <div class="nav-tab" onclick="switchTab('ops',this)"><span class="tab-icon">✅</span>Checklist & Fees</div>
   <div class="nav-tab" onclick="switchTab('advance',this)"><span class="tab-icon">📅</span>ล่วงหน้า 3 เดือน</div>
@@ -360,7 +360,7 @@ tr:hover td{background:#FAFAF7}
 <!-- ══════════════════════════════════════
      TAB 1: EXECUTIVE OVERVIEW
 ══════════════════════════════════════ -->
-<div class="tab-page active" id="tab-exec">
+<div class="tab-page" id="tab-exec">
 
   <!-- Upload bar -->
   <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-bottom:12px">
@@ -613,7 +613,27 @@ tr:hover td{background:#FAFAF7}
 <!-- ══════════════════════════════════════
      TAB 2: PRICING
 ══════════════════════════════════════ -->
-<div class="tab-page" id="tab-pricing">
+<div class="tab-page active" id="tab-pricing">
+
+  <!-- Day tabs + Price cards — moved to top -->
+  <div class="page-section-label">ราคาสัปดาห์นี้ — เลือกวัน</div>
+  <div class="sec">
+    <div class="sec-hdr">
+      <span class="sec-title">ราคาที่ควรตั้งใน Little Hotelier</span>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span id="action-season-badge2" class="season-tag sb-mid">Normal season</span>
+      </div>
+    </div>
+    <div class="tabs" style="padding:0 18px 12px;margin-top:8px">
+      <div class="tab active" onclick="switchWeek('weekday',this)">จ–พฤ</div>
+      <div class="tab" onclick="switchWeek('fri',this)">ศุกร์</div>
+      <div class="tab" onclick="switchWeek('weekend',this)">เสาร์–อาทิตย์</div>
+      <div class="tab" onclick="switchWeek('peak',this)">Peak day</div>
+    </div>
+    <div style="padding:0 18px 16px">
+      <div id="price-cards-top" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px"></div>
+    </div>
+  </div>
 
   <div class="page-section-label">กรอก Occupancy 7 วันข้างหน้า</div>
   <div class="sec">
@@ -655,16 +675,9 @@ tr:hover td{background:#FAFAF7}
       </div>
     </div>
 
-    <!-- Day tabs -->
-    <div class="tabs">
-      <div class="tab active" onclick="switchWeek('weekday',this)">จ–พฤ</div>
-      <div class="tab" onclick="switchWeek('fri',this)">ศุกร์</div>
-      <div class="tab" onclick="switchWeek('weekend',this)">เสาร์–อาทิตย์</div>
-      <div class="tab" onclick="switchWeek('peak',this)">Peak day</div>
-    </div>
-    <!-- Price cards grid -->
-    <div style="padding:16px 18px">
-      <div id="price-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px"></div>
+    <!-- Price cards rendered by JS in price-cards-top above -->
+    <div style="padding:0 18px 16px">
+      <div id="price-cards" style="display:none"></div>
       <!-- Bar chart -->
       <div style="background:var(--surface2);border-radius:var(--r-md);padding:16px 18px">
         <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">เปรียบเทียบราคาต่อ Channel</div>
@@ -1305,7 +1318,10 @@ function recalc(){
 // ── Week tabs ──
 function switchWeek(w,el){
   currentWeek=w;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  // Only toggle tabs within the top price card section
+  const tabContainer = el.closest('.tabs');
+  if(tabContainer) tabContainer.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  else document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   renderPriceTable();
 }
@@ -1393,8 +1409,10 @@ function renderWeeklyChart(){
 
 function renderPriceTable(){
   const season=getSeason(), dow=currentWeek;
-  const sb=document.getElementById('action-season-badge');
+  const sb=document.getElementById('action-season-badge')||document.getElementById('action-season-badge2');
   if(sb){ sb.textContent=SEASON_RULES[season].name; sb.className='season-tag '+SEASON_RULES[season].badge; }
+  const sb2=document.getElementById('action-season-badge2');
+  if(sb2){ sb2.textContent=SEASON_RULES[season].name; sb2.className='season-tag '+SEASON_RULES[season].badge; }
 
   const actionColors = {
     dn:   {bg:'#EBF5EE',border:'#8DC89A',text:'#3A7D44',label:'ลดราคา'},
@@ -1404,8 +1422,8 @@ function renderPriceTable(){
   };
 
   // ── Price Cards ──
-  const cardsEl = document.getElementById('price-cards');
-  if(cardsEl){
+  const renderCards = (cardsEl) => {
+    if(!cardsEl) return;
     cardsEl.innerHTML = '';
     ROOMS_DATA.forEach(r=>{
       const occ  = r.currentOcc!==undefined?r.currentOcc:r.occ;
@@ -1482,7 +1500,9 @@ function renderPriceTable(){
         </div>`;
       cardsEl.appendChild(card);
     });
-  }
+  };
+  renderCards(document.getElementById('price-cards-top'));
+  renderCards(document.getElementById('price-cards'));
 
   // ── Bar Chart ──
   const season2=season, dow2=dow;
@@ -2032,6 +2052,7 @@ function switchTab(id, el) {
   document.getElementById('tab-'+id).classList.add('active');
   el.classList.add('active');
   if(id==='exec') drawExecCharts();
+  if(id==='pricing') renderPriceTable();
   if(id==='advance') initAdvanceTab();
 }
 
@@ -3810,7 +3831,7 @@ function updateStorageInfo(){
   } catch(e){}
 }
 
-window.addEventListener('load', ()=>{ syncSeasonToOps(); loadChartData(); setTimeout(()=>{ drawExecCharts(); updateStorageInfo(); }, 800); });
+window.addEventListener('load', ()=>{ syncSeasonToOps(); loadChartData(); setTimeout(()=>{ renderPriceTable(); drawExecCharts(); updateStorageInfo(); }, 800); });
 
 </script>
 
