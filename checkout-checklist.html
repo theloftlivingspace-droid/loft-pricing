@@ -412,7 +412,7 @@ textarea{resize:none;min-height:68px;}
     <div class="field">
       <div class="field-label" id="lbl_meter_photo_before">📷 รูปมิเตอร์ Check-in</div>
       <div class="photo-upload" onclick="document.getElementById('meterPhotoBefore').click()">
-        <input type="file" id="meterPhotoBefore" accept="image/*" capture="environment" onchange="previewPhotos(this,'meterPreviewBefore')">
+        <input type="file" id="meterPhotoBefore" accept="image/*" onchange="previewPhotos(this,'meterPreviewBefore')">
         <div class="photo-icon">🔢</div><div class="photo-text" id="meter_tap_before">ถ่ายรูปมิเตอร์ Check-in</div>
       </div>
       <div class="photo-preview" id="meterPreviewBefore"></div>
@@ -420,7 +420,7 @@ textarea{resize:none;min-height:68px;}
     <div class="field">
       <div class="field-label" id="lbl_meter_photo_after">📷 รูปมิเตอร์ Check-out</div>
       <div class="photo-upload" onclick="document.getElementById('meterPhotoAfter').click()">
-        <input type="file" id="meterPhotoAfter" accept="image/*" capture="environment" onchange="previewPhotos(this,'meterPreviewAfter')">
+        <input type="file" id="meterPhotoAfter" accept="image/*" onchange="previewPhotos(this,'meterPreviewAfter')">
         <div class="photo-icon">🔢</div><div class="photo-text" id="meter_tap_after">ถ่ายรูปมิเตอร์ Check-out</div>
       </div>
       <div class="photo-preview" id="meterPreviewAfter"></div>
