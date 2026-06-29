@@ -1571,7 +1571,7 @@ const LANGS = {
     sec3_title:'ห้องพัก', sec4_title:'ห้องน้ำ',
     sec5_title:'Damage / Charge', sec6_title:'มิเตอร์ไฟฟ้า',
     sec7_title:'งานซ่อม / แจ้งช่าง', sec8_title:'ของลืม / ปิดงาน',
-    lbl_room:'เลขห้อง', lbl_inspector:'ผู้ตรวจ', lbl_datetime:'วันที่ / เวลา',
+    lbl_room:'เลขห้อง', lbl_inspector:'ผู้ตรวจ', lbl_maid:'แม่บ้าน', lbl_datetime:'วันที่ / เวลา',
     lbl_ota:'OTA / ช่องทาง', lbl_guest:'ชื่อแขก',
     lbl_late:'เวลา Check-out จริง / Late?',
     late_ok:'ปกติ', late1:'Late ≤1ชม', late2:'Late 2ชม+',
@@ -1593,7 +1593,7 @@ const LANGS = {
     stat_total:'ทั้งหมด', stat_issues:'มีปัญหา', stat_charge:'Charge (฿)',
     filter_all:'ทั้งหมด', filter_issue:'มีปัญหา', filter_normal:'ปกติ',
     settings_title:'⚙️ ตั้งค่าระบบ',
-    ph_room:'-- เลือกห้อง --', ph_inspector:'ชื่อพนักงาน', ph_guest:'ชื่อตามที่จอง',
+    ph_room:'-- เลือกห้อง --', ph_inspector:'ชื่อพนักงาน', ph_maid:'ชื่อแม่บ้าน', ph_guest:'ชื่อตามที่จอง',
     ph_charge:'0', ph_damage:'อธิบายรายละเอียดความเสียหาย...',
     ph_repair:'ระบุรายละเอียด เช่น แอร์ห้อง 203 น้ำไม่เย็น...',
     ph_extra:'ข้อมูลอื่นๆ...',
@@ -1642,7 +1642,7 @@ const LANGS = {
     sec3_title:'အိပ်ခန်း', sec4_title:'ရေချိုးခန်း',
     sec5_title:'ပျက်စီးမှု / ကောက်ခံမည်', sec6_title:'လျှပ်စစ်မီတာ',
     sec7_title:'ပြုပြင်မည် / ဆရာ', sec8_title:'ကျန်ခဲ့သောပစ္စည်း',
-    lbl_room:'ခန်းနံပါတ်', lbl_inspector:'စစ်ဆောင်သူ', lbl_datetime:'ရက်စွဲ / အချိန်',
+    lbl_room:'ခန်းနံပါတ်', lbl_inspector:'စစ်ဆောင်သူ', lbl_maid:'အိမ်သူ', lbl_datetime:'ရက်စွဲ / အချိန်',
     lbl_ota:'OTA / လမ်းကြောင်း', lbl_guest:'ဧည့်သည်အမည်',
     lbl_late:'Check-out အချိန် / နောက်ကျ?',
     late_ok:'ပုံမှန်', late1:'နောက်ကျ ≤1 နာရီ', late2:'နောက်ကျ 2 နာရီ+',
@@ -1664,7 +1664,7 @@ const LANGS = {
     stat_total:'စုစုပေါင်း', stat_issues:'ပြဿနာ', stat_charge:'ကောက်ခံမှု (฿)',
     filter_all:'အားလုံး', filter_issue:'ပြဿနာ', filter_normal:'ပုံမှန်',
     settings_title:'⚙️ စနစ်သတ်မှတ်မှု',
-    ph_room:'-- ခန်းရွေးပါ --', ph_inspector:'ဝန်ထမ်းအမည်', ph_guest:'မှာယူချိန်အမည်',
+    ph_room:'-- ခန်းရွေးပါ --', ph_inspector:'ဝန်ထမ်းအမည်', ph_maid:'အိမ်သူအမည်', ph_guest:'မှာယူချိန်အမည်',
     ph_charge:'0', ph_damage:'ပျက်စီးမှုအသေးစိတ်ဖော်ပြပါ...',
     ph_repair:'ပြုပြင်မှုအသေးစိတ်ဖော်ပြပါ...',
     ph_extra:'အခြားအချက်အလက်...',
@@ -1713,7 +1713,7 @@ const LANGS = {
     sec3_title:'Bedroom', sec4_title:'Bathroom',
     sec5_title:'Damage / Charge', sec6_title:'Electric Meter',
     sec7_title:'Repairs / Maintenance', sec8_title:'Left Items / Close',
-    lbl_room:'Room No.', lbl_inspector:'Inspector', lbl_datetime:'Date / Time',
+    lbl_room:'Room No.', lbl_inspector:'Inspector', lbl_maid:'Housekeeper', lbl_datetime:'Date / Time',
     lbl_ota:'OTA / Channel', lbl_guest:'Guest Name',
     lbl_late:'Actual Check-out / Late?',
     late_ok:'On time', late1:'Late ≤1hr', late2:'Late 2hr+',
@@ -1735,7 +1735,7 @@ const LANGS = {
     stat_total:'Total', stat_issues:'Issues', stat_charge:'Charge (฿)',
     filter_all:'All', filter_issue:'Issues', filter_normal:'Normal',
     settings_title:'⚙️ System Settings',
-    ph_room:'-- Select room --', ph_inspector:'Staff name', ph_guest:'Name on booking',
+    ph_room:'-- Select room --', ph_inspector:'Staff name', ph_maid:'Housekeeper name', ph_guest:'Name on booking',
     ph_charge:'0', ph_damage:'Describe the damage...',
     ph_repair:'E.g. AC in room 203 not cold...',
     ph_extra:'Other information...',
@@ -1784,7 +1784,7 @@ const LANGS = {
     sec3_title:'卧室', sec4_title:'卫生间',
     sec5_title:'损坏 / 收费', sec6_title:'电表',
     sec7_title:'维修 / 通知', sec8_title:'遗留物品',
-    lbl_room:'房间号', lbl_inspector:'检查员', lbl_datetime:'日期 / 时间',
+    lbl_room:'房间号', lbl_inspector:'检查员', lbl_maid:'保洁员', lbl_datetime:'日期 / 时间',
     lbl_ota:'OTA / 渠道', lbl_guest:'客人姓名',
     lbl_late:'实际退房时间 / 晚退?',
     late_ok:'正常', late1:'晚退 ≤1小时', late2:'晚退 2小时+',
@@ -1806,7 +1806,7 @@ const LANGS = {
     stat_total:'总计', stat_issues:'问题', stat_charge:'收费 (฿)',
     filter_all:'全部', filter_issue:'有问题', filter_normal:'正常',
     settings_title:'⚙️ 系统设置',
-    ph_room:'-- 选择房间 --', ph_inspector:'员工姓名', ph_guest:'预订时的名字',
+    ph_room:'-- 选择房间 --', ph_inspector:'员工姓名', ph_maid:'保洁员姓名', ph_guest:'预订时的名字',
     ph_charge:'0', ph_damage:'描述损坏情况...',
     ph_repair:'例如：203房空调不冷...',
     ph_extra:'其他信息...',
@@ -1879,6 +1879,7 @@ function setLang(lang) {
   // Field labels
   _setFieldLabel('roomNum', t.lbl_room, true);
   _setFieldLabel('inspector', t.lbl_inspector, true);
+  _setFieldLabel('maid', t.lbl_maid, false);
   _setFieldLabelById('checkDate', t.lbl_datetime);
   _setFieldLabelById('ota1', t.lbl_ota);
   _setFieldLabelById('guestName', t.lbl_guest);
@@ -1950,6 +1951,7 @@ function setLang(lang) {
 
   // Inspector placeholder
   document.getElementById('inspector').placeholder = t.ph_inspector;
+  document.getElementById('maid').placeholder = t.ph_maid;
   document.getElementById('guestName').placeholder = t.ph_guest;
 
   // History tab
