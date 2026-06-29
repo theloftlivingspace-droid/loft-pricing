@@ -289,6 +289,10 @@ textarea{resize:none;min-height:68px;}
       <input type="text" id="inspector" placeholder="ชื่อพนักงาน" oninput="updateProgress()">
     </div>
     <div class="field">
+      <div class="field-label">แม่บ้าน</div>
+      <input type="text" id="maid" placeholder="ชื่อแม่บ้าน">
+    </div>
+    <div class="field">
       <div class="field-label">วันที่ / เวลา</div>
       <div class="grid2"><input type="date" id="checkDate"><input type="time" id="checkTime"></div>
     </div>
@@ -819,7 +823,7 @@ const appsScriptCode = [
   "    var sheet = ss.getSheetByName(SHEET_NAME);",
   '    if (!sheet) {',
   "      sheet = ss.insertSheet(SHEET_NAME);",
-  "      sheet.appendRow(['UID','Date','Time','Inspector','Room','OTA','Guest',",
+  "      sheet.appendRow(['UID','Date','Time','Inspector','Maid','Room','OTA','Guest',",
   "        'Status','Ready','Issues','Damages','Charge','ChargeNote',",
   "        'ElecUnit','ElecTHB','LateCheckout','Repairs','ExtraNote',",
   "        'DriveLinks','Timestamp','JSON']);",
@@ -850,7 +854,7 @@ const appsScriptCode = [
   '    var dataForSheet = JSON.parse(JSON.stringify(data));',
   '    delete dataForSheet.photos;',
   '    sheet.appendRow([',
-  '      data.uid, data.checkDate, data.checkTime, data.inspector,',
+  '      data.uid, data.checkDate, data.checkTime, data.inspector, data.maid||\'\'  ,',
   '      data.roomNum, data.ota, data.guestName, data.roomStatus, data.ready,',
   "      (data.issues||[]).join(', '), (data.damages||[]).join(', '),",
   '      data.chargeAmount||0, data.chargeNote, data.elecUnit||0, data.elecTotal||0,',
@@ -1126,6 +1130,7 @@ function collectFormData(){
     checkDate:document.getElementById('checkDate').value,
     checkTime:document.getElementById('checkTime').value,
     inspector:document.getElementById('inspector').value,
+    maid:document.getElementById('maid').value,
     roomNum:document.getElementById('roomNum').value,
     ota:document.querySelector('input[name="ota"]:checked')?.value||'',
     guestName:document.getElementById('guestName').value,
