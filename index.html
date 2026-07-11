@@ -833,8 +833,10 @@ tr:hover td{background:#FAFAF7}
         <span style="font-size:11px;color:var(--text3)">คลิก Occ เพื่ออัพเดต</span>
         <button onclick="resetAdvanceOcc()" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface2);cursor:pointer;color:var(--text2)">รีเซ็ต Occ</button>
         <button onclick="recalcAdvance()" class="btn btn-primary" style="padding:5px 14px;font-size:12px">คำนวณใหม่</button>
+        <button onclick="pushAdvanceRatesToSheet()" id="push-lh-btn" class="btn btn-primary" style="padding:5px 14px;font-size:12px;background:var(--green,#3F8F5F)">📤 ส่งราคาเข้า LH</button>
       </div>
     </div>
+    <div id="push-lh-status" style="display:none;margin:0 0 10px;font-size:12px"></div>
     <div class="tbl-wrap">
       <table id="adv-calendar-table">
         <thead>
@@ -1813,6 +1815,58 @@ async function fetchSheetsData(){
       return {success:false, error:'CORS Error: เปิด URL ใน browser ก่อน แล้วกด Allow หรือตรวจสอบ Apps Script deploy'};
     }
     return {success:false, error:msg};
+  }
+}
+
+// ══════════ PUSH RATES → Target_Rates SHEET (สำหรับ GAS LHRateAutomation ดันเข้า LH ทุกคืน) ══════════
+async function pushAdvanceRatesToSheet(){
+  const s = loadSettings();
+  const btn = document.getElementById('push-lh-btn');
+  const statusEl = document.getElementById('push-lh-status');
+  if(!s.url){
+    alert('ยังไม่ได้ตั้งค่า Web App URL — กดปุ่ม ⚙ ตั้งค่าก่อน');
+    return;
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const rates = [];
+
+  PL_WEEK_STARTS.forEach((ws, wi) => {
+    const weekStart = new Date(ws+'T00:00:00');
+    ROOMS_DATA.forEach(r => {
+      const occ = getAdvOcc(r.id, wi);
+      const adv = calcAdvancePrice(r, wi, occ);
+      // ขยายราคารายสัปดาห์ → รายวัน (7 วัน) ข้ามวันที่ผ่านมาแล้ว
+      for(let d=0; d<7; d++){
+        const dateObj = new Date(weekStart.getTime() + d*86400000);
+        if(dateObj < today) continue;
+        const dateStr = dateObj.toISOString().slice(0,10);
+        rates.push({ room_type: r.id, date: dateStr, rate: adv.price });
+      }
+    });
+  });
+
+  if(!rates.length){
+    alert('ไม่มีราคาที่จะส่ง (อาจยังไม่ได้กด "คำนวณใหม่")');
+    return;
+  }
+
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ กำลังส่ง...'; }
+  if(statusEl){ statusEl.style.display='block'; statusEl.style.color='var(--text2)'; statusEl.textContent = `กำลังส่ง ${rates.length} รายการ...`; }
+
+  try {
+    const resp = await fetch(s.url, {
+      method: 'POST',
+      headers: {'Content-Type':'text/plain;charset=utf-8'}, // เลี่ยง CORS preflight บน Apps Script
+      body: JSON.stringify({ rates })
+    });
+    const data = await resp.json();
+    if(!data.success) throw new Error(data.error || 'Apps Script ตอบ success:false');
+    if(statusEl){ statusEl.style.color='var(--green)'; statusEl.textContent = `✅ ส่งสำเร็จ ${data.count} รายการ → GAS จะดันเข้า Little Hotelier คืนนี้`; }
+  } catch(e){
+    if(statusEl){ statusEl.style.color='var(--red)'; statusEl.textContent = '❌ ส่งไม่สำเร็จ: ' + (e.message||e); }
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '📤 ส่งราคาเข้า LH'; }
   }
 }
 
