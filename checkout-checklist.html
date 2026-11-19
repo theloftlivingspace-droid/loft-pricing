@@ -1359,9 +1359,9 @@ function buildLineReport(data){
   txt+=`━━━━━━━━━━━━━━━━━━\n⏱️ ${data.checkDate} ${data.checkTime}`;
   return txt;
 }
-async function copyLineReport(){
+function copyLineReport(){
   const data=collectFormData();
-  await sendReportCard(data);
+  openLineShare(buildLineReport(data));
 }
 async function sendLineFromModal(){
   // Use lastSubmittedUID set after upload completes
@@ -1387,7 +1387,7 @@ async function sendLineFromModal(){
       }
     }catch(se){}
   }
-  await sendReportCard(data);
+  openLineShare(buildLineReport(data));
 }
 async function copyHistoryReport(uid){
   const data=history_data.find(r=>r.uid===uid);
@@ -1410,37 +1410,7 @@ async function copyHistoryReport(uid){
       }
     }catch(se){}
   }
-  await sendReportCard(data);
-}
-// ส่งรายงานเป็นการ์ดเข้ากลุ่มแม่บ้านผ่านบอท (POST /api/checkout-report)
-// ถ้าบอทตอบไม่สำเร็จ/หมดเวลา → ถอยไปใช้ลิงก์ข้อความ LINE แบบเดิมโดยอัตโนมัติ
-const BOT_URL='https://hotel-line-bot.onrender.com';
-const CHECKOUT_REPORT_KEY='a0a945c8287c6678322250391009c9af3bee558cbc9a84c6'; // ใช้ได้แค่ส่งการ์ดนี้เข้ากลุ่ม — ต้องตรงกับ CHECKOUT_REPORT_KEY บน Render
-let _sendingReport=false, _cardFailed=false;
-async function sendReportCard(data){
-  if(_sendingReport) return;
-  // รอบก่อนส่งการ์ดไม่สำเร็จ → กดอีกครั้งส่งแบบข้อความ (เปิดลิงก์ LINE ต้องมาจากการกดของผู้ใช้ ไม่งั้นเบราว์เซอร์มือถือบล็อกป๊อปอัป)
-  if(_cardFailed){ _cardFailed=false; openLineShare(buildLineReport(data)); return; }
-  _sendingReport=true;
-  showToast('⏳ กำลังส่งการ์ดเข้ากลุ่ม LINE...','success');
-  const ctrl=new AbortController();
-  const timer=setTimeout(function(){ctrl.abort();},40000); // Render อาจต้องปลุกเครื่องก่อน
-  try{
-    const payload={uid:data.uid,roomNum:data.roomNum,guestName:data.guestName,inspector:data.inspector,ota:data.ota,
-      roomStatus:data.roomStatus,ready:data.ready,lateCheckout:data.lateCheckout,elecUnit:data.elecUnit,elecTotal:data.elecTotal,
-      chargeAmount:data.chargeAmount,chargeNote:data.chargeNote,issues:data.issues,damages:data.damages,repairs:data.repairs,
-      extraNote:data.extraNote,driveLinks:data.driveLinks,checkDate:data.checkDate,checkTime:data.checkTime};
-    const res=await fetch(BOT_URL+'/api/checkout-report',{method:'POST',signal:ctrl.signal,
-      headers:{'Content-Type':'application/json','x-checkout-key':CHECKOUT_REPORT_KEY},body:JSON.stringify(payload)});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    showToast('✓ ส่งการ์ดเข้ากลุ่ม LINE แล้ว','success');
-  }catch(e){
-    _cardFailed=true;
-    showToast('ส่งการ์ดไม่สำเร็จ — กดปุ่มส่งอีกครั้งเพื่อส่งเป็นข้อความ LINE','error');
-  }finally{
-    clearTimeout(timer);
-    _sendingReport=false;
-  }
+  openLineShare(buildLineReport(data));
 }
 function openLineShare(txt){
   // Try LINE deep link first (opens LINE app with message pre-filled)
